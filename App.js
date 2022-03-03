@@ -1,12 +1,18 @@
+import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
 
-import {View, Text} from 'react-native';
-import Home from './src/screens/Home';
+import {View, Text, StatusBar} from 'react-native';
+import Stacks from './src/navigations/stack';
 
 export default function App() {
   return (
-    <View>
-      <Home />
-    </View>
+    <NavigationContainer>
+      <StatusBar
+        translucent
+        backgroundColor={'transparent'}
+        barStyle="dark-content"
+      />
+      <Stacks />
+    </NavigationContainer>
   );
 }

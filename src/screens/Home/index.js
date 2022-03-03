@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, StatusBar, ScrollView} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {getDate} from 'bangla-calendar';
 import {Colors, Fonts} from '../../constants';
@@ -11,6 +11,7 @@ import {
 import Button from '../../components/Button';
 import {Icon, Image} from 'react-native-elements';
 import FlatListWithHeader from '../../components/FlatListWithHeader';
+import dummyUpcoming from '../../data/dummy.upcoming';
 const Home = () => {
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
@@ -57,7 +58,7 @@ const Home = () => {
     dates[`${key}`] = {
       customStyles: {
         container: {
-          backgroundColor: fullDate === key ? 'red' : Colors.botton,
+          backgroundColor: fullDate === key ? 'red' : Colors.primary,
         },
         text: {
           color: 'white',
@@ -67,15 +68,20 @@ const Home = () => {
     };
   }
   return (
-    <View style={{backgroundColor: '#fff'}}>
+    <ScrollView
+      style={{
+        backgroundColor: '#fff',
+        paddingTop: StatusBar.currentHeight,
+        flex: 1,
+      }}>
       {/* Modal */}
       <Model
         isVisible={modal}
         onBackdropPress={() => setmodal(!modal)}
         animationIn="slideInDown"
         animationOut="slideOutUp"
-        animationInTiming={300}
-        animationOutTiming={300}
+        animationInTiming={900}
+        animationOutTiming={900}
         backdropOpacity={0.6}
         onBackButtonPress={() => setmodal(false)}
         avoidKeyboard>
@@ -185,29 +191,23 @@ const Home = () => {
       {/* Calender */}
       <Calendar
         markingType={'custom'}
+        // hideExtraDays
+
         onDayPress={date => {
           getBengaliDate(date?.dateString);
           setmodal(true);
         }}
-        // customHeaderTitle={
-        //   <Text style={{fontFamily: Fonts.bold, fontSize: 23, marginLeft: 5}}>
-        //     {`${months[_date.getMonth()]} ,${
-        //       _date.getDate() > 10 ? _date.getDate() : ` 0${_date.getDate()}`
-        //     }`}
-        //     <Text style={{}}>{` ${dayNames[_date.getDay()]}`}</Text>
-        //   </Text>
-        // }
         theme={{
           backgroundColor: '#ffffff',
-          calendarBackground: '#ffffff',
+          // calendarBackground: Colors.primary,
           textSectionTitleColor: '#b6c1cd',
           textSectionTitleDisabledColor: '#d9e1e8',
           selectedDayBackgroundColor: '#00adf5',
           selectedDayTextColor: '#80f',
-          todayTextColor: '#00adf5',
+          todayTextColor: 'red',
           dayTextColor: '#000',
           textDisabledColor: '#d9e1e8',
-          dotColor: '#00adf5',
+          // dotColor: '#00adf5',
           selectedDotColor: '#ffffff',
           arrowColor: 'orange',
           disabledArrowColor: '#d9e1e8',
@@ -219,19 +219,36 @@ const Home = () => {
           textDayFontSize: 16,
           textMonthFontSize: 20,
           textDayHeaderFontSize: wp(3.3),
-          weekVerticalMargin: 13,
+          weekVerticalMargin: 5,
           'stylesheet.calendar.header': {
             header: {
               alignItems: 'flex-start',
             },
+          },
+          contentStyle: {
+            // height: hp(80),
+            // width: wp(90),
+            // backgroundColor: Colors.disable,
           },
         }}
         hideArrows={true}
         enableSwipeMonths
         markedDates={dates}
       />
-      <FlatListWithHeader title={'Upcoming Bookings'} items={date_arr} />
-    </View>
+      <View style={{marginTop: 20}}>
+        <FlatListWithHeader
+          title={'Upcoming Bookings'}
+          items={dummyUpcoming}
+          horizontal={true}
+        />
+        <FlatListWithHeader
+          title={'Past Bookings'}
+          items={dummyUpcoming}
+          horizontal={true}
+        />
+      </View>
+      <View style={{height: hp(13) + StatusBar.currentHeight}} />
+    </ScrollView>
   );
 };
 

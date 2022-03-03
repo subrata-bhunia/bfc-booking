@@ -1,8 +1,11 @@
 export const Colors = {
-  primary: 'green',
+  primary: 'blue',
   secondary: '#eee',
   text: '#000',
   botton: 'blue',
+  error: 'red',
+  disable: '#999',
+  white: '#fff',
 };
 
 /**

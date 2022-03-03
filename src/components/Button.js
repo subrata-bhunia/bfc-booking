@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Icon} from 'react-native-elements/dist/icons/Icon';
+import {Colors} from '../constants';
 
 const Button = ({btnName, btnStyle, onPress, textStyle, icon}) => {
   var btnStyle = btnStyle || {};
@@ -15,7 +16,14 @@ const Button = ({btnName, btnStyle, onPress, textStyle, icon}) => {
             alignItems: 'center',
             alignSelf: 'center',
             justifyContent: 'center',
-            elevation: 5,
+            elevation: 10,
+            shadowColor: Colors.primary,
+            shadowOffset: {
+              width: 0,
+              height: 10,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.5,
           },
         ]}
         onPress={onPress}
