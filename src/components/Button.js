@@ -16,8 +16,8 @@ const Button = ({btnName, btnStyle, onPress, textStyle, icon}) => {
             alignItems: 'center',
             alignSelf: 'center',
             justifyContent: 'center',
-            elevation: 10,
-            shadowColor: Colors.primary,
+            // elevation: 10,
+            shadowColor: '#999',
             shadowOffset: {
               width: 0,
               height: 10,

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, StatusBar, ScrollView} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {getDate} from 'bangla-calendar';
@@ -12,12 +12,20 @@ import Button from '../../components/Button';
 import {Icon, Image} from 'react-native-elements';
 import FlatListWithHeader from '../../components/FlatListWithHeader';
 import dummyUpcoming from '../../data/dummy.upcoming';
+import axios from 'axios';
 const Home = () => {
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
-  const [fullDate, setfull] = useState('2022-03-31');
+  const [fullDate, setfull] = useState(['2022-03-02', '2022-03-30']);
+  const [booked, setBooked] = useState([
+    '2022-03-28',
+    '2022-03-02',
+    '2022-03-30',
+    '2022-03-31',
+  ]);
   const [modal, setmodal] = useState(false);
   const [bookings, setBookings] = useState([]);
+
   const months = [
     'January',
     'February',
@@ -51,14 +59,14 @@ const Home = () => {
     setben(getDate(dd, {format: 'D MMMM, YYYY \neeee'}));
     setSelectDate(`${day} ${months[month]},${year}`);
   };
-  var date_arr = ['2022-03-28', '2022-03-02', '2022-03-30', '2022-03-31'];
+  var date_arr = [];
   const dates = {};
-  for (let i = 0; i < date_arr.length; i++) {
-    var key = date_arr[i];
+  for (let i = 0; i < booked.length; i++) {
+    var key = booked[i];
     dates[`${key}`] = {
       customStyles: {
         container: {
-          backgroundColor: fullDate === key ? 'red' : Colors.primary,
+          backgroundColor: fullDate.includes(key) ? 'red' : Colors.primary,
         },
         text: {
           color: 'white',
