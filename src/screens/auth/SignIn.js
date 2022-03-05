@@ -11,7 +11,7 @@ import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
 
-const SignIn = () => {
+const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
 
   return (
@@ -70,6 +70,9 @@ const SignIn = () => {
 
       <BlankSpace height={hp(4)} />
       <Button
+        onPress={() => {
+          navigation.navigate('Home');
+        }}
         btnStyle={{
           height: hp(7),
           width: wp(90),
@@ -85,7 +88,10 @@ const SignIn = () => {
       />
 
       <BlankSpace height={hp(3)} />
-      <TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('ForgotPassword');
+        }}>
         <Text
           style={{
             fontSize: wp(3.5),
@@ -98,23 +104,26 @@ const SignIn = () => {
       </TouchableOpacity>
 
       <BlankSpace height={hp(7)} />
-      <View>
-        <TouchableOpacity
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignSelf: 'center',
+        }}>
+        <Text
           style={{
-            flexDirection: 'row',
+            fontSize: wp(3.7),
+            textAlign: 'center',
+            fontFamily: Fonts.semibold,
             alignItems: 'center',
-            alignSelf: 'center',
+            justifyContent: 'center',
           }}>
-          <Text
-            style={{
-              fontSize: wp(3.7),
-              textAlign: 'center',
-              fontFamily: Fonts.semibold,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            Don't Have an account?
-          </Text>
+          Don't Have an account?
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SignUp');
+          }}>
           <Text
             style={{
               color: Colors.primary,

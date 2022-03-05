@@ -10,7 +10,7 @@ import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
-const ForgotPassword = () => {
+const ForgotPassword = ({navigation}) => {
   const [show, setShow] = useState(false);
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
@@ -52,6 +52,9 @@ const ForgotPassword = () => {
 
       <BlankSpace height={hp(4)} />
       <Button
+        onPress={() => {
+          navigation.navigate('OtpVerify');
+        }}
         btnStyle={{
           height: hp(7),
           width: wp(90),

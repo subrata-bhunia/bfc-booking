@@ -13,7 +13,7 @@ import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {StyleSheet} from 'react-native';
 import BackBtn from '../../components/BackBtn';
 
-const OtpVerify = () => {
+const OtpVerify = ({navigation}) => {
   const [show, setShow] = useState(false);
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
@@ -65,6 +65,9 @@ const OtpVerify = () => {
 
       <BlankSpace height={hp(4)} />
       <Button
+        onPress={() => {
+          navigation.navigate('NewPassword');
+        }}
         btnStyle={{
           height: hp(7),
           width: wp(90),

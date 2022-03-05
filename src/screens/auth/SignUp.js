@@ -9,8 +9,9 @@ import {Colors, Fonts} from '../../constants';
 import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
-const SignUp = () => {
+const SignUp = ({navigation}) => {
   const [show, setShow] = useState(false);
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
@@ -95,21 +96,36 @@ const SignUp = () => {
       />
 
       <BlankSpace height={hp(4)} />
-      <Text
+      <View
         style={{
-          fontSize: wp(3.7),
-          textAlign: 'center',
-          fontFamily: Fonts.semibold,
+          flexDirection: 'row',
+          alignItems: 'center',
+          alignSelf: 'center',
         }}>
-        Have an account?
         <Text
           style={{
-            color: Colors.primary,
+            fontSize: wp(3.7),
+            textAlign: 'center',
+            fontFamily: Fonts.semibold,
+            alignItems: 'center',
+            justifyContent: 'center',
           }}>
-          {' '}
-          Login
+          Have an account?
         </Text>
-      </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('SignIn');
+          }}>
+          <Text
+            style={{
+              color: Colors.primary,
+              fontFamily: Fonts.semibold,
+            }}>
+            {' '}
+            Register
+          </Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAwareScrollView>
   );
 };

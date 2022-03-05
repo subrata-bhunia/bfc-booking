@@ -21,13 +21,16 @@ import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {getDate} from 'bangla-calendar';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Model from 'react-native-modal';
+import AnimatedLottieView from 'lottie-react-native';
 
-const Booking = () => {
+const Booking = ({navigation}) => {
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(true);
   const [next1, setnext1] = useState(false);
   const [next2, setnext2] = useState(false);
+  const [modal, setmodal] = useState(false);
   const [pickupdate, setpickupdate] = useState(null);
   const [returndate, setreturndate] = useState(null);
   const TableHead = ['Item Name', 'Stock', 'Need'];
@@ -54,16 +57,6 @@ const Booking = () => {
   // -------- Date Picker --------------- //
   const [isDatePickerVisibleP, setDatePickerVisibilityP] = useState(false);
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
-  // const showDatePicker = () => {
-  //   setDatePickerVisibility(true);
-  // };
-  // const hideDatePicker = () => {
-  //   setDatePickerVisibility(false);
-  // };
-  // const handleConfirm = date => {
-  //   setpickupdate(new Date(date));
-  //   hideDatePicker();
-  // };
   // ---------- Drop Down ---------- //
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -119,9 +112,9 @@ const Booking = () => {
             width: wp(93),
             alignSelf: 'center',
           }}>
-          <View>
+          <View style={{width: wp(70)}}>
             <Text style={styles.h1}>Personal Details</Text>
-            <Text style={styles.sub}>Pickup Date,Time,Name,Address ...</Text>
+            <Text style={styles.sub}>Pickup Date,Time,Name ...</Text>
           </View>
           <Icon name="arrow-drop-down-circle" type="material" size={30} />
         </TouchableOpacity>
@@ -572,7 +565,7 @@ const Booking = () => {
               width: wp(93),
               alignSelf: 'center',
             }}>
-            <View>
+            <View style={{width: wp(70)}}>
               <Text style={styles.h1}>Items Details</Text>
               <Text style={styles.sub}>
                 কড়া, ডেক, বালতি, Mixer Grinder ...
@@ -699,9 +692,9 @@ const Booking = () => {
               width: wp(93),
               alignSelf: 'center',
             }}>
-            <View>
+            <View style={{width: wp(70)}}>
               <Text style={styles.h1}>Payment Details</Text>
-              <Text style={styles.sub}>Advanced,Full Payment,Fine ...</Text>
+              <Text style={styles.sub}>Advanced,Full Payment ...</Text>
             </View>
             <Icon name="arrow-drop-down-circle" type="material" size={30} />
           </TouchableOpacity>
@@ -894,11 +887,9 @@ const Booking = () => {
       {/* Add Booking Button */}
       {next1 && next2 ? (
         <Button
-          // onPress={() => {
-          //   setView0(!view0);
-          //   setnext1(true);
-          //   setView1(true);
-          // }}
+          onPress={() => {
+            setmodal(true);
+          }}
           btnStyle={{
             height: hp(6),
             width: wp(80),
@@ -923,6 +914,112 @@ const Booking = () => {
         />
       ) : null}
       <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
+      <Model
+        isVisible={modal}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setmodal(false);
+          navigation.navigate('Home');
+        }}
+        avoidKeyboard>
+        <View style={{backgroundColor: 'white', padding: 10, borderRadius: 10}}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 25,
+              textAlign: 'center',
+              letterSpacing: 2,
+            }}>
+            Thank You
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+          </View>
+          <View style={{paddingHorizontal: wp(10)}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>2022-03-04</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={styles.h3}>123456789</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Advanced</Text>
+              <Text style={styles.h3}>{500} /-</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>1200 /-</Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            <Text
+              style={[
+                styles.h1,
+                {textAlign: 'center', marginVertical: hp(7), fontSize: 30},
+              ]}>
+              700 /-
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setmodal(false);
+                navigation.navigate('Home');
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  backgroundColor: Colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.white}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Model>
       {/* </KeyboardAvoidingView> */}
     </ScrollView>
   );
@@ -946,4 +1043,14 @@ const styles = StyleSheet.create({
   row: {flexDirection: 'row', backgroundColor: '#fff'},
   btn: {width: 58, height: 18, backgroundColor: '#78B7BB', borderRadius: 2},
   btnText: {textAlign: 'center', color: '#fff'},
+  h2: {
+    fontFamily: Fonts.semibold,
+    color: 'rgba(0,0,0,0.4)',
+    fontSize: 20,
+  },
+  h3: {
+    fontFamily: Fonts.semibold,
+    color: 'rgba(0,0,0,1)',
+    fontSize: 20,
+  },
 });

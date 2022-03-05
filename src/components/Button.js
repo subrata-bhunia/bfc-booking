@@ -36,7 +36,8 @@ const Button = ({btnName, btnStyle, onPress, textStyle, icon}) => {
               name={icon.name}
               type={icon.type}
               color={icon?.color ? icon?.color : '#000'}
-              size={24}
+              size={icon?.size ? icon?.size : 24}
+              style={icon?.style ? icon?.style : null}
             />
             <Text style={textStyle}>
               {'  '}
