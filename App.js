@@ -7,7 +7,7 @@ import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 
 export default function App() {
-  const [login, setlogin] = useState(false);
+  const [login, setlogin] = useState(true);
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();

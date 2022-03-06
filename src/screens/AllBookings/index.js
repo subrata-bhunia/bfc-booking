@@ -7,14 +7,26 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import {ScrollView} from 'react-native';
+import {Colors, Fonts} from '../../constants';
+import StaticHeader from '../../components/StaticHeader';
+
 const AllBookings = () => {
   return (
-    <ScrollView>
-      <View>
-        <FlatListWithHeader items={dummyUpcoming} />
-      </View>
-      <View style={{height: hp(9) + hp(4)}} />
-    </ScrollView>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: Colors.white,
+        paddingTop: StatusBar.currentHeight,
+      }}>
+      {/* Header */}
+      <StaticHeader />
+      <ScrollView>
+        <View>
+          <FlatListWithHeader items={dummyUpcoming} />
+        </View>
+        <View style={{height: hp(9) + hp(4)}} />
+      </ScrollView>
+    </View>
   );
 };
 

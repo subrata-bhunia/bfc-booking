@@ -35,26 +35,7 @@ const Booking = ({navigation}) => {
   const [pickupdate, setpickupdate] = useState(null);
   const [returndate, setreturndate] = useState(null);
   const TableHead = ['Item Name', 'Stock', 'Need'];
-  const tableData = [
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-    ['কড়া', '200', 'kara'],
-    ['বালতি', '100', 'balti'],
-    ['ডেক', '2000', 'dek'],
-  ];
+
   //
   const isFocused = useIsFocused();
   useEffect(() => {
@@ -82,6 +63,11 @@ const Booking = ({navigation}) => {
     {label: 'Yes', value: 'Yes'},
     {label: 'No', value: 'No'},
   ]);
+  var all_item = new Object();
+  const AddItems = (key, value) => {
+    all_item[key] = value;
+    console.log(all_item);
+  };
   return (
     <ScrollView
       style={{
@@ -627,7 +613,7 @@ const Booking = ({navigation}) => {
                                 placeholder="0"
                                 // value={}
                                 textAlign="center"
-                                onChangeText={txt => console.log(cellData, txt)}
+                                onChangeText={txt => AddItems(cellData, txt)}
                                 keyboardType="numeric"
                               />
                             ) : (
