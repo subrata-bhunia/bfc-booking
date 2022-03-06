@@ -7,6 +7,7 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import {Icon, Image} from 'react-native-elements';
+import {useNavigation} from '@react-navigation/native';
 /**
  *
  * title - List name
@@ -14,24 +15,30 @@ import {Icon, Image} from 'react-native-elements';
  * @returns
  */
 const FlatListWithHeader = ({title, items, horizontal}) => {
+  const navigation = useNavigation();
   var _horizontal = horizontal || false;
   return (
     <View style={{padding: 5}}>
-      <Text
-        style={{
-          fontFamily: Fonts.semibold,
-          fontSize: 20,
-          color: Colors.primary,
-          padding: 10,
-        }}>
-        {title === undefined ? null : title}
-      </Text>
+      {title ? (
+        <Text
+          style={{
+            fontFamily: Fonts.semibold,
+            fontSize: 20,
+            color: Colors.primary,
+            padding: 10,
+          }}>
+          {title}
+        </Text>
+      ) : null}
       <FlatList
         horizontal={_horizontal}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) => {
           return (
-            <TouchableOpacity style={{alignSelf: 'center'}} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={{alignSelf: 'center'}}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('bookingDetails')}>
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{
