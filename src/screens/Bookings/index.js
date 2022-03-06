@@ -8,7 +8,7 @@ import {
   TouchableNativeFeedback,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../constants';
 import {CheckBox, Icon, Input} from 'react-native-elements';
 import {TouchableOpacity} from 'react-native';
@@ -23,6 +23,7 @@ import {getDate} from 'bangla-calendar';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
+import {useIsFocused} from '@react-navigation/native';
 
 const Booking = ({navigation}) => {
   const [view0, setView0] = useState(true);
@@ -54,6 +55,15 @@ const Booking = ({navigation}) => {
     ['বালতি', '100', 'balti'],
     ['ডেক', '2000', 'dek'],
   ];
+  //
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    setView0(true);
+    setView1(true);
+    setView2(true);
+    setnext2(false);
+    setnext1(false);
+  }, [isFocused]);
   // -------- Date Picker --------------- //
   const [isDatePickerVisibleP, setDatePickerVisibilityP] = useState(false);
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
@@ -996,7 +1006,10 @@ const Booking = ({navigation}) => {
             <TouchableOpacity
               onPress={() => {
                 setmodal(false);
-                navigation.navigate('Home');
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                });
               }}>
               <View
                 style={{

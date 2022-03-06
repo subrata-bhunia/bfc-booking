@@ -184,9 +184,7 @@ const Home = () => {
             {'Debpur \nBright Future Club'}
           </Text>
           <Image
-            source={{
-              uri: 'https://scontent.fccu9-1.fna.fbcdn.net/v/t39.30808-6/273369029_3121032658223795_870884867427691309_n.jpg?_nc_cat=103&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=88toaS_OdwwAX-3PztL&_nc_ht=scontent.fccu9-1.fna&oh=00_AT80jPUclNsGnoA5FB2-XWq6K4cCwAvevMQxg_4W_LxTtA&oe=6222459D',
-            }}
+            source={require('../../../assets/bfcLogo.png')}
             style={{
               height: 50,
               width: 50,

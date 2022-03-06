@@ -9,10 +9,27 @@ import {Colors, Fonts} from '../../constants';
 import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import axios from 'axios';
+
+import Vaildation from '../../components/Vaildation';
 
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [phoneValid, setPhoneValid] = useState(true);
+  const [password, setpassword] = useState('');
+  const [passwordV, setpasswordV] = useState(true);
+
+  const _SignIn = () => {
+    if (phone.length == 10) {
+      if (password.length >= 6) {
+        navigation.navigate('Home');
+      } else {
+        setpasswordV(false);
+      }
+    } else {
+      setPhoneValid(false);
+    }
+  };
 
   return (
     <KeyboardAwareScrollView
@@ -49,29 +66,41 @@ const SignIn = ({navigation}) => {
       </Text>
 
       <BlankSpace height={hp(8)} />
-      <CommonInput
-        iconName="phone-iphone"
-        plholder={'Mobile Number'}
-        // value={value}
-        // onChangeText={(value) => onchangeText(value)}
-        keyboardType="numeric"
-      />
-
+      <View>
+        <CommonInput
+          iconName="phone-iphone"
+          plholder={'Mobile Number'}
+          value={phone}
+          onchangeText={txt => {
+            setPhone(txt);
+            setPhoneValid(true);
+          }}
+          keyboardType="numeric"
+          max={10}
+        />
+        {phoneValid ? null : <Vaildation errormsg="Enter Vaild Phone Number" />}
+      </View>
       <BlankSpace height={hp(4)} />
-      <CommonInput
-        iconName="lock"
-        plholder={'Password'}
-        // value={value}
-        // onChangeText={(value) => onchangeText(value)}
-        rightIconName={show ? 'visibility' : 'visibility-off'}
-        rightIconClick={() => setShow(!show)}
-        textType={show ? true : false}
-      />
+      <View>
+        <CommonInput
+          iconName="lock"
+          plholder={'Password'}
+          value={password}
+          onchangeText={value => {
+            setpassword(value);
+            setpasswordV(true);
+          }}
+          rightIconName={!show ? 'visibility' : 'visibility-off'}
+          rightIconClick={() => setShow(!show)}
+          textType={show ? false : true}
+        />
+        {passwordV ? null : <Vaildation errormsg="Enter Vaild Password" />}
+      </View>
 
       <BlankSpace height={hp(4)} />
       <Button
         onPress={() => {
-          navigation.navigate('Home');
+          _SignIn();
         }}
         btnStyle={{
           height: hp(7),

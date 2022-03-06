@@ -12,6 +12,7 @@ import {Colors, Fonts} from '../constants';
 import AllBookings from '../screens/AllBookings';
 import ContactList from '../screens/Contacts';
 import Events from '../screens/Events';
+import Stacks from './stack';
 const Tab = createBottomTabNavigator();
 const CustomTabBarButton = ({children, onPress}) => (
   <TouchableOpacity

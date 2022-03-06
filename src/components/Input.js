@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   TextInput,
@@ -26,6 +26,7 @@ export const CommonInput = ({
   rightIconType,
   keyboardType,
   rightIconClick,
+  max = 16,
 }) => {
   return (
     <View style={[{backgroundColor: '#fff', alignSelf: 'center'}]}>
@@ -53,6 +54,7 @@ export const CommonInput = ({
               editable={true}
               secureTextEntry={textType}
               keyboardType={keyboardType || 'default'}
+              maxLength={max}
             />
           )}
         </View>

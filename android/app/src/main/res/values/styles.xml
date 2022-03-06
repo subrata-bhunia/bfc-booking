@@ -10,5 +10,7 @@
     </style>
     <style name="SplashScreenTheme" parent="SplashScreen_SplashTheme">
         <item name="android:statusBarColor">@color/yellow</item>
+        <item name="android:colorPrimary">@color/yellow</item>
+
     </style>
 </resources>

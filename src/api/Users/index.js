@@ -14,7 +14,7 @@ export const SignIn = data => {
  * @param {*} data
  * @returns
  */
-export const SignUp = data => {
+export const SignUpUser = data => {
   return axios.post('/signup', data);
 };
 
