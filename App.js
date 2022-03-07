@@ -2,7 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import React, { useEffect, useState } from 'react';
 
-import { View, Text, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 
