@@ -43,6 +43,7 @@ const Booking = () => {
   const [returndateV, setreturndateV] = useState(true);
   const TableHead = ['Item Name', 'Stock', 'Need'];
   const [tableData, setTableDate] = useState([]);
+  const [addBiookingStatus, setaddBiookingStatus] = useState(null);
   //------- API ----------- //
   const getInventory = () => {
     AvailableItems().then(res => {
@@ -68,13 +69,7 @@ const Booking = () => {
   };
   // ------------------ //
   const isFocused = useIsFocused();
-  useEffect(() => {
-    setView0(true);
-    setView1(true);
-    setView2(true);
-    setnext2(false);
-    setnext1(false);
-  }, [isFocused]);
+
   // -------- Date Picker --------------- //
   const [isDatePickerVisibleP, setDatePickerVisibilityP] = useState(false);
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
@@ -112,13 +107,39 @@ const Booking = () => {
   const [total, settotal] = useState(0);
   const [Pending, setPending] = useState(0);
   const [rentV, setrentV] = useState(true);
+  const [book_items, setbook_items] = useState([]);
+
   // ------------- //
+  useEffect(() => {
+    // ------ Style ---------- //
+    setView0(true);
+    setView1(true);
+    setView2(true);
+    setnext2(false);
+    setnext1(false);
+    // ------ Personal ------- //
+    setpickupdate(null);
+    setValue(null);
+    setrvalue(null);
+    setreturndate(null);
+    setcadd('');
+    setcname('');
+    setcphone('');
+    setgathering('');
+    // ------- Booking Items ------ //
+    setbook_items([]);
+    // -------- Payments ----------- //
+    setPending(0);
+    settotal(0);
+    setAdvanced(0);
+    setPending(0);
+    setcat_rate(0);
+    setextra(0);
+  }, [isFocused]);
   useEffect(() => {
     settotal(rent === 0 ? 0 : rent + extra + cat_rate);
     setPending(Advanced && rent === 0 ? 0 : total - Advanced);
   }, [rent, extra, cat_rate, Advanced, total, Pending]);
-
-  const [book_items, setbook_items] = useState([]);
 
   const obj1 = new Object();
   const arr = new Array();
@@ -208,7 +229,9 @@ const Booking = () => {
         .then(res => {
           if (res?.data?.status === 'Success') {
             setmodal(true);
-            console.log(res?.data);
+          } else {
+            setaddBiookingStatus(res?.data?.message);
+            console.log(res?.data?.message);
           }
         })
         .catch(err => {
@@ -840,7 +863,8 @@ const Booking = () => {
                             cellIndex === 2 ? (
                               <Input
                                 placeholder="0"
-                                // value={t}
+                                defaultValue={book_items[cellData]}
+                                // value={book_items[cellData]}
                                 textAlign="center"
                                 onChangeText={txt => AddItems(cellData, txt)}
                                 keyboardType="numeric"
@@ -1138,32 +1162,39 @@ const Booking = () => {
 
       {/* Add Booking Button */}
       {next1 && next2 ? (
-        <Button
-          onPress={() => {
-            _AddBooking();
-          }}
-          btnStyle={{
-            height: hp(6),
-            width: wp(80),
-            borderRadius: 50,
-            backgroundColor: Colors.botton,
-            marginVertical: hp(2),
-            shadowColor: Colors.primary,
-            shadowOffset: {
-              width: 0,
-              height: 10,
-            },
-            shadowOpacity: 1,
-            shadowRadius: 3.5,
-            elevation: 10,
-          }}
-          textStyle={{
-            fontFamily: Fonts.semibold,
-            color: '#fff',
-            fontSize: 20,
-          }}
-          btnName="Add Book"
-        />
+        <>
+          <View style={{marginBottom: addBiookingStatus === null ? 0 : -hp(2)}}>
+            {addBiookingStatus === null ? null : (
+              <Vaildation errormsg={addBiookingStatus} />
+            )}
+          </View>
+          <Button
+            onPress={() => {
+              _AddBooking();
+            }}
+            btnStyle={{
+              height: hp(6),
+              width: wp(80),
+              borderRadius: 50,
+              backgroundColor: Colors.botton,
+              marginVertical: hp(2),
+              shadowColor: Colors.primary,
+              shadowOffset: {
+                width: 0,
+                height: 10,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 3.5,
+              elevation: 10,
+            }}
+            textStyle={{
+              fontFamily: Fonts.semibold,
+              color: '#fff',
+              fontSize: 20,
+            }}
+            btnName="Add Book"
+          />
+        </>
       ) : null}
       <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
       <Model
