@@ -23,9 +23,14 @@ import {getDate} from 'bangla-calendar';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {AvailableItems} from '../../api/Inventory';
+import axios from 'axios';
+import Vaildation from '../../components/Vaildation';
+import {AddBooking} from '../../api/Bookings';
 
-const Booking = ({navigation}) => {
+const Booking = () => {
+  const navigation = useNavigation();
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(true);
@@ -34,9 +39,34 @@ const Booking = ({navigation}) => {
   const [modal, setmodal] = useState(false);
   const [pickupdate, setpickupdate] = useState(null);
   const [returndate, setreturndate] = useState(null);
+  const [pickupdateV, setpickupdateV] = useState(true);
+  const [returndateV, setreturndateV] = useState(true);
   const TableHead = ['Item Name', 'Stock', 'Need'];
+  const [tableData, setTableDate] = useState([]);
+  //------- API ----------- //
+  const getInventory = () => {
+    AvailableItems().then(res => {
+      if (res.data?.status === 'Success') {
+        setTableDate(res?.data?.data);
+      }
+    });
+  };
+  useEffect(() => {
+    getInventory();
+  }, [isFocused]);
 
-  //
+  const Test = () => {
+    axios({
+      method: 'POST',
+      url: 'https://debpurbfc.com/api/v1/add-booking',
+      data: {
+        items: all_item,
+      },
+    }).then(res => {
+      console.log(res.data);
+    });
+  };
+  // ------------------ //
   const isFocused = useIsFocused();
   useEffect(() => {
     setView0(true);
@@ -51,22 +81,142 @@ const Booking = ({navigation}) => {
   // ---------- Drop Down ---------- //
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const [valueV, setValueV] = useState(true);
   const [_return, setreturn] = useState(false);
   const [rvalue, setrvalue] = useState(null);
+  const [rvalueV, setrvalueV] = useState(true);
   const [items, setItems] = useState([
     {label: 'Morning', value: 'Morning'},
     {label: 'Evening', value: 'Evening'},
   ]);
   const [_cateres, setcateres] = useState(false);
-  const [caterersvalue, setcaterersvalue] = useState(null);
+  const [caterersvalue, setcaterersvalue] = useState('');
   const [Catitems, setCatitems] = useState([
     {label: 'Yes', value: 'Yes'},
     {label: 'No', value: 'No'},
   ]);
-  var all_item = new Object();
+  const [gathering, setgathering] = useState('');
+  const [gatheringV, setgatheringV] = useState(true);
+  const [cname, setcname] = useState('');
+  const [cnameV, setcnameV] = useState(true);
+  const [cphone, setcphone] = useState('');
+  const [cphoneV, setcphoneV] = useState(true);
+  const [cadd, setcadd] = useState('');
+  const [caddV, setcaddV] = useState(true);
+  const [whp, setwhp] = useState(true);
+  // ---------- //
+  const [rent, setrent] = useState(0);
+  const [cat_rate, setcat_rate] = useState(0);
+  const [extra, setextra] = useState(0);
+  const [Advanced, setAdvanced] = useState(0);
+  const [total, settotal] = useState(0);
+  const [Pending, setPending] = useState(0);
+  const [rentV, setrentV] = useState(true);
+  // ------------- //
+  useEffect(() => {
+    settotal(rent === 0 ? 0 : rent + extra + cat_rate);
+    setPending(Advanced && rent === 0 ? 0 : total - Advanced);
+  }, [rent, extra, cat_rate, Advanced, total, Pending]);
+
+  const [book_items, setbook_items] = useState([]);
+
+  const obj1 = new Object();
+  const arr = new Array();
   const AddItems = (key, value) => {
-    all_item[key] = value;
-    console.log(all_item);
+    obj1[key] = value;
+    arr.push(obj1);
+  };
+  const PersonalCheck = () => {
+    if (
+      pickupdate !== null ||
+      returndate !== null ||
+      value !== null ||
+      rvalue !== null ||
+      cname.length > 3 ||
+      cadd.length > 3 ||
+      cphone.length == 10 ||
+      gathering.length > 1
+    ) {
+      if (pickupdate !== null) {
+        if (returndate !== null) {
+          if (value !== null) {
+            if (rvalue !== null) {
+              if (cname.length > 3) {
+                if (cphone.length == 10) {
+                  if (cadd.length > 3) {
+                    if (gathering.length > 1) {
+                      setView0(!view0);
+                      setnext1(true);
+                      setView1(true);
+                    } else {
+                      setgatheringV(false);
+                    }
+                  } else {
+                    setcaddV(false);
+                  }
+                } else {
+                  setcphoneV(false);
+                }
+              } else {
+                setcnameV(false);
+              }
+            } else {
+              setrvalueV(false);
+            }
+          } else {
+            setValueV(false);
+          }
+        } else {
+          setreturndateV(false);
+        }
+      } else {
+        setpickupdateV(false);
+      }
+    } else {
+      setpickupdateV(false);
+      setValueV(false);
+      setrvalueV(false);
+      setreturndateV(false);
+      setcaddV(false);
+      setcnameV(false);
+      setcphoneV(false);
+      setgatheringV(false);
+    }
+  };
+  const _AddBooking = () => {
+    if (rent > 0) {
+      console.log(book_items);
+      AddBooking({
+        pickup_date: pickupdate,
+        pickup_time: value,
+        return_date: returndate,
+        return_time: rvalue,
+        customer_name: cname,
+        customer_phone: cphone,
+        whatsapp: whp,
+        customer_address: cadd,
+        items: book_items,
+        gathering: gathering,
+        rent: rent,
+        advanced: Advanced,
+        caterers: caterersvalue,
+        caterer_charge: cat_rate,
+        extra_charges: extra,
+        total_amount: total,
+        user_id: 'USR1646497778',
+      })
+        .then(res => {
+          if (res?.data?.status === 'Success') {
+            setmodal(true);
+            console.log(res?.data);
+          }
+        })
+        .catch(err => {
+          console.log(err, 'TTTT');
+        });
+    } else {
+      setrentV(false);
+    }
   };
   return (
     <ScrollView
@@ -77,10 +227,6 @@ const Booking = ({navigation}) => {
         padding: 10,
       }}
       keyboardDismissMode="interactive">
-      {/* <KeyboardAvoidingView
-        enabled={true}
-        behavior="position"
-        style={{flex: 1}}> */}
       {/* Personal */}
       <View>
         <TouchableOpacity
@@ -136,211 +282,257 @@ const Booking = ({navigation}) => {
               marginTop: -hp(1.5),
             }}>
             {/* Pick UP Date && TIME */}
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity onPress={() => setDatePickerVisibilityP(true)}>
-                <Input
-                  label="Pickup Date & Time"
-                  disabled
-                  caretHidden={true}
-                  defaultValue={'Select Date'}
-                  inputStyle={{
-                    fontFamily: Fonts.regular,
-                    textAlign: 'auto',
-                    marginLeft: 10,
+            <View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setDatePickerVisibilityP(true);
+                    setpickupdateV(true);
+                  }}>
+                  <Input
+                    label="Pickup Date & Time"
+                    disabled
+                    caretHidden={true}
+                    defaultValue={'Select Date'}
+                    inputStyle={{
+                      fontFamily: Fonts.regular,
+                      textAlign: 'auto',
+                      marginLeft: 10,
+                    }}
+                    value={
+                      pickupdate === null
+                        ? null
+                        : getDate(pickupdate, {format: 'D MMMM, YYYY'})
+                    }
+                    containerStyle={{
+                      width: wp(55),
+                      borderBottomWidth: 0,
+                    }}
+                    inputContainerStyle={{
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      marginTop: 5,
+                    }}
+                    labelStyle={{
+                      fontFamily: Fonts.semibold,
+                      color: '#000',
+                    }}
+                    rightIcon={
+                      <Icon
+                        name="calendar"
+                        type="antdesign"
+                        style={{padding: 5}}
+                      />
+                    }
+                  />
+                </TouchableOpacity>
+                <DropDownPicker
+                  open={open}
+                  value={value}
+                  items={items}
+                  setOpen={setOpen}
+                  setValue={setValue}
+                  setItems={setItems}
+                  onChangeValue={() => {
+                    setValueV(true);
                   }}
-                  value={
-                    pickupdate === null
-                      ? null
-                      : getDate(pickupdate, {format: 'D MMMM, YYYY'})
-                  }
+                  // zIndex={5000}
+                  // zIndexInverse={6000}
+                  style={{
+                    width: wp(30),
+                    borderColor: '#999',
+                  }}
+                  flatListProps={{
+                    style: {
+                      width: wp(30),
+                    },
+                  }}
                   containerStyle={{
-                    width: wp(55),
-                    borderBottomWidth: 0,
-                  }}
-                  inputContainerStyle={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    marginTop: 5,
+                    width: wp(30),
+                    borderColor: 'red',
                   }}
                   labelStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#000',
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
                   }}
-                  rightIcon={
-                    <Icon
-                      name="calendar"
-                      type="antdesign"
-                      style={{padding: 5}}
-                    />
-                  }
+                  placeholder={'Time'}
+                  placeholderStyle={{
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
+                  }}
+                  listItemLabelStyle={{
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
+                  }}
+                  dropDownDirection="TOP"
+                  dropDownContainerStyle={{
+                    backgroundColor: '#eee',
+                    position: 'absolute',
+                    // elevation: 10,
+                    borderColor: '#999',
+                  }}
                 />
-              </TouchableOpacity>
-              <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                zIndex={5000}
-                zIndexInverse={6000}
-                style={{
-                  width: wp(30),
-                  borderColor: '#999',
-                }}
-                flatListProps={{
-                  style: {
-                    width: wp(30),
-                  },
-                }}
-                containerStyle={{
-                  width: wp(30),
-                  borderColor: 'red',
-                }}
-                labelStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                placeholder={'Time'}
-                placeholderStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                listItemLabelStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                dropDownDirection="TOP"
-                dropDownContainerStyle={{
-                  backgroundColor: '#eee',
-                  position: 'absolute',
-                  // elevation: 10,
-                  borderColor: '#999',
-                }}
-              />
+              </View>
+              <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                {pickupdateV ? (
+                  valueV ? null : (
+                    <Vaildation errormsg="Enter Pickup Time" />
+                  )
+                ) : (
+                  <Vaildation errormsg="Enter Pickup Date & Time" />
+                )}
+              </View>
             </View>
             {/* Return */}
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <TouchableOpacity onPress={() => setDatePickerVisibilityR(true)}>
-                <Input
-                  label="Return Date & Time"
-                  disabled
-                  caretHidden={true}
-                  defaultValue={'Select Date'}
-                  inputStyle={{
-                    fontFamily: Fonts.regular,
-                    textAlign: 'auto',
-                    marginLeft: 10,
+            <View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setDatePickerVisibilityR(true);
+                    setreturndateV(true);
+                  }}>
+                  <Input
+                    label="Return Date & Time"
+                    disabled
+                    caretHidden={true}
+                    defaultValue={'Select Date'}
+                    inputStyle={{
+                      fontFamily: Fonts.regular,
+                      textAlign: 'auto',
+                      marginLeft: 10,
+                    }}
+                    value={
+                      returndate === null
+                        ? null
+                        : getDate(returndate, {format: 'D MMMM, YYYY'})
+                    }
+                    onChangeText={txt => {
+                      // setcadd(txt);
+                    }}
+                    containerStyle={{
+                      width: wp(55),
+                      borderBottomWidth: 0,
+                    }}
+                    inputContainerStyle={{
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      marginTop: 5,
+                    }}
+                    labelStyle={{
+                      fontFamily: Fonts.semibold,
+                      color: '#000',
+                    }}
+                    rightIcon={
+                      <Icon
+                        name="calendar"
+                        type="antdesign"
+                        style={{padding: 5}}
+                      />
+                    }
+                  />
+                </TouchableOpacity>
+                <DropDownPicker
+                  open={_return}
+                  value={rvalue}
+                  items={items}
+                  setOpen={setreturn}
+                  setValue={setrvalue}
+                  setItems={setItems}
+                  onChangeValue={() => {
+                    setrvalueV(true);
                   }}
-                  value={
-                    returndate === null
-                      ? null
-                      : getDate(returndate, {format: 'D MMMM, YYYY'})
-                  }
+                  style={{
+                    width: wp(30),
+                    borderColor: '#999',
+                  }}
+                  flatListProps={{
+                    style: {
+                      width: wp(30),
+                    },
+                  }}
                   containerStyle={{
-                    width: wp(55),
-                    borderBottomWidth: 0,
-                  }}
-                  inputContainerStyle={{
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    marginTop: 5,
+                    width: wp(30),
+                    borderColor: 'red',
                   }}
                   labelStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#000',
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
                   }}
-                  rightIcon={
-                    <Icon
-                      name="calendar"
-                      type="antdesign"
-                      style={{padding: 5}}
-                    />
-                  }
+                  placeholder={'Time'}
+                  placeholderStyle={{
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
+                  }}
+                  listItemLabelStyle={{
+                    fontFamily: Fonts.regular,
+                    fontSize: 15,
+                  }}
+                  dropDownDirection="TOP"
+                  dropDownContainerStyle={{
+                    backgroundColor: '#eee',
+                    position: 'absolute',
+                    // elevation: 10,
+                    borderColor: '#999',
+                  }}
                 />
-              </TouchableOpacity>
-              <DropDownPicker
-                open={_return}
-                value={rvalue}
-                items={items}
-                setOpen={setreturn}
-                setValue={setrvalue}
-                setItems={setItems}
-                style={{
-                  width: wp(30),
-                  borderColor: '#999',
-                }}
-                flatListProps={{
-                  style: {
-                    width: wp(30),
-                  },
-                }}
-                containerStyle={{
-                  width: wp(30),
-                  borderColor: 'red',
-                }}
-                labelStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                placeholder={'Time'}
-                placeholderStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                listItemLabelStyle={{
-                  fontFamily: Fonts.regular,
-                  fontSize: 15,
-                }}
-                dropDownDirection="TOP"
-                dropDownContainerStyle={{
-                  backgroundColor: '#eee',
-                  position: 'absolute',
-                  // elevation: 10,
-                  borderColor: '#999',
-                }}
-              />
+              </View>
+              <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                {returndateV ? (
+                  rvalueV ? null : (
+                    <Vaildation errormsg="Enter Return Time" />
+                  )
+                ) : (
+                  <Vaildation errormsg="Enter Return Date & Time" />
+                )}
+              </View>
             </View>
             {/* Gathering & Catterr */}
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Input
-                label="Gathering"
-                caretHidden={true}
-                inputStyle={{
-                  fontFamily: Fonts.regular,
-                  textAlign: 'auto',
-                  marginLeft: 10,
-                }}
-                keyboardType="number-pad"
-                placeholder="Gathering"
-                value={
-                  returndate === null
-                    ? null
-                    : getDate(returndate, {format: 'D MMMM, YYYY'})
-                }
-                containerStyle={{
-                  width: wp(55),
-                  borderBottomWidth: 0,
-                }}
-                inputContainerStyle={{
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  marginTop: 5,
-                }}
-                labelStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                }}
-                rightIcon={
-                  <Icon
-                    name="users"
-                    type="feather"
-                    size={20}
-                    style={{padding: 5}}
-                  />
-                }
-              />
-              <View style={{marginTop: -hp(3)}}>
+              <View>
+                <Input
+                  label="Gathering"
+                  caretHidden={true}
+                  value={gathering}
+                  onChangeText={txt => {
+                    setgathering(txt);
+                    setgatheringV(true);
+                  }}
+                  inputStyle={{
+                    fontFamily: Fonts.regular,
+                    textAlign: 'auto',
+                    marginLeft: 10,
+                  }}
+                  keyboardType="number-pad"
+                  placeholder="Gathering"
+                  containerStyle={{
+                    width: wp(55),
+                    borderBottomWidth: 0,
+                  }}
+                  inputContainerStyle={{
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    marginTop: 5,
+                  }}
+                  labelStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#000',
+                  }}
+                  rightIcon={
+                    <Icon
+                      name="users"
+                      type="feather"
+                      size={20}
+                      style={{padding: 5}}
+                    />
+                  }
+                />
+                <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                  {gatheringV ? null : (
+                    <Vaildation errormsg="Enter Gathering " />
+                  )}
+                </View>
+              </View>
+              <View style={{marginTop: gatheringV ? -hp(1) : -hp(4)}}>
                 <Text
                   style={{
                     fontFamily: Fonts.semibold,
@@ -395,54 +587,78 @@ const Booking = ({navigation}) => {
               </View>
             </View>
             {/* Customer Name */}
-            <Input
-              label="Customer Name"
-              caretHidden={true}
-              placeholder="Enter Customer Name"
-              inputStyle={{
-                fontFamily: Fonts.regular,
-                textAlign: 'auto',
-                marginLeft: 10,
-              }}
-              containerStyle={{
-                width: '100%',
-                borderBottomWidth: 0,
-              }}
-              inputContainerStyle={{
-                borderWidth: 1,
-                borderRadius: 10,
-                marginTop: 5,
-              }}
-              labelStyle={{
-                fontFamily: Fonts.semibold,
-                color: '#000',
-              }}
-            />
+            <View>
+              <Input
+                label="Customer Name"
+                caretHidden={true}
+                placeholder="Enter Customer Name"
+                value={cname}
+                onChangeText={txt => {
+                  setcname(txt);
+                  setcnameV(true);
+                }}
+                inputStyle={{
+                  fontFamily: Fonts.regular,
+                  textAlign: 'auto',
+                  marginLeft: 10,
+                }}
+                containerStyle={{
+                  width: '100%',
+                  borderBottomWidth: 0,
+                }}
+                inputContainerStyle={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  marginTop: 5,
+                }}
+                labelStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+              />
+              <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                {cnameV ? null : <Vaildation errormsg="Enter Customer Name" />}
+              </View>
+            </View>
             {/* Customer Phone */}
-            <Input
-              label="Customer Phone"
-              caretHidden={true}
-              keyboardType="number-pad"
-              placeholder="Enter Customer Phone"
-              inputStyle={{
-                fontFamily: Fonts.regular,
-                textAlign: 'auto',
-                marginLeft: 10,
-              }}
-              containerStyle={{
-                width: '100%',
-                borderBottomWidth: 0,
-              }}
-              inputContainerStyle={{
-                borderWidth: 1,
-                borderRadius: 10,
-                marginTop: 5,
-              }}
-              labelStyle={{
-                fontFamily: Fonts.semibold,
-                color: '#000',
-              }}
-            />
+            <View>
+              <Input
+                label="Customer Phone"
+                caretHidden={true}
+                keyboardType="number-pad"
+                placeholder="Enter Customer Phone"
+                maxLength={10}
+                value={cphone}
+                onChangeText={txt => {
+                  setcphone(txt);
+                  setcphoneV(true);
+                }}
+                inputStyle={{
+                  fontFamily: Fonts.regular,
+                  textAlign: 'auto',
+                  marginLeft: 10,
+                }}
+                containerStyle={{
+                  width: '100%',
+                  borderBottomWidth: 0,
+                }}
+                inputContainerStyle={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  marginTop: 5,
+                }}
+                labelStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+              />
+              <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                {cphoneV ? null : (
+                  <Vaildation errormsg="Enter Customer Phone No" />
+                )}
+              </View>
+            </View>
+            {/*  */}
             <CheckBox
               title={'Have Whatsapp?'}
               textStyle={{fontFamily: Fonts.bold}}
@@ -451,37 +667,52 @@ const Booking = ({navigation}) => {
                   fontFamily: Fonts.bold,
                 },
               }}
-              checked={true}
-              containerStyle={{
-                marginTop: -10,
-                marginBottom: 10,
-              }}
+              checked={whp}
+              onPress={() => setwhp(!whp)}
+              containerStyle={
+                {
+                  // marginTop: -10,
+                  // marginBottom: 10,
+                }
+              }
             />
             {/* Customer Addresss */}
-            <Input
-              label="Customer Address"
-              caretHidden={true}
-              multiline
-              placeholder="Enter Customer Address"
-              inputStyle={{
-                fontFamily: Fonts.regular,
-                textAlign: 'auto',
-                marginLeft: 10,
-              }}
-              containerStyle={{
-                width: '100%',
-                borderBottomWidth: 0,
-              }}
-              inputContainerStyle={{
-                borderWidth: 1,
-                borderRadius: 10,
-                marginTop: 5,
-              }}
-              labelStyle={{
-                fontFamily: Fonts.semibold,
-                color: '#000',
-              }}
-            />
+            <View>
+              <Input
+                label="Customer Address"
+                caretHidden={true}
+                multiline
+                value={cadd}
+                onChangeText={txt => {
+                  setcadd(txt);
+                  setcaddV(true);
+                }}
+                placeholder="Enter Customer Address"
+                inputStyle={{
+                  fontFamily: Fonts.regular,
+                  textAlign: 'auto',
+                  marginLeft: 10,
+                }}
+                containerStyle={{
+                  width: '100%',
+                  borderBottomWidth: 0,
+                }}
+                inputContainerStyle={{
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  marginTop: 5,
+                }}
+                labelStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+              />
+              <View style={{marginTop: -hp(2), marginHorizontal: -wp(8)}}>
+                {caddV ? null : (
+                  <Vaildation errormsg="Enter Customer Address" />
+                )}
+              </View>
+            </View>
             {/* -------------------- */}
             <DateTimePickerModal
               isVisible={isDatePickerVisibleP}
@@ -503,9 +734,7 @@ const Booking = ({navigation}) => {
             />
             <Button
               onPress={() => {
-                setView0(!view0);
-                setnext1(true);
-                setView1(true);
+                PersonalCheck();
               }}
               btnStyle={{
                 height: hp(6),
@@ -611,7 +840,7 @@ const Booking = ({navigation}) => {
                             cellIndex === 2 ? (
                               <Input
                                 placeholder="0"
-                                // value={}
+                                // value={t}
                                 textAlign="center"
                                 onChangeText={txt => AddItems(cellData, txt)}
                                 keyboardType="numeric"
@@ -632,6 +861,7 @@ const Booking = ({navigation}) => {
                   setView1(!view1);
                   setnext2(true);
                   setView2(true);
+                  setbook_items(obj1);
                 }}
                 btnStyle={{
                   height: hp(6),
@@ -731,13 +961,26 @@ const Booking = ({navigation}) => {
                   Rent :
                 </Text>
                 <Input
-                  defaultValue={'0'}
+                  placeholder={'0'}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                  value={rent}
+                  onChangeText={txt => {
+                    setrent(parseInt(txt));
+                    setrentV(true);
+                  }}
                   inputStyle={{
                     fontSize: 20,
                   }}
                 />
+              </View>
+              <View
+                style={{
+                  // marginTop: -hp(2),
+                  marginHorizontal: -wp(8),
+                  alignSelf: 'center',
+                }}>
+                {rentV ? null : <Vaildation errormsg="Enter Rent " />}
               </View>
               {/* Caterer Charge */}
               <View
@@ -757,7 +1000,11 @@ const Booking = ({navigation}) => {
                   Caterer Charge :
                 </Text>
                 <Input
-                  defaultValue={'0'}
+                  placeholder={'0'}
+                  value={cat_rate}
+                  onChangeText={txt => {
+                    setcat_rate(parseInt(txt));
+                  }}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
@@ -783,7 +1030,11 @@ const Booking = ({navigation}) => {
                   Extra Charges :
                 </Text>
                 <Input
-                  defaultValue={'0'}
+                  placeholder={'0'}
+                  value={extra}
+                  onChangeText={txt => {
+                    setextra(parseInt(txt));
+                  }}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
@@ -816,7 +1067,8 @@ const Booking = ({navigation}) => {
                 </Text>
                 <Input
                   disabled
-                  defaultValue={'0'}
+                  defaultValue={total.toString()}
+                  // value={total}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
@@ -841,7 +1093,11 @@ const Booking = ({navigation}) => {
                   Advanced :
                 </Text>
                 <Input
-                  defaultValue={'0'}
+                  placeholder={'0'}
+                  value={Advanced}
+                  onChangeText={txt => {
+                    setAdvanced(parseInt(txt));
+                  }}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
@@ -867,7 +1123,7 @@ const Booking = ({navigation}) => {
                 </Text>
                 <Input
                   disabled
-                  defaultValue={'0'}
+                  defaultValue={Pending.toString()}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
@@ -884,7 +1140,7 @@ const Booking = ({navigation}) => {
       {next1 && next2 ? (
         <Button
           onPress={() => {
-            setmodal(true);
+            _AddBooking();
           }}
           btnStyle={{
             height: hp(6),
@@ -990,12 +1246,13 @@ const Booking = ({navigation}) => {
               700 /-
             </Text>
             <TouchableOpacity
-              onPress={() => {
+              onPress={event => {
                 setmodal(false);
                 navigation.reset({
                   index: 0,
                   routes: [{name: 'Home'}],
                 });
+                event.preventDefault();
               }}>
               <View
                 style={{

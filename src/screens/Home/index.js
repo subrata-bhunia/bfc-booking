@@ -14,6 +14,7 @@ import FlatListWithHeader from '../../components/FlatListWithHeader';
 import dummyUpcoming from '../../data/dummy.upcoming';
 import axios from 'axios';
 import StaticHeader from '../../components/StaticHeader';
+import {useNavigation} from '@react-navigation/native';
 const Home = () => {
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
@@ -76,6 +77,7 @@ const Home = () => {
       },
     };
   }
+  const navigation = useNavigation();
   return (
     <View
       style={{
@@ -85,46 +87,6 @@ const Home = () => {
       }}>
       {/* Header */}
       <StaticHeader />
-      {/* <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginVertical: 10,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            width: wp(30),
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            padding: hp(1),
-          }}>
-          <Icon name="mail-outline" type="ionicon" size={27} />
-          <Icon name="bell" type="simple-line-icon" size={27} />
-        </View>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text
-            style={{
-              textAlign: 'right',
-              fontFamily: Fonts.semibold,
-              color: Colors.text,
-              letterSpacing: 2,
-            }}>
-            {'Debpur \nBright Future Club'}
-          </Text>
-          <Image
-            source={require('../../../assets/bfcLogo.png')}
-            style={{
-              height: 50,
-              width: 50,
-              borderRadius: 25,
-              resizeMode: 'contain',
-            }}
-          height: wp(0.2),
-          width: wp(100),
-          backgroundColor: '#999',
-        }}
-      /> */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Modal */}
         <Model
@@ -177,7 +139,7 @@ const Home = () => {
                   No Booking Found
                 </Text>
                 <Button
-                  // onPress={() => gotoSafetyTips()}
+                  onPress={() => navigation.navigate('Booking')}
                   btnStyle={{
                     height: 50,
                     width: wp(50),
