@@ -1,8 +1,8 @@
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 
-import {View, Text, StatusBar} from 'react-native';
+import { View, Text, StatusBar } from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 
@@ -12,7 +12,6 @@ export default function App() {
     setTimeout(() => {
       SplashScreen.hide();
     }, 1000);
-    // SplashScreen.hide();
   }, []);
   return (
     <NavigationContainer>
