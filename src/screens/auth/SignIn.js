@@ -9,8 +9,9 @@ import {Colors, Fonts} from '../../constants';
 import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-
 import Vaildation from '../../components/Vaildation';
+import {AuthContext} from '../../components/context';
+import {SignInUser} from '../../api/Users';
 
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -18,15 +19,36 @@ const SignIn = ({navigation}) => {
   const [phoneValid, setPhoneValid] = useState(true);
   const [password, setpassword] = useState('');
   const [passwordV, setpasswordV] = useState(true);
-
+  const [status, setstatus] = useState(false);
+  const [statusMsg, setstatusMsg] = useState('');
+  const {signIn} = React.useContext(AuthContext);
   const _SignIn = () => {
-    if (phone.length == 10) {
-      if (password.length >= 6) {
-        navigation.navigate('Home');
+    if (phone.length == 10 || password.length >= 6) {
+      if (phone.length == 10) {
+        if (password.length >= 6) {
+          SignInUser({
+            phone: phone,
+            password: password,
+          })
+            .then(res => {
+              if (res?.data?.status === 'Success') {
+                signIn(res?.data?.user_id);
+              } else {
+                setstatus(true);
+                setstatusMsg(res?.data?.message);
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        } else {
+          setpasswordV(false);
+        }
       } else {
-        setpasswordV(false);
+        setPhoneValid(false);
       }
     } else {
+      setpasswordV(false);
       setPhoneValid(false);
     }
   };
@@ -98,6 +120,7 @@ const SignIn = ({navigation}) => {
       </View>
 
       <BlankSpace height={hp(4)} />
+      {status ? <Vaildation errormsg={statusMsg} /> : null}
       <Button
         onPress={() => {
           _SignIn();

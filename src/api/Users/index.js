@@ -5,8 +5,8 @@ import axios from '../axios';
  * @data {mobileNo,password}
  * @returns
  */
-export const SignIn = data => {
-  return axios.post('/signin', data);
+export const SignInUser = data => {
+  return axios.post('/login', data);
 };
 
 /**

@@ -86,7 +86,7 @@ const Home = () => {
         flex: 1,
       }}>
       {/* Header */}
-      <StaticHeader />
+      <StaticHeader userName="Subrata" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Modal */}
         <Model

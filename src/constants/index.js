@@ -6,6 +6,7 @@ export const Colors = {
   error: 'red',
   disable: '#999',
   white: '#fff',
+  yellow: '#ddb540',
 };
 
 /**

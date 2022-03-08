@@ -28,6 +28,7 @@ import {AvailableItems} from '../../api/Inventory';
 import axios from 'axios';
 import Vaildation from '../../components/Vaildation';
 import {AddBooking} from '../../api/Bookings';
+import {UIStore} from '../../UIStore';
 
 const Booking = () => {
   const navigation = useNavigation();
@@ -44,6 +45,9 @@ const Booking = () => {
   const TableHead = ['Item Name', 'Stock', 'Need'];
   const [tableData, setTableDate] = useState([]);
   const [addBiookingStatus, setaddBiookingStatus] = useState(null);
+  const [modalData, setmodalData] = useState(null);
+  const userId = UIStore.useState(s => s.userId);
+
   //------- API ----------- //
   const getInventory = () => {
     AvailableItems().then(res => {
@@ -55,21 +59,8 @@ const Booking = () => {
   useEffect(() => {
     getInventory();
   }, [isFocused]);
-
-  const Test = () => {
-    axios({
-      method: 'POST',
-      url: 'https://debpurbfc.com/api/v1/add-booking',
-      data: {
-        items: all_item,
-      },
-    }).then(res => {
-      console.log(res.data);
-    });
-  };
   // ------------------ //
   const isFocused = useIsFocused();
-
   // -------- Date Picker --------------- //
   const [isDatePickerVisibleP, setDatePickerVisibilityP] = useState(false);
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
@@ -224,11 +215,12 @@ const Booking = () => {
         caterer_charge: cat_rate,
         extra_charges: extra,
         total_amount: total,
-        user_id: 'USR1646497778',
+        user_id: userId,
       })
         .then(res => {
           if (res?.data?.status === 'Success') {
             setmodal(true);
+            setmodalData(res?.data?.data);
           } else {
             setaddBiookingStatus(res?.data?.message);
             console.log(res?.data?.message);
@@ -1235,36 +1227,40 @@ const Booking = () => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginVertical: hp(2),
+                alignItems: 'center',
               }}>
               <Text style={styles.h2}>Date</Text>
-              <Text style={styles.h3}>2022-03-04</Text>
+              <Text style={styles.h3}>{modalData?.date}</Text>
             </View>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginVertical: hp(2),
+                alignItems: 'center',
               }}>
               <Text style={styles.h2}>Booking Id</Text>
-              <Text style={styles.h3}>123456789</Text>
+              <Text style={[styles.h3]}>{modalData?.booking_id}</Text>
             </View>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginVertical: hp(2),
+                alignItems: 'center',
               }}>
               <Text style={styles.h2}>Advanced</Text>
-              <Text style={styles.h3}>{500} /-</Text>
+              <Text style={styles.h3}>{modalData?.advanced} /-</Text>
             </View>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginVertical: hp(2),
+                alignItems: 'center',
               }}>
               <Text style={styles.h2}>Total Amount</Text>
-              <Text style={styles.h3}>1200 /-</Text>
+              <Text style={styles.h3}>{modalData?.total_amount} /-</Text>
             </View>
           </View>
           {/*  */}
@@ -1272,10 +1268,33 @@ const Booking = () => {
             <Text
               style={[
                 styles.h1,
-                {textAlign: 'center', marginVertical: hp(7), fontSize: 30},
+                {textAlign: 'center', marginVertical: hp(5), fontSize: 30},
               ]}>
-              700 /-
+              {parseInt(modalData?.total_amount) -
+                parseInt(modalData?.advanced)}{' '}
+              /-
             </Text>
+            {whp ? (
+              <Button
+                // onPress={() => navigation.navigate('Booking')}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Get Bill And Share"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
             <TouchableOpacity
               onPress={event => {
                 setmodal(false);
@@ -1338,6 +1357,8 @@ const styles = StyleSheet.create({
   h3: {
     fontFamily: Fonts.semibold,
     color: 'rgba(0,0,0,1)',
-    fontSize: 20,
+    fontSize: 15,
+    // fontFamily: Fonts.medium,
+    // fontSize: 15,
   },
 });

@@ -12,6 +12,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import Vaildation from '../../components/Vaildation';
 import {SignUpUser} from '../../api/Users';
+import {AuthContext} from '../../components/context';
 
 const SignUp = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -24,7 +25,7 @@ const SignUp = ({navigation}) => {
   const [PasswordV, setPasswordV] = useState(true);
   const [status, setstatus] = useState(false);
   const [statusMsg, setstatusMsg] = useState('');
-
+  const {signUp} = React.useContext(AuthContext);
   const _SignUp = () => {
     if (Name.length > 5 || phone.length == 10 || Password.length >= 6) {
       if (Name.length > 5) {
@@ -40,6 +41,8 @@ const SignUp = ({navigation}) => {
                 if (res.data?.status === 'Failed') {
                   setstatus(true);
                   setstatusMsg(res.data?.message);
+                } else {
+                  signUp(res.data?.user_id);
                 }
               })
               .catch(err => {
@@ -107,6 +110,7 @@ const SignUp = ({navigation}) => {
         <CommonInput
           iconName="phone-iphone"
           plholder={'Mobile Number'}
+          max={10}
           value={phone}
           onchangeText={value => {
             setphone(value);
