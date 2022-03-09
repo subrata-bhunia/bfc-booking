@@ -32,13 +32,25 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
       ) : null}
       <FlatList
         horizontal={_horizontal}
+        ListEmptyComponent = {()=>{
+          return(
+            <View style={{padding: 5}}>
+              <Text style={{
+            fontFamily: Fonts.semibold,
+            padding: 10,
+          }}>
+                No Booking Found
+              </Text>
+            </View>
+          )
+        }}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) => {
           return (
             <TouchableOpacity
               style={{alignSelf: 'center'}}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('bookingDetails')}>
+              onPress={() => navigation.navigate('bookingDetails',{booking_id:item?.booking_id})}>
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{
@@ -108,7 +120,7 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
                       marginTop: 5,
                     }}>
                     <Icon name="person" />
-                    <Text style={styles.textH2}>{`${item?.name}`}</Text>
+                    <Text style={styles.textH2}>{`${item?.customer_name}`}</Text>
                   </View>
                   <View
                     style={{
@@ -117,7 +129,7 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
                       marginTop: 5,
                     }}>
                     <Icon name="home" />
-                    <Text style={styles.textH2}>{`${item?.address}`}</Text>
+                    <Text style={styles.textH2}>{`${item?.customer_address}`}</Text>
                   </View>
                   <View
                     style={{

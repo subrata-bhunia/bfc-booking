@@ -1,5 +1,5 @@
 import {StatusBar, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import FlatListWithHeader from '../../components/FlatListWithHeader';
 import dummyUpcoming from '../../data/dummy.upcoming';
 import {
@@ -9,8 +9,20 @@ import {
 import {ScrollView} from 'react-native';
 import {Colors, Fonts} from '../../constants';
 import StaticHeader from '../../components/StaticHeader';
+import {allBookingList} from '../../api/Bookings';
 
 const AllBookings = () => {
+  const [allBooking, setallBooking] = useState([]);
+  const getallBookingList = () => {
+    allBookingList().then(res => {
+      if (res?.data?.status === 'Success') {
+        setallBooking(res?.data?.data);
+      }
+    });
+  };
+  useEffect(() => {
+    getallBookingList();
+  }, []);
   return (
     <View
       style={{
@@ -22,7 +34,7 @@ const AllBookings = () => {
       <StaticHeader />
       <ScrollView>
         <View>
-          <FlatListWithHeader items={dummyUpcoming} />
+          <FlatListWithHeader items={allBooking} />
         </View>
         <View style={{height: hp(9) + hp(4)}} />
       </ScrollView>
