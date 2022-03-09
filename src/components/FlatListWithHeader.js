@@ -42,7 +42,7 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{
-                  height: hp(22),
+                  paddingVertical: hp(3),
                   width: wp(90),
                   elevation: 2,
                   borderRadius: hp(1),
