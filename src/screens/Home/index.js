@@ -14,7 +14,9 @@ import FlatListWithHeader from '../../components/FlatListWithHeader';
 import dummyUpcoming from '../../data/dummy.upcoming';
 import axios from 'axios';
 import StaticHeader from '../../components/StaticHeader';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {upComingBookingList} from '../../api/Bookings';
+import {UIStore} from '../../UIStore';
 const Home = () => {
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
@@ -27,7 +29,9 @@ const Home = () => {
   ]);
   const [modal, setmodal] = useState(false);
   const [bookings, setBookings] = useState([]);
-
+  const [upComingbookingsList, setupComingbookingsList] = useState([]);
+  const [pastbookingList, setpastbookingList] = useState([]);
+  const userId = UIStore.useState(s => s.userId);
   const months = [
     'January',
     'February',
@@ -78,6 +82,18 @@ const Home = () => {
     };
   }
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+  // --------------- UPCOMING BOOK LIST ----------- //
+  const getUpcomingList = () => {
+    upComingBookingList({user_id: userId}).then(res => {
+      if (res?.data?.status === 'Success') {
+        setupComingbookingsList(res?.data?.data);
+      }
+    });
+  };
+  useEffect(() => {
+    getUpcomingList();
+  }, [isFocused]);
   return (
     <View
       style={{
@@ -164,15 +180,12 @@ const Home = () => {
         {/* Calender */}
         <Calendar
           markingType={'custom'}
-          // hideExtraDays
-
           onDayPress={date => {
             getBengaliDate(date?.dateString);
             setmodal(true);
           }}
           theme={{
             backgroundColor: '#ffffff',
-            // calendarBackground: Colors.primary,
             textSectionTitleColor: '#b6c1cd',
             textSectionTitleDisabledColor: '#d9e1e8',
             selectedDayBackgroundColor: '#00adf5',
@@ -211,12 +224,12 @@ const Home = () => {
         <View style={{marginTop: 20}}>
           <FlatListWithHeader
             title={'Upcoming Bookings'}
-            items={dummyUpcoming}
+            items={upComingbookingsList}
             horizontal={true}
           />
           <FlatListWithHeader
-            title={'Past Bookings'}
-            items={dummyUpcoming}
+            title={'Due Bookings'}
+            items={pastbookingList}
             horizontal={true}
           />
         </View>

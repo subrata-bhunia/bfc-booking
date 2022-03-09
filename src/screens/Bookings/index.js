@@ -25,7 +25,6 @@ import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {AvailableItems} from '../../api/Inventory';
-import axios from 'axios';
 import Vaildation from '../../components/Vaildation';
 import {AddBooking} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
@@ -158,8 +157,8 @@ const Booking = () => {
                   if (cadd.length > 3) {
                     if (gathering.length > 1) {
                       setView0(!view0);
-                      setnext1(true);
-                      setView1(true);
+                      setnext2(true);
+                      setView2(true);
                     } else {
                       setgatheringV(false);
                     }
@@ -242,8 +241,135 @@ const Booking = () => {
         padding: 10,
       }}
       keyboardDismissMode="interactive">
-      {/* Personal */}
+      {/* items */}
+      {/* 2nd  Items*/}
       <View>
+          <TouchableOpacity
+            onPress={() => {
+              setView0(false);
+              setView1(!view1);
+              setView2(false);
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 10,
+              justifyContent: 'space-between',
+              backgroundColor: Colors.white,
+              padding: 20,
+              borderRadius: 10,
+              shadowColor: '#0f0',
+              shadowOffset: {
+                width: 0,
+                height: 10,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.5,
+              elevation: 10,
+              width: wp(93),
+              alignSelf: 'center',
+            }}>
+            <View style={{width: wp(70)}}>
+              <Text style={styles.h1}>Items Details</Text>
+              <Text style={styles.sub}>
+                কড়া, ডেক, বালতি, Mixer Grinder ...
+              </Text>
+            </View>
+            <Icon name="arrow-drop-down-circle" type="material" size={30} />
+          </TouchableOpacity>
+          {view1 ? (
+            <View
+              style={{
+                padding: 10,
+                backgroundColor: Colors.white,
+                borderBottomLeftRadius: 10,
+                borderBottomRightRadius: 10,
+                borderRadius: 10,
+                shadowColor: '#999',
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.5,
+                // elevation: 10,
+                width: wp(93),
+                alignSelf: 'center',
+                marginTop: -hp(1.5),
+              }}>
+              {/* Table */}
+              <View>
+                <Table
+                  borderStyle={{
+                    borderColor: Colors.secondary,
+                    borderWidth: 2,
+                  }}
+                  style={{}}>
+                  <Row
+                    data={TableHead}
+                    style={styles.head}
+                    textStyle={styles.text}
+                  />
+                  {tableData.map((rowData, index) => (
+                    <TableWrapper key={index} style={styles.row}>
+                      {rowData.map((cellData, cellIndex) => (
+                        <Cell
+                          key={cellIndex}
+                          data={
+                            cellIndex === 2 ? (
+                              <Input
+                                placeholder="0"
+                                defaultValue={book_items[cellData]}
+                                textAlign="center"
+                                onChangeText={txt => AddItems(cellData, txt)}
+                                keyboardType="numeric"
+                              />
+                            ) : (
+                              cellData
+                            )
+                          }
+                          textStyle={styles.text}
+                        />
+                      ))}
+                    </TableWrapper>
+                  ))}
+                </Table>
+              </View>
+              <Button
+                onPress={() => {
+                  setView1(!view1);
+                  setnext1(true);
+                  setView0(true);
+                  setbook_items(obj1);
+                }}
+                btnStyle={{
+                  height: hp(6),
+                  width: wp(80),
+                  borderRadius: 50,
+                  backgroundColor: Colors.botton,
+                  marginVertical: hp(2),
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#fff',
+                  fontSize: 20,
+                }}
+                btnName="Next"
+              />
+            </View>
+          ) : null}
+        </View>
+      {/* Personal */}
+      {next1 === true ? (
+        <View>
         <TouchableOpacity
           onPress={() => {
             setView0(!view0);
@@ -776,134 +902,6 @@ const Booking = () => {
           </View>
         ) : null}
       </View>
-
-      {/* 2nd  Items*/}
-      {next1 === true ? (
-        <View>
-          <TouchableOpacity
-            onPress={() => {
-              setView0(false);
-              setView1(!view1);
-              setView2(false);
-            }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginTop: 10,
-              justifyContent: 'space-between',
-              backgroundColor: Colors.white,
-              padding: 20,
-              borderRadius: 10,
-              shadowColor: '#0f0',
-              shadowOffset: {
-                width: 0,
-                height: 10,
-              },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.5,
-              elevation: 10,
-              width: wp(93),
-              alignSelf: 'center',
-            }}>
-            <View style={{width: wp(70)}}>
-              <Text style={styles.h1}>Items Details</Text>
-              <Text style={styles.sub}>
-                কড়া, ডেক, বালতি, Mixer Grinder ...
-              </Text>
-            </View>
-            <Icon name="arrow-drop-down-circle" type="material" size={30} />
-          </TouchableOpacity>
-          {view1 ? (
-            <View
-              style={{
-                padding: 10,
-                backgroundColor: Colors.white,
-                borderBottomLeftRadius: 10,
-                borderBottomRightRadius: 10,
-                borderRadius: 10,
-                shadowColor: '#999',
-                shadowOffset: {
-                  width: 0,
-                  height: 10,
-                },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.5,
-                // elevation: 10,
-                width: wp(93),
-                alignSelf: 'center',
-                marginTop: -hp(1.5),
-              }}>
-              {/* Table */}
-              <View>
-                <Table
-                  borderStyle={{
-                    borderColor: Colors.secondary,
-                    borderWidth: 2,
-                  }}
-                  style={{}}>
-                  <Row
-                    data={TableHead}
-                    style={styles.head}
-                    textStyle={styles.text}
-                  />
-                  {tableData.map((rowData, index) => (
-                    <TableWrapper key={index} style={styles.row}>
-                      {rowData.map((cellData, cellIndex) => (
-                        <Cell
-                          key={cellIndex}
-                          data={
-                            cellIndex === 2 ? (
-                              <Input
-                                placeholder="0"
-                                defaultValue={book_items[cellData]}
-                                // value={book_items[cellData]}
-                                textAlign="center"
-                                onChangeText={txt => AddItems(cellData, txt)}
-                                keyboardType="numeric"
-                              />
-                            ) : (
-                              cellData
-                            )
-                          }
-                          textStyle={styles.text}
-                        />
-                      ))}
-                    </TableWrapper>
-                  ))}
-                </Table>
-              </View>
-              <Button
-                onPress={() => {
-                  setView1(!view1);
-                  setnext2(true);
-                  setView2(true);
-                  setbook_items(obj1);
-                }}
-                btnStyle={{
-                  height: hp(6),
-                  width: wp(80),
-                  borderRadius: 50,
-                  backgroundColor: Colors.botton,
-                  marginVertical: hp(2),
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 20,
-                }}
-                btnName="Next"
-              />
-            </View>
-          ) : null}
-        </View>
       ) : null}
 
       {/* 3rd */}

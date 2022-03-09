@@ -3,13 +3,21 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Icon} from 'react-native-elements/dist/icons/Icon';
 import {Colors} from '../constants';
 
-const Button = ({btnName, btnStyle, onPress, textStyle, icon}) => {
+const Button = ({
+  btnName,
+  btnStyle,
+  onPress,
+  textStyle,
+  icon,
+  disabled = false,
+}) => {
   var btnStyle = btnStyle || {};
   var textStyle = textStyle || {};
   var icon = icon || null;
   return (
     <View>
       <TouchableOpacity
+        disabled={disabled}
         style={[
           btnStyle,
           {
