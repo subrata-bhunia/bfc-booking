@@ -15,3 +15,8 @@ export const upComingBookingList = data => {
 export const allBookingList = data => {
   return axios.post('/all-booking', data);
 };
+export const cancelBooking = data => {
+  return axios.post('/cancel-booking', data);
+};
+
+//{"ITM005":"37","ITM007":"45"}

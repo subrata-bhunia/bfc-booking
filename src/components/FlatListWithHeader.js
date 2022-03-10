@@ -1,6 +1,6 @@
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
-import {Colors, Fonts} from '../constants';
+import {Colors, Fonts, statusIcon} from '../constants';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   heightPercentageToDP as hp,
@@ -8,6 +8,7 @@ import {
 } from 'react-native-responsive-screen';
 import {Icon, Image} from 'react-native-elements';
 import {useNavigation} from '@react-navigation/native';
+
 /**
  *
  * title - List name
@@ -32,17 +33,38 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
       ) : null}
       <FlatList
         horizontal={_horizontal}
-        ListEmptyComponent = {()=>{
-          return(
-            <View style={{padding: 5}}>
-              <Text style={{
-            fontFamily: Fonts.semibold,
-            padding: 10,
-          }}>
-                No Booking Found
-              </Text>
-            </View>
-          )
+        refreshing
+        ListEmptyComponent={() => {
+          return (
+            <>
+              {_horizontal ? (
+                <View style={{padding: 5}}>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.semibold,
+                      padding: 10,
+                    }}>
+                    No Booking Found
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: 1,
+                  }}>
+                  <Text
+                    style={{
+                      fontFamily: Fonts.semibold,
+                      padding: 10,
+                    }}>
+                    No Booking Found
+                  </Text>
+                </View>
+              )}
+            </>
+          );
         }}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) => {
@@ -50,7 +72,11 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
             <TouchableOpacity
               style={{alignSelf: 'center'}}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('bookingDetails',{booking_id:item?.booking_id})}>
+              onPress={() =>
+                navigation.navigate('bookingDetails', {
+                  booking_id: item?.booking_id,
+                })
+              }>
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{
@@ -62,6 +88,7 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
                   opacity: 1,
                   padding: 10,
                   paddingHorizontal: wp(6),
+                  alignSelf: 'center',
                 }}>
                 {/* 1st */}
                 <View
@@ -112,64 +139,103 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
                   </View>
                 </View>
                 {/* 2nd */}
-                <View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 5,
-                    }}>
-                    <Icon name="person" />
-                    <Text style={styles.textH2}>{`${item?.customer_name}`}</Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 5,
-                    }}>
-                    <Icon name="home" />
-                    <Text style={styles.textH2}>{`${item?.customer_address}`}</Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      width: '70%',
-                      marginTop: 5,
-                    }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{width: '75%'}}>
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        // width: wp(19),
-                        // justifyContent: 'space-between',
+                        marginTop: 5,
                       }}>
-                      <Icon name="users" type="font-awesome-5" size={20} />
-                      <Text style={styles.textH2}> {item?.gathering}</Text>
+                      <Icon name="person" />
+                      <Text
+                        style={styles.textH2}>{`${item?.customer_name}`}</Text>
                     </View>
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        width: wp(15),
+                        marginTop: 5,
+                      }}>
+                      <Icon name="home" />
+                      <Text
+                        style={
+                          styles.textH2
+                        }>{`${item?.customer_address}`}</Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
                         justifyContent: 'space-between',
+                        width: '70%',
+                        marginTop: 5,
                       }}>
-                      <Image
-                        source={require('../../assets/images/icons/catering.png')}
+                      <View
                         style={{
-                          height: 25,
-                          width: 25,
-                        }}
-                      />
-                      <Text style={styles.textH2}>{item?.caterers}</Text>
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          // width: wp(19),
+                          // justifyContent: 'space-between',
+                        }}>
+                        <Icon name="users" type="font-awesome-5" size={20} />
+                        <Text style={styles.textH2}> {item?.gathering}</Text>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          width: wp(15),
+                          justifyContent: 'space-between',
+                        }}>
+                        <Image
+                          source={require('../../assets/images/icons/catering.png')}
+                          style={{
+                            height: 25,
+                            width: 25,
+                          }}
+                        />
+                        <Text style={styles.textH2}>{item?.caterers}</Text>
+                      </View>
                     </View>
+                  </View>
+                  <View style={{width: '50%', alignSelf: 'flex-end'}}>
+                    <Image
+                      source={
+                        item?.status === 'Confirm'
+                          ? statusIcon.booked
+                          : item?.status === 'Pickup'
+                          ? statusIcon.pickup
+                          : item?.status === 'Due'
+                          ? statusIcon.due
+                          : item?.status === 'Paid'
+                          ? statusIcon.paid
+                          : item?.status === 'Missing'
+                          ? statusIcon.missing
+                          : item?.status === 'Cancel'
+                          ? statusIcon.cancel
+                          : statusIcon.booked
+                      }
+                      style={{
+                        height: hp(11),
+                        resizeMode: 'center',
+                        width: hp(11),
+                        marginBottom: -hp(1),
+                      }}
+                    />
                   </View>
                 </View>
               </LinearGradient>
             </TouchableOpacity>
           );
         }}
+        pagingEnabled={!_horizontal}
+        persistentScrollbar
+        maxToRenderPerBatch={3}
+        numColumns={1}
         data={items}
       />
     </View>
