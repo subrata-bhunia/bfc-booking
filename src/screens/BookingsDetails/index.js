@@ -27,6 +27,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {getReturnBookingById} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
+import WarningModal from '../../components/WarningModal';
 
 const BookingDetails = ({navigation}) => {
   const [view0, setView0] = useState(true);
@@ -43,7 +44,6 @@ const BookingDetails = ({navigation}) => {
   const booking_id = route?.params?.booking_id;
   //Activity Indicator
   const [show, setShow] = useState(false);
-
   // setDate from backend
   const [resReturnData, setResReturnData] = useState(null);
   const [returndate, setreturndate] = useState(null);
@@ -74,14 +74,11 @@ const BookingDetails = ({navigation}) => {
     getReturnBookingById({booking_id: booking_id}).then(res => {
       const {data, status} = res.data;
       if (status === 'Success') {
-        if (data?.status === 'Confirm') {
-          setcancle(true);
-        }
         setShow(false);
         setResReturnData(data);
         setTableData(res.data.data.items);
       }
-      console.log('getData', data);
+      // console.log('getData', data);
     });
   };
   return (
@@ -464,7 +461,7 @@ const BookingDetails = ({navigation}) => {
                           }}
                           style={{}}>
                           <Row
-                            data={TableHead}
+                            data={TableHead2}
                             style={styles.head}
                             textStyle={styles.text}
                           />
@@ -478,7 +475,7 @@ const BookingDetails = ({navigation}) => {
                                       <Input
                                         placeholder="0"
                                         // value={}
-                                        value={`${cellData.taken}`}
+                                        defaultValue={`${cellData.taken}`}
                                         textAlign="center"
                                         onChangeText={txt =>
                                           console.log(cellData, txt)
@@ -528,7 +525,6 @@ const BookingDetails = ({navigation}) => {
                   ) : null}
                 </View>
               )}
-
               {/* 3rd */}
               {modifyView === true ? (
                 <View>
@@ -605,6 +601,7 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           defaultValue={'0'}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -633,6 +630,7 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           defaultValue={'0'}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -661,6 +659,7 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           defaultValue={'0'}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -724,6 +723,7 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           defaultValue={'0'}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -923,7 +923,8 @@ const BookingDetails = ({navigation}) => {
                           Extra Charges :
                         </Text>
                         <Input
-                          defaultValue={`${resReturnData.extra_charges}`}
+                          defaultValue={`${resReturnData?.extra_charges}`}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -1045,6 +1046,7 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           defaultValue={'0'}
+                          keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -1296,6 +1298,9 @@ const BookingDetails = ({navigation}) => {
                   marginRight: wp(2),
                   borderRadius: wp(66),
                 }}
+                onPress={() => {
+                  setopenCancelModal(true);
+                }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
                   color: '#000',
@@ -1304,6 +1309,9 @@ const BookingDetails = ({navigation}) => {
                 btnName="CANCEL"
               />
               <Button
+                onPress={() => {
+                  setpickup(true);
+                }}
                 btnStyle={{
                   height: hp(7),
                   width: wp(45),
@@ -1373,6 +1381,9 @@ const BookingDetails = ({navigation}) => {
                   elevation: 10,
                   borderRadius: wp(66),
                 }}
+                onPress={() => {
+                  setreturnbtn(true);
+                }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
                   color: '#fff',
@@ -1384,6 +1395,48 @@ const BookingDetails = ({navigation}) => {
           ) : null}
         </View>
       )}
+      <WarningModal
+        h1="Are you want to cancel this booking ?"
+        open={openCancelModal}
+        setopen={setopenCancelModal}
+        yes={{
+          name: 'Confirm',
+          onPress: () => {
+            console.log('Confirm');
+          },
+        }}
+        no={{
+          name: 'Cancel',
+        }}
+      />
+      <WarningModal
+        h1="Are you sure to confirm pickup this booking ?"
+        open={pickupbtn}
+        setopen={setpickup}
+        yes={{
+          name: 'Confirm',
+          onPress: () => {
+            console.log('Confirm');
+          },
+        }}
+        no={{
+          name: 'Cancel',
+        }}
+      />
+      <WarningModal
+        h1="Are you confirm to return this booking ?"
+        open={returnbtn}
+        setopen={setreturnbtn}
+        yes={{
+          name: 'Confirm',
+          onPress: () => {
+            console.log('Confirm');
+          },
+        }}
+        no={{
+          name: 'Cancel',
+        }}
+      />
     </>
   );
 };

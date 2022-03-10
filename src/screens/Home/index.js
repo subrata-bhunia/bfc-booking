@@ -233,7 +233,7 @@ const Home = () => {
             horizontal={true}
           />
         </View>
-        <View style={{height: hp(13) + StatusBar.currentHeight}} />
+        <View style={{height: hp(13)}} />
       </ScrollView>
     </View>
   );
