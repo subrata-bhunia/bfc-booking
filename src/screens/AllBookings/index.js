@@ -10,8 +10,10 @@ import {ScrollView} from 'react-native';
 import {Colors, Fonts} from '../../constants';
 import StaticHeader from '../../components/StaticHeader';
 import {allBookingList} from '../../api/Bookings';
+import {useIsFocused} from '@react-navigation/native';
 
 const AllBookings = () => {
+  const isFocused = useIsFocused();
   const [allBooking, setallBooking] = useState([]);
   const getallBookingList = () => {
     allBookingList().then(res => {
@@ -22,7 +24,7 @@ const AllBookings = () => {
   };
   useEffect(() => {
     getallBookingList();
-  }, []);
+  }, [isFocused]);
   return (
     <View
       style={{
@@ -32,10 +34,9 @@ const AllBookings = () => {
       }}>
       {/* Header */}
       <StaticHeader />
+
       <ScrollView>
-        <View>
-          <FlatListWithHeader items={allBooking} />
-        </View>
+        <FlatListWithHeader items={allBooking} />
         <View style={{height: hp(9) + hp(4)}} />
       </ScrollView>
     </View>

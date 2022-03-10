@@ -1,16 +1,15 @@
 import {
-  KeyboardAvoidingView,
+  Linking,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TouchableHighlight,
-  TouchableNativeFeedback,
+  ToastAndroid,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../constants';
-import {CheckBox, Icon, Input} from 'react-native-elements';
+import {Icon, Input} from 'react-native-elements';
 import {TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import Button from '../../components/Button';
 import {
@@ -18,13 +17,10 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import {getDate} from 'bangla-calendar';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {getReturnBookingById} from '../../api/Bookings';
+import {cancelBooking, getReturnBookingById} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
@@ -55,11 +51,46 @@ const BookingDetails = ({navigation}) => {
   const [_cateres, setcateres] = useState(false);
 
   // ---------- Confirm -------------- //
-  const [canclebtn, setcancle] = useState(false);
+  const [canclebtn, setcancle] = useState([]);
   const [openCancelModal, setopenCancelModal] = useState(false);
   const [pickupbtn, setpickup] = useState(false);
   const [pickupcanbtn, setpickupcanbtn] = useState(false);
   const [pickupconbtn, setpickupconbtn] = useState(false);
+  const sendWPsms = (phone, msg) => {
+    var phone_n = phone.split(' ').join('').replace('+91', '');
+    var phone_new = phone_n.charAt(0) === '0' ? phone_n.substring(1) : phone_n;
+    Linking.openURL(
+      'whatsapp://send?text=' + msg + '&phone=91' + phone_new,
+    ).catch(err =>
+      ToastAndroid.show(
+        "Can't Open Whatsapp.",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      ),
+    );
+    // console.log("WP")
+  };
+  const CancelClick = () => {
+    cancelBooking({
+      booking_id: booking_id,
+    })
+      .then(res => {
+        if (res?.data?.status === 'Success') {
+          setcancle(res?.data?.data);
+          setShow(true);
+          setopenCancelModal(false);
+          if (res?.data?.data?.wa_message !== undefined) {
+            sendWPsms(
+              res?.data?.data?.customer_phone,
+              res?.data?.data?.wa_message,
+            );
+          }
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
   const [modifybtn, setmodifybtn] = useState(false);
@@ -68,7 +99,7 @@ const BookingDetails = ({navigation}) => {
   // const [modifybtn,setmodifybtn] = useState(false)
   useEffect(() => {
     handleGetBookingDetails();
-  }, []);
+  }, [canclebtn]);
   const handleGetBookingDetails = async () => {
     setShow(true);
     getReturnBookingById({booking_id: booking_id}).then(res => {
@@ -1392,6 +1423,168 @@ const BookingDetails = ({navigation}) => {
                 btnName="RETURN"
               />
             </View>
+          ) : resReturnData?.status === 'Due' ? (
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                flexDirection: 'row',
+                margin: wp(4),
+              }}>
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(35),
+                  backgroundColor: '#fff',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  marginRight: wp(2),
+                  borderRadius: wp(66),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                  fontSize: 16,
+                }}
+                btnName="REMIND"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(55),
+                  backgroundColor: '#2196F3',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  borderRadius: wp(66),
+                }}
+                onPress={() => {
+                  setreturnbtn(true);
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#fff',
+                  fontSize: 16,
+                }}
+                btnName="PAYMENT RECIVED"
+              />
+            </View>
+          ) : resReturnData?.status === 'Missing' ? (
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                flexDirection: 'row',
+                margin: wp(4),
+              }}>
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(35),
+                  backgroundColor: '#fff',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  marginRight: wp(2),
+                  borderRadius: wp(66),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                  fontSize: 16,
+                }}
+                btnName="REMIND"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(55),
+                  backgroundColor: '#2196F3',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  borderRadius: wp(66),
+                }}
+                onPress={() => {
+                  setreturnbtn(true);
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#fff',
+                  fontSize: 16,
+                }}
+                btnName="ITEM RECIVED"
+              />
+            </View>
+          ) : resReturnData?.status === 'Paid' ? (
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                flexDirection: 'row',
+                margin: wp(4),
+                alignSelf: 'center',
+              }}>
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(55),
+                  backgroundColor: '#2196F3',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  borderRadius: wp(66),
+                }}
+                onPress={() => {
+                  setreturnbtn(true);
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#fff',
+                  fontSize: 16,
+                }}
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                  color: Colors.white,
+                }}
+                btnName="SHARE INVOICE"
+              />
+            </View>
           ) : null}
         </View>
       )}
@@ -1400,13 +1593,13 @@ const BookingDetails = ({navigation}) => {
         open={openCancelModal}
         setopen={setopenCancelModal}
         yes={{
-          name: 'Confirm',
+          name: 'Yes',
           onPress: () => {
-            console.log('Confirm');
+            CancelClick();
           },
         }}
         no={{
-          name: 'Cancel',
+          name: 'No',
         }}
       />
       <WarningModal

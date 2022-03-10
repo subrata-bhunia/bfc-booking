@@ -10,13 +10,13 @@ export const Colors = {
 };
 
 /**
- * name : font-weight ->
- * regular: 400
- * semibold : 600
- * bold : 700
- * extrabold : 800
- * thin : 100
- * medium : 500
+ *   name : font-weight ->
+ * * regular: 400
+ * * semibold : 600
+ * * bold : 700
+ * * extrabold : 800
+ * * thin : 100
+ * * medium : 500
  */
 export const Fonts = {
   regular: 'Montserrat-Regular',
@@ -25,4 +25,13 @@ export const Fonts = {
   extrabold: 'Montserrat-ExtraBold',
   thin: 'Montserrat-Thin',
   medium: 'Montserrat-Medium',
+};
+
+export const statusIcon = {
+  booked: require('../../assets/images/icons/statusIcon/booked.png'),
+  due: require('../../assets/images/icons/statusIcon/due.png'),
+  missing: require('../../assets/images/icons/statusIcon/missing.png'),
+  paid: require('../../assets/images/icons/statusIcon/paid.png'),
+  pickup: require('../../assets/images/icons/statusIcon/pickup.png'),
+  cancel: require('../../assets/images/icons/statusIcon/cancel.png'),
 };
