@@ -101,6 +101,9 @@ const Home = () => {
     })
       .then(res => {
         if (res.data?.data?.status == 'Active') {
+          UIStore.update(s => {
+            s.userName = res.data?.data?.user_name;
+          });
         } else {
           signOut();
           ToastAndroid.show(
