@@ -26,3 +26,7 @@ export const SignUpUser = data => {
 export const ForgetPassword = data => {
   return axios.post('/forget-password', data);
 };
+
+export const UserInfo = data => {
+  return axios.post('/user-info', data);
+};

@@ -84,10 +84,13 @@ const Home = () => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   // --------------- UPCOMING BOOK LIST ----------- //
+  const [loader, setloader] = useState(true);
   const getUpcomingList = () => {
     upComingBookingList({user_id: userId}).then(res => {
+      setloader(true);
       if (res?.data?.status === 'Success') {
         setupComingbookingsList(res?.data?.data);
+        setloader(false);
       }
     });
   };
@@ -226,11 +229,13 @@ const Home = () => {
             title={'Upcoming Bookings'}
             items={upComingbookingsList}
             horizontal={true}
+            isloader={loader}
           />
           <FlatListWithHeader
             title={'Due Bookings'}
             items={pastbookingList}
             horizontal={true}
+            isloader={loader}
           />
         </View>
         <View style={{height: hp(13)}} />

@@ -7,6 +7,7 @@ export const Colors = {
   disable: '#999',
   white: '#fff',
   yellow: '#ddb540',
+  red: '#dc3545',
 };
 
 /**
@@ -34,4 +35,11 @@ export const statusIcon = {
   paid: require('../../assets/images/icons/statusIcon/paid.png'),
   pickup: require('../../assets/images/icons/statusIcon/pickup.png'),
   cancel: require('../../assets/images/icons/statusIcon/cancel.png'),
+};
+
+export const Icons = {
+  catering: require('../../assets/images/icons/catering.png'),
+  contact: require('../../assets/images/icons/contact.png'),
+  event: require('../../assets/images/icons/event.png'),
+  list: require('../../assets/images/icons/list.png'),
 };

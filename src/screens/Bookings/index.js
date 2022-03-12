@@ -1144,47 +1144,50 @@ const Booking = () => {
                   }}
                 />
               </View>
+              {/* Add Booking Button */}
+              {next1 && next2 ? (
+                <>
+                  <View
+                    style={{
+                      marginBottom: addBiookingStatus === null ? 0 : -hp(2),
+                    }}>
+                    {addBiookingStatus === null ? null : (
+                      <Vaildation errormsg={addBiookingStatus} />
+                    )}
+                  </View>
+                  <Button
+                    onPress={() => {
+                      _AddBooking();
+                    }}
+                    btnStyle={{
+                      height: hp(6),
+                      width: wp(80),
+                      borderRadius: 50,
+                      backgroundColor: Colors.botton,
+                      marginVertical: hp(2),
+                      shadowColor: Colors.primary,
+                      shadowOffset: {
+                        width: 0,
+                        height: 10,
+                      },
+                      shadowOpacity: 1,
+                      shadowRadius: 3.5,
+                      elevation: 10,
+                    }}
+                    textStyle={{
+                      fontFamily: Fonts.semibold,
+                      color: '#fff',
+                      fontSize: 20,
+                    }}
+                    btnName="Add Book"
+                  />
+                </>
+              ) : null}
             </View>
           ) : null}
         </View>
       ) : null}
 
-      {/* Add Booking Button */}
-      {next1 && next2 ? (
-        <>
-          <View style={{marginBottom: addBiookingStatus === null ? 0 : -hp(2)}}>
-            {addBiookingStatus === null ? null : (
-              <Vaildation errormsg={addBiookingStatus} />
-            )}
-          </View>
-          <Button
-            onPress={() => {
-              _AddBooking();
-            }}
-            btnStyle={{
-              height: hp(6),
-              width: wp(80),
-              borderRadius: 50,
-              backgroundColor: Colors.botton,
-              marginVertical: hp(2),
-              shadowColor: Colors.primary,
-              shadowOffset: {
-                width: 0,
-                height: 10,
-              },
-              shadowOpacity: 1,
-              shadowRadius: 3.5,
-              elevation: 10,
-            }}
-            textStyle={{
-              fontFamily: Fonts.semibold,
-              color: '#fff',
-              fontSize: 20,
-            }}
-            btnName="Add Book"
-          />
-        </>
-      ) : null}
       <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
       <Model
         isVisible={modal}

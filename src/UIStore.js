@@ -6,4 +6,5 @@ export const UIStore = new Store({
   userId: AsyncStorage.getItem('userId').then(res => {
     return res;
   }),
+  userName: '',
 });

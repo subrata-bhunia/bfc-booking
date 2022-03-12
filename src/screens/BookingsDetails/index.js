@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Colors, Fonts} from '../../constants';
+import {Colors, Fonts, Icons, statusIcon} from '../../constants';
 import {Icon, Input} from 'react-native-elements';
 import {TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import Button from '../../components/Button';
@@ -20,10 +20,15 @@ import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {cancelBooking, getReturnBookingById} from '../../api/Bookings';
+import {
+  cancelBooking,
+  getReturnBookingById,
+  pickupBooking,
+} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
+import {UIStore} from '../../UIStore';
 
 const BookingDetails = ({navigation}) => {
   const [view0, setView0] = useState(true);
@@ -32,12 +37,15 @@ const BookingDetails = ({navigation}) => {
   const [next1, setnext1] = useState(true);
   const [next2, setnext2] = useState(true);
   const [modal, setmodal] = useState(false);
+  const [modalCancel, setmodalCancel] = useState(false);
+  const [modalRes, setmodalRes] = useState([]);
   const [modifyView, setModifyView] = useState(false);
   const [clickModifyBtn, setClickModifyBtn] = useState(false);
   const [clickReturnBtn, setClickReturnBtn] = useState(false);
   const [modifyHandle, setModifyHandle] = useState(true);
   const route = useRoute();
   const booking_id = route?.params?.booking_id;
+  const user_id = UIStore.useState(s => s.userId);
   //Activity Indicator
   const [show, setShow] = useState(false);
   // setDate from backend
@@ -54,8 +62,9 @@ const BookingDetails = ({navigation}) => {
   const [canclebtn, setcancle] = useState([]);
   const [openCancelModal, setopenCancelModal] = useState(false);
   const [pickupbtn, setpickup] = useState(false);
-  const [pickupcanbtn, setpickupcanbtn] = useState(false);
-  const [pickupconbtn, setpickupconbtn] = useState(false);
+  const [pickupitem, setpickupitem] = useState([]);
+  const [pickupitemRes, setpickupitemRes] = useState([]);
+  const [pickuppayment, setpickuppayment] = useState('');
   const sendWPsms = (phone, msg) => {
     var phone_n = phone.split(' ').join('').replace('+91', '');
     var phone_new = phone_n.charAt(0) === '0' ? phone_n.substring(1) : phone_n;
@@ -71,20 +80,49 @@ const BookingDetails = ({navigation}) => {
     // console.log("WP")
   };
   const CancelClick = () => {
+    setShow(true);
+    setopenCancelModal(false);
     cancelBooking({
       booking_id: booking_id,
+      user_id: user_id,
     })
       .then(res => {
         if (res?.data?.status === 'Success') {
           setcancle(res?.data?.data);
-          setShow(true);
-          setopenCancelModal(false);
-          if (res?.data?.data?.wa_message !== undefined) {
-            sendWPsms(
-              res?.data?.data?.customer_phone,
-              res?.data?.data?.wa_message,
-            );
-          }
+          setmodalCancel(true);
+          setmodalRes(res?.data?.data);
+          // if (res?.data?.data?.have_whatsapp == 1) {
+          //   sendWPsms(
+          //     res?.data?.data?.customer_phone,
+          //     res?.data?.data?.wa_message,
+          //   );
+          // }
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  const obj1 = new Object();
+  const arr = new Array();
+  const AddItems = (key, value) => {
+    obj1[key] = value;
+    arr.push(obj1);
+  };
+  const PickupClick = () => {
+    setpickup(false);
+    setShow(true);
+    pickupBooking({
+      user_id: user_id,
+      booking_id: booking_id,
+      items: pickupitem,
+      payment: pickuppayment,
+    })
+      .then(res => {
+        if (res?.data?.status === 'Success') {
+          setpickupitemRes(res?.data?.data);
+          setmodal(true);
+          setmodalRes(res?.data?.data);
         }
       })
       .catch(err => {
@@ -99,7 +137,8 @@ const BookingDetails = ({navigation}) => {
   // const [modifybtn,setmodifybtn] = useState(false)
   useEffect(() => {
     handleGetBookingDetails();
-  }, [canclebtn]);
+    setpickuppayment('');
+  }, [canclebtn, pickupitemRes]);
   const handleGetBookingDetails = async () => {
     setShow(true);
     getReturnBookingById({booking_id: booking_id}).then(res => {
@@ -145,10 +184,6 @@ const BookingDetails = ({navigation}) => {
             <ScrollView
               keyboardDismissMode="interactive"
               showsVerticalScrollIndicator={false}>
-              {/* <KeyboardAvoidingView
-        enabled={true}
-        behavior="position"
-        style={{flex: 1}}> */}
               {/* Personal */}
               <View>
                 <TouchableOpacity
@@ -226,67 +261,111 @@ const BookingDetails = ({navigation}) => {
                       </View>
                     </View>
                     {/* 2nd */}
-                    <View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginTop: 5,
-                        }}>
-                        <Icon name="person" />
-                        <Text style={styles.textH2}>
-                          {resReturnData?.customer_name}
-                        </Text>
-                      </View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          marginTop: 5,
-                        }}>
-                        <Icon name="home" />
-                        <Text style={styles.textH2}>
-                          {resReturnData?.customer_address}
-                        </Text>
-                      </View>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                          width: '70%',
-                          marginTop: 5,
-                        }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <View style={{width: '75%'}}>
                         <View
                           style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            // width: wp(19),
-                            // justifyContent: 'space-between',
+                            marginTop: 5,
                           }}>
-                          <Icon name="users" type="font-awesome-5" size={20} />
-                          <Text style={styles.textH2}>
-                            {' '}
-                            {resReturnData?.gathering}
-                          </Text>
+                          <Icon name="person" />
+                          <Text
+                            style={
+                              styles.textH2
+                            }>{`${resReturnData?.customer_name}`}</Text>
                         </View>
                         <View
                           style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            width: wp(15),
+                            marginTop: 5,
+                          }}>
+                          <Icon name="home" />
+                          <Text
+                            style={
+                              styles.textH2
+                            }>{`${resReturnData?.customer_address}`}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
                             justifyContent: 'space-between',
+                            width: '70%',
+                            marginTop: 5,
                           }}>
-                          <Image
-                            source={require('../../../assets/images/icons/catering.png')}
+                          <View
                             style={{
-                              height: 25,
-                              width: 25,
-                            }}
-                          />
-                          <Text style={styles.textH2}>
-                            {resReturnData?.caterers}
-                          </Text>
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              // width: wp(19),
+                              // justifyContent: 'space-between',
+                            }}>
+                            <Icon
+                              name="users"
+                              type="font-awesome-5"
+                              size={20}
+                            />
+                            <Text style={styles.textH2}>
+                              {' '}
+                              {resReturnData?.gathering}
+                            </Text>
+                          </View>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              width: wp(15),
+                              justifyContent: 'space-between',
+                            }}>
+                            <Image
+                              source={Icons.catering}
+                              style={{
+                                height: 25,
+                                width: 25,
+                              }}
+                            />
+                            <Text style={styles.textH2}>
+                              {resReturnData?.caterers}
+                            </Text>
+                          </View>
                         </View>
+                      </View>
+                      <View style={{width: '50%', alignSelf: 'flex-end'}}>
+                        <Image
+                          source={
+                            resReturnData?.status === 'Confirm'
+                              ? statusIcon.booked
+                              : resReturnData?.status === 'Pickup'
+                              ? statusIcon.pickup
+                              : resReturnData?.status === 'Due'
+                              ? statusIcon.due
+                              : resReturnData?.status === 'Paid'
+                              ? statusIcon.paid
+                              : resReturnData?.status === 'Missing'
+                              ? statusIcon.missing
+                              : resReturnData?.status === 'Cancel'
+                              ? statusIcon.cancel
+                              : statusIcon.booked
+                          }
+                          style={{
+                            height: hp(11),
+                            resizeMode: 'center',
+                            width: hp(11),
+                            marginBottom: -hp(1),
+                          }}
+                          PlaceholderContent={
+                            <ActivityIndicator
+                              size={30}
+                              color={Colors.yellow}
+                              style={{alignSelf: 'center'}}
+                            />
+                          }
+                        />
                       </View>
                     </View>
                   </LinearGradient>
@@ -362,7 +441,7 @@ const BookingDetails = ({navigation}) => {
                           }}
                           style={{}}>
                           <Row
-                            data={TableHead2}
+                            data={TableHead}
                             style={styles.head}
                             textStyle={styles.text}
                           />
@@ -504,12 +583,15 @@ const BookingDetails = ({navigation}) => {
                                   data={
                                     cellIndex === 2 ? (
                                       <Input
-                                        placeholder="0"
+                                        placeholder={`${cellData.taken}`}
+                                        placeholderTextColor={Colors.text}
                                         // value={}
-                                        defaultValue={`${cellData.taken}`}
+                                        defaultValue={
+                                          pickupitem[cellData?.item_id]
+                                        }
                                         textAlign="center"
                                         onChangeText={txt =>
-                                          console.log(cellData, txt)
+                                          AddItems(cellData?.item_id, txt)
                                         }
                                         keyboardType="numeric"
                                       />
@@ -529,6 +611,7 @@ const BookingDetails = ({navigation}) => {
                           setView1(!view1);
                           setnext2(true);
                           setView2(true);
+                          setpickupitem(obj1);
                         }}
                         btnStyle={{
                           height: hp(6),
@@ -1085,222 +1168,19 @@ const BookingDetails = ({navigation}) => {
                           inputStyle={{
                             fontSize: wp(4),
                           }}
+                          value={pickuppayment}
+                          onChangeText={txt => {
+                            setpickuppayment(txt);
+                          }}
                         />
                       </View>
-                      {/* Payment Accepted By
-                <View
-                  style={
-                    {
-                      // flexDirection: 'row',
-                      // alignItems: 'center',
-                      // justifyContent: 'space-between',
-                    }
-                  }>
-                  <Text
-                    style={{
-                      fontFamily: Fonts.semibold,
-                      fontSize: wp(4),
-                      textAlign: 'left',
-                      marginBottom: hp(2),
-                    }}>
-                    Payment Accepted By :
-                  </Text>
-                  <DropDownPicker
-                    open={open}
-                    value={value}
-                    items={items}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    setItems={setItems}
-                    // zIndex={5000}
-                    // zIndexInverse={6000}
-                    style={{
-                      width: wp(80),
-                      borderColor: '#999',
-                      height: hp(6),
-                    }}
-                    // flatListProps={{
-                    //   style: {
-
-                    //     // height: hp(10),
-                    //   },
-                    // }}
-                    listMode="SCROLLVIEW"
-                    containerStyle={{
-                      width: wp(80),
-                      height: hp(6),
-                      marginLeft: wp(3),
-                      borderColor: 'red',
-                    }}
-                    labelStyle={{
-                      fontFamily: Fonts.regular,
-                      fontSize: 15,
-                    }}
-                    placeholder={'SELECTE NAME'}
-                    placeholderStyle={{
-                      fontFamily: Fonts.regular,
-                      fontSize: 15,
-                    }}
-                    listItemLabelStyle={{
-                      fontFamily: Fonts.regular,
-                      fontSize: 15,
-                    }}
-                    dropDownDirection="TOP"
-                    // dropDownContainerStyle={{
-                    //   backgroundColor: '#eee',
-                    //   position: 'absolute',
-                    //   // elevation: 10,
-                    //   borderColor: '#999',
-                    // }}
-                  />
-                </View> */}
-                      {/* <Button
-                  onPress={() => {
-                    setmodal(true);
-                  }}
-                  btnStyle={{
-                    height: hp(6),
-                    width: wp(80),
-                    borderRadius: 50,
-                    backgroundColor: Colors.botton,
-                    marginVertical: hp(2),
-                    shadowColor: Colors.primary,
-                    shadowOffset: {
-                      width: 0,
-                      height: 10,
-                    },
-                    shadowOpacity: 1,
-                    shadowRadius: 3.5,
-                    elevation: 10,
-                  }}
-                  textStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#fff',
-                    fontSize: wp(4),
-                  }}
-                  btnName="UPDATE BOOKING"
-                /> */}
                     </View>
                   ) : null}
                 </View>
               )}
 
               <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
-              <Model
-                isVisible={modal}
-                statusBarTranslucent
-                // onBackdropPress={() => setmodal(!modal)}
-                backdropOpacity={0.6}
-                focusable
-                onBackButtonPress={() => {
-                  setmodal(false);
-                  navigation.navigate('Home');
-                }}
-                avoidKeyboard>
-                <View
-                  style={{
-                    backgroundColor: 'white',
-                    padding: 10,
-                    borderRadius: 10,
-                  }}>
-                  <Text
-                    style={{
-                      fontFamily: Fonts.bold,
-                      fontSize: 25,
-                      textAlign: 'center',
-                      letterSpacing: 2,
-                    }}>
-                    Thank You
-                  </Text>
-                  <View style={{alignItems: 'center'}}>
-                    <AnimatedLottieView
-                      autoPlay
-                      loop={false}
-                      style={{
-                        height: hp(20),
-                        width: wp(10),
-                      }}
-                      source={require('./complete.json')}
-                    />
-                  </View>
-                  <View style={{paddingHorizontal: wp(10)}}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginVertical: hp(2),
-                      }}>
-                      <Text style={styles.h2}>Date</Text>
-                      <Text style={styles.h3}>2022-03-04</Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginVertical: hp(2),
-                      }}>
-                      <Text style={styles.h2}>Booking Id</Text>
-                      <Text style={styles.h3}>123456789</Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginVertical: hp(2),
-                      }}>
-                      <Text style={styles.h2}>Advanced</Text>
-                      <Text style={styles.h3}>{500} /-</Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginVertical: hp(2),
-                      }}>
-                      <Text style={styles.h2}>Total Amount</Text>
-                      <Text style={styles.h3}>1200 /-</Text>
-                    </View>
-                  </View>
-                  {/*  */}
-                  <View>
-                    <Text
-                      style={[
-                        styles.h1,
-                        {
-                          textAlign: 'center',
-                          marginVertical: hp(7),
-                          fontSize: 30,
-                        },
-                      ]}>
-                      700 /-
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setmodal(false);
-                        navigation.navigate('Home');
-                      }}>
-                      <View
-                        style={{
-                          height: wp(15),
-                          width: wp(15),
-                          borderRadius: wp(7.5),
-                          backgroundColor: Colors.primary,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          alignSelf: 'center',
-                          margin: 20,
-                        }}>
-                        <Icon
-                          name="cross"
-                          type="entypo"
-                          color={Colors.white}
-                          size={wp(10)}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Model>
+
               {/* </KeyboardAvoidingView> */}
             </ScrollView>
           )}
@@ -1342,6 +1222,7 @@ const BookingDetails = ({navigation}) => {
               <Button
                 onPress={() => {
                   setpickup(true);
+                  console.log(pickupitem);
                 }}
                 btnStyle={{
                   height: hp(7),
@@ -1607,13 +1488,14 @@ const BookingDetails = ({navigation}) => {
         open={pickupbtn}
         setopen={setpickup}
         yes={{
-          name: 'Confirm',
+          name: 'Yes',
           onPress: () => {
-            console.log('Confirm');
+            setpickup(!pickupbtn);
+            PickupClick();
           },
         }}
         no={{
-          name: 'Cancel',
+          name: 'No',
         }}
       />
       <WarningModal
@@ -1630,6 +1512,270 @@ const BookingDetails = ({navigation}) => {
           name: 'Cancel',
         }}
       />
+      {/* Success Modal */}
+      <Model
+        isVisible={modal}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setmodal(false);
+          navigation.navigate('Home');
+        }}
+        avoidKeyboard>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+          }}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 25,
+              textAlign: 'center',
+              letterSpacing: 2,
+            }}>
+            Thank You
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+          </View>
+          <View style={{paddingHorizontal: wp(10)}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>{modalRes?.date}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Advanced</Text>
+              <Text style={styles.h3}>{modalRes?.advanced} /-</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            <Text
+              style={[
+                styles.h1,
+                {
+                  textAlign: 'center',
+                  marginVertical: hp(7),
+                  fontSize: 30,
+                },
+              ]}>
+              {modalRes?.pending_amount} /-
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                setmodal(false);
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  backgroundColor: Colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.white}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Model>
+      {/* Cancel Modal */}
+      <Model
+        isVisible={modalCancel}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setmodalCancel(false);
+          // navigation.navigate('Home');
+        }}
+        avoidKeyboard>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+            paddingTop: 25,
+          }}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 2,
+            }}>
+            Cancel Successful
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+            {/* <Image
+              source={statusIcon.cancel}
+              style={{
+                height: hp(25),
+                width: wp(25),
+                resizeMode: 'center',
+              }}
+            /> */}
+          </View>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>{modalRes?.date}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Advanced</Text>
+              <Text style={styles.h3}>{modalRes?.advanced} /-</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            {/* <Text
+              style={[
+                styles.h1,
+                {
+                  textAlign: 'center',
+                  marginVertical: hp(7),
+                  fontSize: 30,
+                },
+              ]}>
+              {modalRes?.pending_amount} /-
+            </Text> */}
+            {modalRes?.have_whatsapp == 1 ? (
+              <Button
+                onPress={() => {
+                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
+                }}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  marginVertical: hp(4),
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Share on Whatsapp"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
+            <TouchableOpacity
+              onPress={() => {
+                setmodalCancel(false);
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  borderColor: Colors.red,
+                  borderWidth: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.red}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Model>
     </>
   );
 };

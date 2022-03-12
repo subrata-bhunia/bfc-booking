@@ -1,5 +1,12 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useState} from 'react';
 import {Colors, Fonts, statusIcon} from '../constants';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -15,9 +22,10 @@ import {useNavigation} from '@react-navigation/native';
  * items - [all data]
  * @returns
  */
-const FlatListWithHeader = ({title, items, horizontal}) => {
+const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
   const navigation = useNavigation();
   var _horizontal = horizontal || false;
+  var isLoader = isloader || false;
   return (
     <View style={{padding: 5}}>
       {title ? (
@@ -37,7 +45,22 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
         ListEmptyComponent={() => {
           return (
             <>
-              {_horizontal ? (
+              {isLoader ? (
+                <View
+                  style={{
+                    flex: 1,
+                    height: hp(20),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: wp(100),
+                  }}>
+                  <ActivityIndicator
+                    size={30}
+                    color={Colors.primary}
+                    style={{alignSelf: 'center'}}
+                  />
+                </View>
+              ) : _horizontal == true ? (
                 <View style={{padding: 5}}>
                   <Text
                     style={{
@@ -225,6 +248,13 @@ const FlatListWithHeader = ({title, items, horizontal}) => {
                         width: hp(11),
                         marginBottom: -hp(1),
                       }}
+                      PlaceholderContent={
+                        <ActivityIndicator
+                          size={30}
+                          color={Colors.yellow}
+                          style={{alignSelf: 'center'}}
+                        />
+                      }
                     />
                   </View>
                 </View>

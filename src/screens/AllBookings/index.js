@@ -15,10 +15,14 @@ import {useIsFocused} from '@react-navigation/native';
 const AllBookings = () => {
   const isFocused = useIsFocused();
   const [allBooking, setallBooking] = useState([]);
+  const [loader, setloader] = useState(true);
   const getallBookingList = () => {
+    setloader(true);
+    console.log('uuuu');
     allBookingList().then(res => {
       if (res?.data?.status === 'Success') {
         setallBooking(res?.data?.data);
+        setloader(false);
       }
     });
   };
@@ -36,7 +40,7 @@ const AllBookings = () => {
       <StaticHeader />
 
       <ScrollView>
-        <FlatListWithHeader items={allBooking} />
+        <FlatListWithHeader items={allBooking} isloader={loader} />
         <View style={{height: hp(9) + hp(4)}} />
       </ScrollView>
     </View>
