@@ -2,6 +2,8 @@ import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Icon} from 'react-native-elements/dist/icons/Icon';
 import {Colors} from '../constants';
+import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
+import {widthPercentageToDP} from 'react-native-responsive-screen';
 
 const Button = ({
   btnName,
@@ -10,6 +12,7 @@ const Button = ({
   textStyle,
   icon,
   disabled = false,
+  isLoader = false,
 }) => {
   var btnStyle = btnStyle || {};
   var textStyle = textStyle || {};
@@ -17,7 +20,7 @@ const Button = ({
   return (
     <View>
       <TouchableOpacity
-        disabled={disabled}
+        disabled={isLoader || disabled}
         style={[
           btnStyle,
           {
@@ -32,11 +35,20 @@ const Button = ({
             },
             shadowOpacity: 0.25,
             shadowRadius: 3.5,
+            opacity: disabled ? 0.5 : 1,
+            // backgroundColor: isLoader ? Colors.white : Colors.botton,
           },
+          isLoader ? {backgroundColor: Colors.white} : null,
         ]}
         onPress={onPress}
         activeOpacity={0.4}>
-        {icon === null ? (
+        {isLoader ? (
+          <SkypeIndicator
+            color={Colors.botton}
+            count={5}
+            size={widthPercentageToDP(12)}
+          />
+        ) : icon === null ? (
           <Text style={textStyle}>{btnName}</Text>
         ) : (
           <View style={{flexDirection: 'row', alignItems: 'center'}}>

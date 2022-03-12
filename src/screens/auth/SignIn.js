@@ -21,11 +21,17 @@ const SignIn = ({navigation}) => {
   const [passwordV, setpasswordV] = useState(true);
   const [status, setstatus] = useState(false);
   const [statusMsg, setstatusMsg] = useState('');
+  const [btnLoader, setBtnLoader] = useState(false);
   const {signIn} = React.useContext(AuthContext);
+
+  useEffect(() => {
+    setstatus(false);
+  }, [password, phone]);
   const _SignIn = () => {
     if (phone.length == 10 || password.length >= 6) {
       if (phone.length == 10) {
         if (password.length >= 6) {
+          setBtnLoader(true);
           SignInUser({
             phone: phone,
             password: password,
@@ -36,10 +42,12 @@ const SignIn = ({navigation}) => {
               } else {
                 setstatus(true);
                 setstatusMsg(res?.data?.message);
+                setBtnLoader(false);
               }
             })
             .catch(err => {
               console.log(err);
+              setBtnLoader(false);
             });
         } else {
           setpasswordV(false);
@@ -86,8 +94,31 @@ const SignIn = ({navigation}) => {
         }}>
         Keep your data safe null null null
       </Text>
+      <BlankSpace height={hp(2)} />
 
-      <BlankSpace height={hp(8)} />
+      {/* <Text
+        style={{
+          color: Colors.red,
+          fontFamily: Fonts.semibold,
+          textAlign: 'center',
+          fontSize: wp(3.5),
+        }}>
+        {status && statusMsg}
+      </Text> */}
+      <View
+        style={{
+          height: hp(5),
+          alignItems: 'center',
+        }}>
+        {status ? (
+          <Vaildation
+            errormsg={statusMsg}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
+
+      <BlankSpace height={hp(3)} />
       <View>
         <CommonInput
           iconName="phone-iphone"
@@ -120,7 +151,7 @@ const SignIn = ({navigation}) => {
       </View>
 
       <BlankSpace height={hp(4)} />
-      {status ? <Vaildation errormsg={statusMsg} /> : null}
+      {/* {status ? <Vaildation errormsg={statusMsg} /> : null} */}
       <Button
         onPress={() => {
           _SignIn();
@@ -137,6 +168,7 @@ const SignIn = ({navigation}) => {
           fontSize: wp(4),
         }}
         btnName="SIGN IN"
+        isLoader={btnLoader}
       />
 
       <BlankSpace height={hp(3)} />
