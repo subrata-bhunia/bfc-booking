@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, StatusBar, ScrollView} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  StatusBar,
+  ScrollView,
+  ToastAndroid,
+} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {getDate} from 'bangla-calendar';
 import {Colors, Fonts} from '../../constants';
@@ -17,7 +24,10 @@ import StaticHeader from '../../components/StaticHeader';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {upComingBookingList} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
+import {AuthContext} from '../../components/context';
+import {UserInfo} from '../../api/Users';
 const Home = () => {
+  const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
   const [fullDate, setfull] = useState(['2022-03-02', '2022-03-30']);
@@ -83,6 +93,31 @@ const Home = () => {
   }
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  // --------------------- //
+  const {signOut} = React.useContext(AuthContext);
+  const Check = () => {
+    UserInfo({
+      user_id: user_id,
+    })
+      .then(res => {
+        if (res.data?.data?.status == 'Active') {
+        } else {
+          signOut();
+          ToastAndroid.show(
+            'Logout! Please login again 👌',
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER,
+            ToastAndroid.BOTTOM,
+          );
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    Check();
+  }, []);
   // --------------- UPCOMING BOOK LIST ----------- //
   const [loader, setloader] = useState(true);
   const getUpcomingList = () => {

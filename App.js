@@ -19,27 +19,7 @@ export default function App() {
       const user_id = await AsyncStorage.getItem('userId');
       if (value !== null) {
         if (user_id !== null) {
-          UserInfo({
-            user_id: user_id,
-          })
-            .then(res => {
-              if (res.data?.data?.status == 'Active') {
-                setlogin(true);
-                UIStore.update(s => {
-                  s.userName = res?.data?.data?.user_name;
-                });
-              } else {
-                ToastAndroid.show(
-                  'Logout! Please login again 👌',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER,
-                  ToastAndroid.BOTTOM,
-                );
-              }
-            })
-            .catch(err => {
-              console.log(err);
-            });
+          setlogin(true);
         }
       }
     } catch (error) {
