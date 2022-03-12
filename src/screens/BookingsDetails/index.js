@@ -1512,7 +1512,7 @@ const BookingDetails = ({navigation}) => {
           name: 'Cancel',
         }}
       />
-      {/* Success Modal */}
+      {/* Pickup Modal */}
       <Model
         isVisible={modal}
         statusBarTranslucent
@@ -1521,7 +1521,7 @@ const BookingDetails = ({navigation}) => {
         focusable
         onBackButtonPress={() => {
           setmodal(false);
-          navigation.navigate('Home');
+          // navigation.navigate('Home');
         }}
         avoidKeyboard>
         <View
@@ -1529,15 +1529,16 @@ const BookingDetails = ({navigation}) => {
             backgroundColor: 'white',
             padding: 10,
             borderRadius: 10,
+            paddingTop: hp(3.5),
           }}>
           <Text
             style={{
               fontFamily: Fonts.bold,
-              fontSize: 25,
+              fontSize: 22,
               textAlign: 'center',
-              letterSpacing: 2,
+              letterSpacing: 1,
             }}>
-            Thank You
+            Pickup Successful
           </Text>
           <View style={{alignItems: 'center'}}>
             <AnimatedLottieView
@@ -1549,8 +1550,16 @@ const BookingDetails = ({navigation}) => {
               }}
               source={require('./complete.json')}
             />
+            {/* <Image
+              source={statusIcon.cancel}
+              style={{
+                height: hp(25),
+                width: wp(25),
+                resizeMode: 'center',
+              }}
+            /> */}
           </View>
-          <View style={{paddingHorizontal: wp(10)}}>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
             <View
               style={{
                 flexDirection: 'row',
@@ -1590,7 +1599,7 @@ const BookingDetails = ({navigation}) => {
           </View>
           {/*  */}
           <View>
-            <Text
+            {/* <Text
               style={[
                 styles.h1,
                 {
@@ -1600,7 +1609,31 @@ const BookingDetails = ({navigation}) => {
                 },
               ]}>
               {modalRes?.pending_amount} /-
-            </Text>
+            </Text> */}
+            {modalRes?.have_whatsapp == 1 ? (
+              <Button
+                onPress={() => {
+                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
+                }}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  marginVertical: hp(4),
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Share on Whatsapp"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
             <TouchableOpacity
               onPress={() => {
                 setmodal(false);
@@ -1610,7 +1643,8 @@ const BookingDetails = ({navigation}) => {
                   height: wp(15),
                   width: wp(15),
                   borderRadius: wp(7.5),
-                  backgroundColor: Colors.primary,
+                  borderColor: Colors.red,
+                  borderWidth: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
                   alignSelf: 'center',
@@ -1619,7 +1653,7 @@ const BookingDetails = ({navigation}) => {
                 <Icon
                   name="cross"
                   type="entypo"
-                  color={Colors.white}
+                  color={Colors.red}
                   size={wp(10)}
                 />
               </View>
@@ -1644,14 +1678,14 @@ const BookingDetails = ({navigation}) => {
             backgroundColor: 'white',
             padding: 10,
             borderRadius: 10,
-            paddingTop: 25,
+            paddingTop: hp(3.5),
           }}>
           <Text
             style={{
               fontFamily: Fonts.bold,
               fontSize: 22,
               textAlign: 'center',
-              letterSpacing: 2,
+              letterSpacing: 1,
             }}>
             Cancel Successful
           </Text>

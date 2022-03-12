@@ -7,7 +7,7 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
-const Vaildation = ({errormsg = ''}) => {
+const Vaildation = ({errormsg = '', txtStyle}) => {
   return (
     <View
       style={{
@@ -25,7 +25,8 @@ const Vaildation = ({errormsg = ''}) => {
           marginRight: 2,
         }}
       />
-      <Text style={{color: Colors.error, fontFamily: Fonts.regular}}>
+      <Text
+        style={[{color: Colors.error, fontFamily: Fonts.regular}, txtStyle]}>
         {errormsg}
       </Text>
     </View>

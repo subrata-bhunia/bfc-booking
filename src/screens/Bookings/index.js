@@ -28,6 +28,7 @@ import {AvailableItems} from '../../api/Inventory';
 import Vaildation from '../../components/Vaildation';
 import {AddBooking} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
+import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 
 const Booking = () => {
   const navigation = useNavigation();
@@ -46,6 +47,7 @@ const Booking = () => {
   const [addBiookingStatus, setaddBiookingStatus] = useState(null);
   const [modalData, setmodalData] = useState(null);
   const userId = UIStore.useState(s => s.userId);
+  const [btnLoader, setBtnLoader] = useState(false);
 
   //------- API ----------- //
   const getInventory = () => {
@@ -197,6 +199,7 @@ const Booking = () => {
   const _AddBooking = () => {
     if (rent > 0) {
       console.log(book_items);
+      setBtnLoader(true);
       AddBooking({
         pickup_date: pickupdate,
         pickup_time: value,
@@ -223,10 +226,18 @@ const Booking = () => {
           } else {
             setaddBiookingStatus(res?.data?.message);
             console.log(res?.data?.message);
+            setBtnLoader(false);
+            setTimeout(() => {
+              setaddBiookingStatus(null);
+            }, 5000);
           }
         })
         .catch(err => {
           console.log(err, 'TTTT');
+          setBtnLoader(false);
+          setTimeout(() => {
+            setaddBiookingStatus(null);
+          }, 5000);
         });
     } else {
       setrentV(false);
@@ -297,41 +308,45 @@ const Booking = () => {
             }}>
             {/* Table */}
             <View>
-              <Table
-                borderStyle={{
-                  borderColor: Colors.secondary,
-                  borderWidth: 2,
-                }}
-                style={{}}>
-                <Row
-                  data={TableHead}
-                  style={styles.head}
-                  textStyle={styles.text}
-                />
-                {tableData.map((rowData, index) => (
-                  <TableWrapper key={index} style={styles.row}>
-                    {rowData.map((cellData, cellIndex) => (
-                      <Cell
-                        key={cellIndex}
-                        data={
-                          cellIndex === 2 ? (
-                            <Input
-                              placeholder="0"
-                              defaultValue={book_items[cellData]}
-                              textAlign="center"
-                              onChangeText={txt => AddItems(cellData, txt)}
-                              keyboardType="numeric"
-                            />
-                          ) : (
-                            cellData
-                          )
-                        }
-                        textStyle={styles.text}
-                      />
-                    ))}
-                  </TableWrapper>
-                ))}
-              </Table>
+              {tableData.length == 0 ? (
+                <SkypeIndicator color={Colors.botton} count={5} size={wp(12)} />
+              ) : (
+                <Table
+                  borderStyle={{
+                    borderColor: Colors.secondary,
+                    borderWidth: 2,
+                  }}
+                  style={{}}>
+                  <Row
+                    data={TableHead}
+                    style={styles.head}
+                    textStyle={styles.text}
+                  />
+                  {tableData.map((rowData, index) => (
+                    <TableWrapper key={index} style={styles.row}>
+                      {rowData.map((cellData, cellIndex) => (
+                        <Cell
+                          key={cellIndex}
+                          data={
+                            cellIndex === 2 ? (
+                              <Input
+                                placeholder="0"
+                                defaultValue={book_items[cellData]}
+                                textAlign="center"
+                                onChangeText={txt => AddItems(cellData, txt)}
+                                keyboardType="numeric"
+                              />
+                            ) : (
+                              cellData
+                            )
+                          }
+                          textStyle={styles.text}
+                        />
+                      ))}
+                    </TableWrapper>
+                  ))}
+                </Table>
+              )}
             </View>
             <Button
               onPress={() => {
@@ -870,6 +885,9 @@ const Booking = () => {
               <Button
                 onPress={() => {
                   PersonalCheck();
+                  // setView0(!view0);
+                  // setnext2(true);
+                  // setView2(true);
                 }}
                 btnStyle={{
                   height: hp(6),
@@ -1149,7 +1167,8 @@ const Booking = () => {
                 <>
                   <View
                     style={{
-                      marginBottom: addBiookingStatus === null ? 0 : -hp(2),
+                      // marginBottom: addBiookingStatus === null ? 0 : -hp(2),
+                      alignItems: 'center',
                     }}>
                     {addBiookingStatus === null ? null : (
                       <Vaildation errormsg={addBiookingStatus} />
@@ -1172,7 +1191,7 @@ const Booking = () => {
                       },
                       shadowOpacity: 1,
                       shadowRadius: 3.5,
-                      elevation: 10,
+                      elevation: btnLoader ? 0 : 10,
                     }}
                     textStyle={{
                       fontFamily: Fonts.semibold,
@@ -1180,6 +1199,7 @@ const Booking = () => {
                       fontSize: 20,
                     }}
                     btnName="Add Book"
+                    isLoader={btnLoader}
                   />
                 </>
               ) : null}
@@ -1200,15 +1220,21 @@ const Booking = () => {
           navigation.navigate('Home');
         }}
         avoidKeyboard>
-        <View style={{backgroundColor: 'white', padding: 10, borderRadius: 10}}>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+            paddingTop: hp(3.5),
+          }}>
           <Text
             style={{
               fontFamily: Fonts.bold,
-              fontSize: 25,
+              fontSize: 22,
               textAlign: 'center',
-              letterSpacing: 2,
+              letterSpacing: 1,
             }}>
-            Thank You
+            Booking Successful
           </Text>
           <View style={{alignItems: 'center'}}>
             <AnimatedLottieView
@@ -1220,8 +1246,16 @@ const Booking = () => {
               }}
               source={require('./complete.json')}
             />
+            {/* <Image
+              source={statusIcon.cancel}
+              style={{
+                height: hp(25),
+                width: wp(25),
+                resizeMode: 'center',
+              }}
+            /> */}
           </View>
-          <View style={{paddingHorizontal: wp(10)}}>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
             <View
               style={{
                 flexDirection: 'row',
@@ -1249,8 +1283,8 @@ const Booking = () => {
                 marginVertical: hp(2),
                 alignItems: 'center',
               }}>
-              <Text style={styles.h2}>Advanced</Text>
-              <Text style={styles.h3}>{modalData?.advanced} /-</Text>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>{modalData?.total_amount} /-</Text>
             </View>
             <View
               style={{
@@ -1259,13 +1293,13 @@ const Booking = () => {
                 marginVertical: hp(2),
                 alignItems: 'center',
               }}>
-              <Text style={styles.h2}>Total Amount</Text>
-              <Text style={styles.h3}>{modalData?.total_amount} /-</Text>
+              <Text style={styles.h2}>Advanced</Text>
+              <Text style={styles.h3}>{modalData?.advanced} /-</Text>
             </View>
           </View>
           {/*  */}
           <View>
-            <Text
+            {/* <Text
               style={[
                 styles.h1,
                 {textAlign: 'center', marginVertical: hp(5), fontSize: 30},
@@ -1273,7 +1307,7 @@ const Booking = () => {
               {parseInt(modalData?.total_amount) -
                 parseInt(modalData?.advanced)}{' '}
               /-
-            </Text>
+            </Text> */}
             {whp ? (
               <Button
                 // onPress={() => navigation.navigate('Booking')}
@@ -1281,6 +1315,7 @@ const Booking = () => {
                   height: 50,
                   width: wp(60),
                   borderRadius: 10,
+                  marginVertical: hp(4),
                   backgroundColor: Colors.secondary,
                   // marginVertical: hp(2),
                 }}
@@ -1309,7 +1344,8 @@ const Booking = () => {
                   height: wp(15),
                   width: wp(15),
                   borderRadius: wp(7.5),
-                  backgroundColor: Colors.primary,
+                  borderColor: Colors.red,
+                  borderWidth: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
                   alignSelf: 'center',
@@ -1318,7 +1354,7 @@ const Booking = () => {
                 <Icon
                   name="cross"
                   type="entypo"
-                  color={Colors.white}
+                  color={Colors.red}
                   size={wp(10)}
                 />
               </View>

@@ -1,5 +1,5 @@
 import {View, Text, Image} from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -26,11 +26,18 @@ const SignUp = ({navigation}) => {
   const [status, setstatus] = useState(false);
   const [statusMsg, setstatusMsg] = useState('');
   const {signUp} = React.useContext(AuthContext);
+  const [btnLoader, setBtnLoader] = useState(false);
+
+  useEffect(() => {
+    setstatus(false);
+  }, [Password, phone, Email, Name]);
+
   const _SignUp = () => {
     if (Name.length > 5 || phone.length == 10 || Password.length >= 6) {
       if (Name.length > 5) {
         if (phone.length == 10) {
           if (Password.length >= 6) {
+            setBtnLoader(true);
             SignUpUser({
               name: Name,
               email: Email,
@@ -38,14 +45,16 @@ const SignUp = ({navigation}) => {
               password: Password,
             })
               .then(res => {
-                if (res.data?.status === 'Failed') {
+                if (res.data?.status === 'Success') {
+                  signUp(res.data?.user_id);
+                } else {
+                  setBtnLoader(false);
                   setstatus(true);
                   setstatusMsg(res.data?.message);
-                } else {
-                  signUp(res.data?.user_id);
                 }
               })
               .catch(err => {
+                setBtnLoader(false);
                 console.log(err);
                 alert('Error in Signup');
               });
@@ -91,7 +100,20 @@ const SignUp = ({navigation}) => {
         }}>
         Keep your data safe null null null
       </Text>
-      <BlankSpace height={hp(5)} />
+      <BlankSpace height={hp(2)} />
+      <View
+        style={{
+          height: hp(5),
+          alignItems: 'center',
+        }}>
+        {status ? (
+          <Vaildation
+            errormsg={statusMsg}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
+      <BlankSpace height={hp(3)} />
       <View>
         <CommonInput
           iconName="person"
@@ -151,7 +173,7 @@ const SignUp = ({navigation}) => {
       <BlankSpace height={hp(4)} />
 
       <View>
-        {status ? <Vaildation errormsg={statusMsg} /> : null}
+        {/* {status ? <Vaildation errormsg={statusMsg} /> : null} */}
         <Button
           btnStyle={{
             height: hp(7),
@@ -168,6 +190,7 @@ const SignUp = ({navigation}) => {
           onPress={() => {
             _SignUp();
           }}
+          isLoader={btnLoader}
         />
       </View>
 
