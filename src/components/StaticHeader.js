@@ -10,9 +10,10 @@ import Button from './Button';
 import {AuthContext} from './context';
 import {UIStore} from '../UIStore';
 
-const StaticHeader = ({userName = ''}) => {
+const StaticHeader = () => {
   const {signOut} = React.useContext(AuthContext);
   const userId = UIStore.useState(s => s.userId);
+  const userName = UIStore.useState(s => s.userName);
   // console.log(userId);
   return (
     <View
@@ -55,12 +56,12 @@ const StaticHeader = ({userName = ''}) => {
                     fontFamily: Fonts.semibold,
                     letterSpacing: 1.6,
                   }}>
-                  {`Hi ${userId},\nWelcome to BFC Booking App.\nThank You.`}
+                  {`Hi ${userName},\nWelcome to BFC Booking App.\nThank You.`}
                 </Text>
                 <Button
                   onPress={() => signOut()}
                   btnStyle={{
-                    height: 50,
+                    height: 40,
                     width: wp(50),
                     borderRadius: 50,
                     backgroundColor: Colors.secondary,

@@ -2,12 +2,13 @@ import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import React, {useEffect, useState} from 'react';
 
-import {StatusBar} from 'react-native';
+import {StatusBar, ToastAndroid} from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthContext} from './src/components/context';
 import {UIStore} from './src/UIStore';
+import {UserInfo} from './src/api/Users';
 
 export default function App() {
   const [login, setlogin] = useState(false);
@@ -15,14 +16,31 @@ export default function App() {
   const checkLogin = async () => {
     try {
       const value = await AsyncStorage.getItem('@login');
-      if (value !== null) {
-        setlogin(true);
-      }
       const user_id = await AsyncStorage.getItem('userId');
-      if (user_id !== null) {
-        UIStore.update(s => {
-          s.userId = user_id;
-        });
+      if (value !== null) {
+        if (user_id !== null) {
+          UserInfo({
+            user_id: user_id,
+          })
+            .then(res => {
+              if (res.data?.data?.status == 'Active') {
+                setlogin(true);
+                UIStore.update(s => {
+                  s.userName = res?.data?.data?.user_name;
+                });
+              } else {
+                ToastAndroid.show(
+                  'Logout! Please login again 👌',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.CENTER,
+                  ToastAndroid.BOTTOM,
+                );
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
       }
     } catch (error) {
       console.log('Check Login', error);
