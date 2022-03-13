@@ -12,9 +12,52 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {StyleSheet} from 'react-native';
 import BackBtn from '../../components/BackBtn';
+import {OtpVerifyAPI} from '../../api/Users';
+import Vaildation from '../../components/Vaildation';
 
-const OtpVerify = ({navigation}) => {
-  const [show, setShow] = useState(false);
+const OtpVerify = ({navigation, route}) => {
+  const RoutData = route?.params;
+
+  const [phone, setPhone] = useState(RoutData?.phone);
+  const [phoneValid, setPhoneValid] = useState(true);
+  const [otp, setOtp] = useState(null);
+  const [status, setstatus] = useState(false);
+  const [statusMsg, setstatusMsg] = useState('');
+  const [btnLoader, setBtnLoader] = useState(false);
+
+  console.log('From RoutParams', phone);
+
+  const handleVerifybtn = () => {
+    setstatus(false);
+    if (otp) {
+      setBtnLoader(true);
+      OtpVerifyAPI({
+        phone: phone,
+        otp: otp,
+      })
+        .then(res => {
+          console.log('0000', res?.data);
+          if (res?.data?.status == 'Success') {
+            setBtnLoader(false);
+            navigation.navigate('NewPassword', {
+              phone: phone,
+            });
+          } else {
+            setstatusMsg(res?.data?.message);
+            setstatus(true);
+            setBtnLoader(false);
+          }
+        })
+        .catch(err => {
+          console.log('verify otp api error :', err);
+          setstatusMsg('Something went wrong');
+          setstatus(true);
+          setBtnLoader(false);
+        });
+    } else {
+      setPhoneValid(false);
+    }
+  };
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
       <BlankSpace height={hp(4)} />
@@ -44,29 +87,37 @@ const OtpVerify = ({navigation}) => {
         }}>
         Keep your data safe null null null
       </Text>
+      <BlankSpace height={hp(2)} />
+      <View
+        style={{
+          height: hp(7),
+          alignItems: 'center',
+        }}>
+        {status ? (
+          <Vaildation
+            errormsg={statusMsg}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
 
-      <BlankSpace height={hp(10)} />
+      <BlankSpace height={hp(3)} />
       <OTPInputView
-        style={{width: wp(85), height: 50, alignSelf: 'center'}}
-        pinCount={6}
+        style={{width: wp(65), height: 50, alignSelf: 'center'}}
+        pinCount={4}
         autoFocusOnLoad
         codeInputFieldStyle={styles.underlineStyleBase}
         codeInputHighlightStyle={styles.underlineStyleHighLighted}
-        // onCodeFilled={code => {
-        //   this.setState({ codeInput: code, isLoading: true });
-        //   this.confirmCode(code);
-        //   this.keyDissmiss1(code);
-        // }}
-        // code={otp}
-        // onCodeChanged={data => {
-        //   onChangeInput(data, 'otp');
-        // }}
+        onCodeFilled={code => {
+          setOtp(code);
+        }}
       />
 
       <BlankSpace height={hp(4)} />
       <Button
         onPress={() => {
-          navigation.navigate('NewPassword');
+          handleVerifybtn();
+          // navigation.navigate('NewPassword');
         }}
         btnStyle={{
           height: hp(7),
@@ -80,6 +131,7 @@ const OtpVerify = ({navigation}) => {
           fontSize: wp(4),
         }}
         btnName="VERIFY"
+        isLoader={btnLoader}
       />
 
       <BlankSpace height={hp(4)} />
@@ -104,18 +156,23 @@ const OtpVerify = ({navigation}) => {
 
 const styles = StyleSheet.create({
   underlineStyleBase: {
-    width: wp(11),
-    height: wp(11),
-    borderRadius: wp(2),
-    backgroundColor: Colors.primary,
-    opacity: 0.5,
+    width: wp(13),
+    height: wp(13),
+    borderRadius: wp(90),
+    // backgroundColor: Colors.primary,
+    borderColor: Colors.disable,
+    opacity: 0.8,
     fontFamily: Fonts.semibold,
-    fontSize: wp(4),
+    fontSize: wp(5),
+    borderWidth: 3,
+    color: Colors.text,
   },
 
   underlineStyleHighLighted: {
     borderColor: Colors.primary,
-    borderWidth: 1,
+    // borderWidth: 1,
+    opacity: 1,
+    color: Colors.text,
   },
 });
 

@@ -9,9 +9,60 @@ import {Colors, Fonts} from '../../constants';
 import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {ResetPassword} from '../../api/Users';
+import Vaildation from '../../components/Vaildation';
+import {useNavigation} from '@react-navigation/native';
 
-const NewPassword = () => {
+const NewPassword = ({route}) => {
+  const RoutData = route?.params;
+
+  const navigation = useNavigation();
+
   const [show, setShow] = useState(false);
+  const [phone, setPhone] = useState(RoutData?.phone);
+  const [password, setPassword] = useState('');
+  const [PasswordV, setPasswordV] = useState(true);
+  const [confPasswordV, setConfPasswordV] = useState(true);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [status, setstatus] = useState(false);
+  const [statusMsg, setstatusMsg] = useState('');
+  const [btnLoader, setBtnLoader] = useState(false);
+
+  console.log('From RoutParams', phone);
+
+  const handleSavepasswordbtn = () => {
+    setstatus(false);
+    if (password.length >= 6) {
+      if (password == confirmPassword) {
+        setBtnLoader(true);
+        ResetPassword({
+          phone: phone,
+          password: password,
+        })
+          .then(res => {
+            console.log('0000', res?.data);
+            if (res?.data?.status == 'Success') {
+              navigation.navigate('SignIn');
+              setBtnLoader(false);
+            } else {
+              setstatusMsg(res?.data?.message);
+              setstatus(true);
+              setBtnLoader(false);
+            }
+          })
+          .catch(err => {
+            console.log('verify otp api error :', err);
+            setstatusMsg('Something went wrong');
+            setstatus(true);
+            setBtnLoader(false);
+          });
+      } else {
+        setConfPasswordV(false);
+      }
+    } else {
+      setPasswordV(false);
+    }
+  };
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
       <BlankSpace height={hp(4)} />
@@ -40,28 +91,48 @@ const NewPassword = () => {
         }}>
         Keep your data safe null null null
       </Text>
+      <BlankSpace height={hp(2)} />
+      <View
+        style={{
+          height: hp(7),
+          alignItems: 'center',
+        }}>
+        {status ? (
+          <Vaildation
+            errormsg={statusMsg}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
 
-      <BlankSpace height={hp(8)} />
+      <BlankSpace height={hp(3)} />
       <CommonInput
         iconName="lock"
         plholder={'New Password'}
-        // value={value}
-        // onChangeText={(value) => onchangeText(value)}
+        value={password}
+        onchangeText={value => {
+          setPassword(value), setPasswordV(true);
+        }}
         rightIconName={show ? 'visibility' : 'visibility-off'}
         rightIconClick={() => setShow(!show)}
         textType={show ? true : false}
       />
+      {PasswordV ? null : <Vaildation errormsg="Enter Vaild Password" />}
 
       <BlankSpace height={hp(4)} />
       <CommonInput
         iconName="lock"
         plholder={'Re-Enter Password'}
-        // value={value}
-        // onChangeText={(value) => onchangeText(value)}
+        value={confirmPassword}
+        onchangeText={value => {
+          setConfirmPassword(value);
+          setConfPasswordV(true);
+        }}
         rightIconName={show ? 'visibility' : 'visibility-off'}
         rightIconClick={() => setShow(!show)}
         textType={show ? true : false}
       />
+      {confPasswordV ? null : <Vaildation errormsg="Password mismatch" />}
 
       <BlankSpace height={hp(4)} />
       <Button
@@ -77,6 +148,8 @@ const NewPassword = () => {
           fontSize: wp(4),
         }}
         btnName="SAVE PASSWORD"
+        onPress={() => handleSavepasswordbtn()}
+        isLoader={btnLoader}
       />
     </KeyboardAwareScrollView>
   );

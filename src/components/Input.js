@@ -14,6 +14,7 @@ import {
   widthPercentageToDP,
 } from 'react-native-responsive-screen';
 import {Fonts, Colors} from '../constants';
+import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 export const CommonInput = ({
   text,
   iconName,
@@ -26,11 +27,15 @@ export const CommonInput = ({
   rightIconType,
   keyboardType,
   rightIconClick,
-  max = 16,
+  max = 50,
+  rightText = '',
+  rightTextClick,
+  editable = true,
+  rightLoader = false,
 }) => {
   return (
     <View style={[{backgroundColor: '#fff', alignSelf: 'center'}]}>
-      <TouchableOpacity style={styles.input}>
+      <View style={styles.input}>
         <View style={{width: '20%', alignItems: 'center'}}>
           {iconName && (
             <Icon
@@ -41,7 +46,7 @@ export const CommonInput = ({
             />
           )}
         </View>
-        <View style={{width: '60%', alignItems: 'flex-start'}}>
+        <View style={{width: '55%', alignItems: 'flex-start'}}>
           {plholder && (
             <TextInput
               placeholder={plholder}
@@ -51,25 +56,43 @@ export const CommonInput = ({
               placeholderTextColor={'#999'}
               onChangeText={onchangeText}
               style={styles.text}
-              editable={true}
+              editable={editable}
               secureTextEntry={textType}
               keyboardType={keyboardType || 'default'}
               maxLength={max}
             />
           )}
         </View>
-        <View style={{width: '20%', alignItems: 'center'}}>
-          {rightIconName && (
-            <Icon
-              name={rightIconName}
-              type={rightIconType}
-              color={Colors.primary}
-              size={wp(6)}
-              onPress={rightIconClick}
-            />
-          )}
-        </View>
-      </TouchableOpacity>
+        {rightLoader ? (
+          <View style={{width: '25%', alignItems: 'center'}}>
+            <SkypeIndicator color={Colors.botton} count={5} size={wp(6)} />
+          </View>
+        ) : (
+          <View style={{width: '25%', alignItems: 'center'}}>
+            {rightIconName && (
+              <Icon
+                name={rightIconName}
+                type={rightIconType}
+                color={rightIconName == 'verified' ? 'green' : Colors.primary}
+                size={rightIconName == 'verified' ? wp(7) : wp(6)}
+                onPress={rightIconClick}
+              />
+            )}
+            {rightText ? (
+              <Text
+                style={{
+                  color: Colors.primary,
+                  fontSize: wp(4),
+                  fontFamily: Fonts.semibold,
+                  marginRight: wp(3),
+                }}
+                onPress={rightTextClick}>
+                {rightText}
+              </Text>
+            ) : null}
+          </View>
+        )}
+      </View>
     </View>
   );
 };
