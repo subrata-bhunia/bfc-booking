@@ -20,6 +20,10 @@ export default function App() {
       if (value !== null) {
         if (user_id !== null) {
           setlogin(true);
+          UIStore.update(s => {
+            s.userId = user_id;
+          });
+          console.log(user_id);
         }
       }
     } catch (error) {
@@ -34,7 +38,7 @@ export default function App() {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-    }, 1000);
+    }, 10000);
   }, []);
   // -------------- //
 

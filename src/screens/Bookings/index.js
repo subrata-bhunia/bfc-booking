@@ -787,7 +787,7 @@ const Booking = () => {
         ) : null}
       </View>
 
-      {/* Personal */}
+      {/* Items */}
       {next1 === true ? (
         <View>
           <TouchableOpacity
