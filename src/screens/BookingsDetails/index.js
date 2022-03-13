@@ -91,18 +91,14 @@ const BookingDetails = ({navigation}) => {
           setcancle(res?.data?.data);
           setmodalCancel(true);
           setmodalRes(res?.data?.data);
-          // if (res?.data?.data?.have_whatsapp == 1) {
-          //   sendWPsms(
-          //     res?.data?.data?.customer_phone,
-          //     res?.data?.data?.wa_message,
-          //   );
-          // }
         }
       })
       .catch(err => {
         console.log(err);
       });
   };
+
+  console.log(modalRes);
   const obj1 = new Object();
   const arr = new Array();
   const AddItems = (key, value) => {

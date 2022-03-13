@@ -201,45 +201,45 @@ const Booking = () => {
       console.log(book_items);
       setBtnLoader(true);
       console.log('userId', userId);
-      // AddBooking({
-      //   pickup_date: pickupdate,
-      //   pickup_time: value,
-      //   return_date: returndate,
-      //   return_time: rvalue,
-      //   customer_name: cname,
-      //   customer_phone: cphone,
-      //   whatsapp: whp,
-      //   customer_address: cadd,
-      //   items: book_items,
-      //   gathering: gathering,
-      //   rent: rent,
-      //   advanced: Advanced,
-      //   caterers: caterersvalue,
-      //   caterer_charge: cat_rate,
-      //   extra_charges: extra,
-      //   total_amount: total,
-      //   user_id: userId,
-      // })
-      //   .then(res => {
-      //     if (res?.data?.status === 'Success') {
-      //       setmodal(true);
-      //       setmodalData(res?.data?.data);
-      //     } else {
-      //       setaddBiookingStatus(res?.data?.message);
-      //       console.log(res?.data?.message);
-      //       setBtnLoader(false);
-      //       setTimeout(() => {
-      //         setaddBiookingStatus(null);
-      //       }, 5000);
-      //     }
-      //   })
-      //   .catch(err => {
-      //     console.log(err, 'TTTT');
-      //     setBtnLoader(false);
-      //     setTimeout(() => {
-      //       setaddBiookingStatus(null);
-      //     }, 5000);
-      //   });
+      AddBooking({
+        pickup_date: pickupdate,
+        pickup_time: value,
+        return_date: returndate,
+        return_time: rvalue,
+        customer_name: cname,
+        customer_phone: cphone,
+        whatsapp: whp,
+        customer_address: cadd,
+        items: book_items,
+        gathering: gathering,
+        rent: rent,
+        advanced: Advanced,
+        caterers: caterersvalue,
+        caterer_charge: cat_rate,
+        extra_charges: extra,
+        total_amount: total,
+        user_id: userId,
+      })
+        .then(res => {
+          if (res?.data?.status === 'Success') {
+            setmodal(true);
+            setmodalData(res?.data?.data);
+          } else {
+            setaddBiookingStatus(res?.data?.message);
+            console.log(res?.data?.message);
+            setBtnLoader(false);
+            setTimeout(() => {
+              setaddBiookingStatus(null);
+            }, 5000);
+          }
+        })
+        .catch(err => {
+          console.log(err, 'TTTT');
+          setBtnLoader(false);
+          setTimeout(() => {
+            setaddBiookingStatus(null);
+          }, 5000);
+        });
     } else {
       setrentV(false);
     }
@@ -755,10 +755,7 @@ const Booking = () => {
             />
             <Button
               onPress={() => {
-                // PersonalCheck();
-                setView0(!view0);
-                setnext1(true);
-                setView1(true);
+                PersonalCheck();
               }}
               btnStyle={{
                 height: hp(6),
@@ -786,7 +783,7 @@ const Booking = () => {
         ) : null}
       </View>
 
-      {/* Personal */}
+      {/* Items */}
       {next1 === true ? (
         <View>
           <TouchableOpacity

@@ -26,6 +26,7 @@ import {upComingBookingList} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {AuthContext} from '../../components/context';
 import {UserInfo} from '../../api/Users';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const Home = () => {
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
@@ -41,7 +42,6 @@ const Home = () => {
   const [bookings, setBookings] = useState([]);
   const [upComingbookingsList, setupComingbookingsList] = useState([]);
   const [pastbookingList, setpastbookingList] = useState([]);
-  const userId = UIStore.useState(s => s.userId);
   const months = [
     'January',
     'February',
@@ -95,28 +95,62 @@ const Home = () => {
   const isFocused = useIsFocused();
   // --------------------- //
   const {signOut} = React.useContext(AuthContext);
-  const Check = () => {
-    UserInfo({
-      user_id: user_id,
-    })
-      .then(res => {
-        if (res.data?.data?.status == 'Active') {
-          UIStore.update(s => {
-            s.userName = res.data?.data?.user_name;
+  const Check = async () => {
+    console.log('user_id', user_id);
+    if (user_id === '') {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        UIStore.update(s => {
+          s.userId = userId;
+        });
+        UserInfo({
+          user_id: userId,
+        })
+          .then(res => {
+            if (res.data?.data?.status == 'Active') {
+              UIStore.update(s => {
+                s.userName = res.data?.data?.user_name;
+              });
+            } else {
+              signOut();
+              ToastAndroid.show(
+                'Logout! Please login again 👌',
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER,
+                ToastAndroid.BOTTOM,
+              );
+            }
+          })
+          .catch(err => {
+            console.log(err);
           });
-        } else {
-          signOut();
-          ToastAndroid.show(
-            'Logout! Please login again 👌',
-            ToastAndroid.SHORT,
-            ToastAndroid.CENTER,
-            ToastAndroid.BOTTOM,
-          );
-        }
-      })
-      .catch(err => {
+      } catch (err) {
         console.log(err);
-      });
+        alert(`Error In Home`);
+      }
+    } else {
+      UserInfo({
+        user_id: user_id,
+      })
+        .then(res => {
+          if (res.data?.data?.status == 'Active') {
+            UIStore.update(s => {
+              s.userName = res.data?.data?.user_name;
+            });
+          } else {
+            signOut();
+            ToastAndroid.show(
+              'Logout! Please login again 👌',
+              ToastAndroid.SHORT,
+              ToastAndroid.CENTER,
+              ToastAndroid.BOTTOM,
+            );
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   };
   useEffect(() => {
     Check();
@@ -124,7 +158,7 @@ const Home = () => {
   // --------------- UPCOMING BOOK LIST ----------- //
   const [loader, setloader] = useState(true);
   const getUpcomingList = () => {
-    upComingBookingList({user_id: userId}).then(res => {
+    upComingBookingList({user_id: user_id}).then(res => {
       setloader(true);
       if (res?.data?.status === 'Success') {
         setupComingbookingsList(res?.data?.data);

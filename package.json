@@ -21,6 +21,7 @@
     "add": "^2.0.6",
     "axios": "^0.26.0",
     "bangla-calendar": "^3.0.0",
+    "date-bengali-revised": "^2.0.1",
     "lottie-react-native": "^5.0.1",
     "or": "^0.2.0",
     "pullstate": "^1.23.0",
