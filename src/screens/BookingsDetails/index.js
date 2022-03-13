@@ -30,6 +30,8 @@ import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
 import {UIStore} from '../../UIStore';
+import {RadioButton} from 'react-native-simple-radio-button';
+import RadioForm from 'react-native-simple-radio-button';
 
 const BookingDetails = ({navigation}) => {
   const [view0, setView0] = useState(true);
@@ -143,6 +145,7 @@ const BookingDetails = ({navigation}) => {
       setView1(true);
     }
   }, [resReturnData]);
+
   const handleGetBookingDetails = async () => {
     setShow(true);
     getReturnBookingById({booking_id: booking_id}).then(res => {
@@ -156,6 +159,8 @@ const BookingDetails = ({navigation}) => {
     });
   };
   // ----------------- Next ----------- //
+  const [nextModal, setnextModal] = useState(false);
+  const [nextModalres, setnextModalres] = useState([]);
   const NextButtonClick = () => {
     setpickupitem;
     console.log(obj1);
@@ -167,8 +172,9 @@ const BookingDetails = ({navigation}) => {
       })
         .then(res => {
           if (res?.data?.status === 'Missing') {
-            console.log(res?.data?.data);
+            setnextModalres(res?.data?.data);
             setnextLoader(false);
+            setnextModal(true);
           } else {
             setView1(!view1);
             setnext2(true);
@@ -186,6 +192,10 @@ const BookingDetails = ({navigation}) => {
       setView2(true);
     }
   };
+  var radio_props = [
+    {label: 'Extra Charge', value: 0},
+    {label: 'Products', value: 1},
+  ];
   return (
     <>
       {resReturnData === null ? (
@@ -1846,6 +1856,118 @@ const BookingDetails = ({navigation}) => {
               </View>
             </TouchableOpacity>
           </View>
+        </View>
+      </Model>
+      {/* Retrun Missing Modal */}
+      <Model isVisible={nextModal}>
+        <View
+          style={{
+            // height: hp(80),
+            backgroundColor: Colors.white,
+            borderRadius: 10,
+            padding: 10,
+            paddingTop: hp(3.5),
+          }}>
+          {/* msg */}
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 1,
+            }}>
+            Missing Item Details
+          </Text>
+          {/* Missing Table */}
+          <View
+            style={{
+              marginVertical: 20,
+            }}>
+            <Table
+              borderStyle={{
+                borderColor: Colors.secondary,
+                borderWidth: 2,
+              }}
+              style={{}}>
+              <Row
+                data={TableHead3}
+                style={styles.head}
+                textStyle={styles.text}
+              />
+              {nextModalres?.missing_items?.map((rowData, index) => (
+                <TableWrapper key={index} style={styles.row}>
+                  {rowData.map((cellData, cellIndex) => (
+                    <Cell
+                      key={cellIndex}
+                      data={cellData}
+                      textStyle={[styles.text, {padding: 10}]}
+                    />
+                  ))}
+                </TableWrapper>
+              ))}
+            </Table>
+            <Table
+              borderStyle={{
+                borderColor: Colors.disable,
+                borderWidth: 2,
+                borderTopColor: '#000',
+              }}
+              style={{
+                marginVertical: 10,
+              }}>
+              <Row
+                data={['Total', nextModalres?.missing_charge]}
+                style={{height: 30}}
+                textStyle={styles.text}
+              />
+            </Table>
+          </View>
+          {/* Choose  */}
+          <View>
+            <Text style={[styles.h3, {marginBottom: 20}]}>
+              What You choose?
+            </Text>
+            <RadioForm
+              accessibilityLabel="Test"
+              animation={true}
+              radio_props={radio_props}
+              initial={0}
+              buttonColor={Colors.disable}
+              onPress={val => {
+                val === 0
+                  ? console.log('Extra Charge')
+                  : console.log('Products');
+              }}
+            />
+          </View>
+          {/* Button */}
+          <TouchableOpacity
+            onPress={() => {
+              setnextModal(false);
+              setView1(false);
+              setView2(true);
+              setnext2(true);
+            }}>
+            <View
+              style={{
+                height: wp(15),
+                width: wp(15),
+                borderRadius: wp(7.5),
+                borderColor: Colors.red,
+                borderWidth: 2,
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'center',
+                margin: 20,
+              }}>
+              <Icon
+                name="cross"
+                type="entypo"
+                color={Colors.red}
+                size={wp(10)}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </Model>
     </>
