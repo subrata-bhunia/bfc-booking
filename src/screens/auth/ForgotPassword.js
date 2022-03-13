@@ -1,5 +1,5 @@
 import {View, Text, Image} from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -9,9 +9,52 @@ import {Colors, Fonts} from '../../constants';
 import {CommonInput} from '../../components/Input';
 import BlankSpace from '../../components/BlankSpace';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {ForgetPassword} from '../../api/Users';
+import Vaildation from '../../components/Vaildation';
 
 const ForgotPassword = ({navigation}) => {
-  const [show, setShow] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [phoneValid, setPhoneValid] = useState(true);
+  const [status, setstatus] = useState(false);
+  const [statusMsg, setstatusMsg] = useState('');
+  const [btnLoader, setBtnLoader] = useState(false);
+
+  console.log('phone', phone);
+
+  useEffect(() => {
+    setstatus(false);
+  }, [phone]);
+
+  const handleOtpbtn = () => {
+    setstatus(false);
+    if (phone.length == 10) {
+      setBtnLoader(true);
+      ForgetPassword({
+        phone: phone,
+      })
+        .then(res => {
+          console.log('0000', res?.data);
+          if (res?.data?.status == 'Success') {
+            setBtnLoader(false);
+            navigation.navigate('OtpVerify', {
+              phone: phone,
+            });
+          } else {
+            setstatusMsg(res?.data?.message);
+            setstatus(true);
+            setBtnLoader(false);
+          }
+        })
+        .catch(err => {
+          console.log('send otp api error :', err);
+          setstatusMsg('Something went wrong');
+          setstatus(true);
+          setBtnLoader(false);
+        });
+    } else {
+      setPhoneValid(false);
+    }
+  };
   return (
     <KeyboardAwareScrollView style={{backgroundColor: '#fff', flex: 1}}>
       <BlankSpace height={hp(4)} />
@@ -41,20 +84,37 @@ const ForgotPassword = ({navigation}) => {
         Keep your data safe null null null
       </Text>
 
-      <BlankSpace height={hp(10)} />
+      <BlankSpace height={hp(2)} />
+      <View
+        style={{
+          height: hp(7),
+          alignItems: 'center',
+        }}>
+        {status ? (
+          <Vaildation
+            errormsg={statusMsg}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
+
+      <BlankSpace height={hp(3)} />
       <CommonInput
         iconName="phone-iphone"
         plholder={'Mobile Number'}
-        // value={value}
-        // onChangeText={(value) => onchangeText(value)}
+        value={phone}
+        onchangeText={txt => {
+          setPhone(txt);
+          setPhoneValid(true);
+        }}
         keyboardType="numeric"
+        max={10}
       />
+      {phoneValid ? null : <Vaildation errormsg="Enter Vaild Phone Number" />}
 
       <BlankSpace height={hp(4)} />
       <Button
-        onPress={() => {
-          navigation.navigate('OtpVerify');
-        }}
+        onPress={() => handleOtpbtn()}
         btnStyle={{
           height: hp(7),
           width: wp(90),
@@ -67,6 +127,7 @@ const ForgotPassword = ({navigation}) => {
           fontSize: wp(4),
         }}
         btnName="SEND OTP"
+        isLoader={btnLoader}
       />
     </KeyboardAwareScrollView>
   );
