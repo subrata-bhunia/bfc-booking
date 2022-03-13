@@ -22,6 +22,7 @@ import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   cancelBooking,
+  checkReturnItems,
   getReturnBookingById,
   pickupBooking,
 } from '../../api/Bookings';
@@ -53,10 +54,12 @@ const BookingDetails = ({navigation}) => {
   const [returndate, setreturndate] = useState(null);
   const TableHead2 = ['Item Name', 'Stock', 'Need'];
   const TableHead = ['Item Name', 'Taken', 'Return'];
+  const TableHead3 = ['Item Name', 'Qty', 'Price'];
   const [tableData, setTableData] = useState([]);
   // ---------- Drop Down ---------- //
   const [_return, setreturn] = useState(false);
   const [_cateres, setcateres] = useState(false);
+  const [nextLoader, setnextLoader] = useState(false);
 
   // ---------- Confirm -------------- //
   const [canclebtn, setcancle] = useState([]);
@@ -98,7 +101,7 @@ const BookingDetails = ({navigation}) => {
       });
   };
 
-  console.log(modalRes);
+  // console.log(modalRes);
   const obj1 = new Object();
   const arr = new Array();
   const AddItems = (key, value) => {
@@ -127,7 +130,7 @@ const BookingDetails = ({navigation}) => {
   };
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
-  const [modifybtn, setmodifybtn] = useState(false);
+  const [returnBtnDisable, setreturnBtnDisable] = useState(true);
   // -------------- Due ------------------- //
   // const [modifybtn,setmodifybtn] = useState(false)
   // const [modifybtn,setmodifybtn] = useState(false)
@@ -135,6 +138,11 @@ const BookingDetails = ({navigation}) => {
     handleGetBookingDetails();
     setpickuppayment('');
   }, [canclebtn, pickupitemRes]);
+  useEffect(() => {
+    if (resReturnData?.status === 'Pickup') {
+      setView1(true);
+    }
+  }, [resReturnData]);
   const handleGetBookingDetails = async () => {
     setShow(true);
     getReturnBookingById({booking_id: booking_id}).then(res => {
@@ -146,6 +154,37 @@ const BookingDetails = ({navigation}) => {
       }
       // console.log('getData', data);
     });
+  };
+  // ----------------- Next ----------- //
+  const NextButtonClick = () => {
+    setpickupitem;
+    console.log(obj1);
+    if (resReturnData?.status === 'Pickup') {
+      setnextLoader(true);
+      checkReturnItems({
+        booking_id: booking_id,
+        items: obj1,
+      })
+        .then(res => {
+          if (res?.data?.status === 'Missing') {
+            console.log(res?.data?.data);
+            setnextLoader(false);
+          } else {
+            setView1(!view1);
+            setnext2(true);
+            setView2(true);
+            setnextLoader(false);
+            setreturnBtnDisable(false);
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    } else {
+      setView1(!view1);
+      setnext2(true);
+      setView2(true);
+    }
   };
   return (
     <>
@@ -567,7 +606,11 @@ const BookingDetails = ({navigation}) => {
                           }}
                           style={{}}>
                           <Row
-                            data={TableHead2}
+                            data={
+                              resReturnData?.status === 'Confirm'
+                                ? TableHead2
+                                : TableHead
+                            }
                             style={styles.head}
                             textStyle={styles.text}
                           />
@@ -604,11 +647,9 @@ const BookingDetails = ({navigation}) => {
                       </View>
                       <Button
                         onPress={() => {
-                          setView1(!view1);
-                          setnext2(true);
-                          setView2(true);
-                          setpickupitem(obj1);
+                          NextButtonClick();
                         }}
+                        isLoader={nextLoader}
                         btnStyle={{
                           height: hp(6),
                           width: wp(80),
@@ -622,7 +663,7 @@ const BookingDetails = ({navigation}) => {
                           },
                           shadowOpacity: 1,
                           shadowRadius: 3.5,
-                          elevation: 10,
+                          // elevation: 10,
                         }}
                         textStyle={{
                           fontFamily: Fonts.semibold,
@@ -1297,6 +1338,7 @@ const BookingDetails = ({navigation}) => {
                   color: '#fff',
                   fontSize: 16,
                 }}
+                disabled={returnBtnDisable}
                 btnName="RETURN"
               />
             </View>
@@ -1466,7 +1508,7 @@ const BookingDetails = ({navigation}) => {
         </View>
       )}
       <WarningModal
-        h1="Are you want to cancel this booking ?"
+        h1="Are you want to cancel this booking?"
         open={openCancelModal}
         setopen={setopenCancelModal}
         yes={{
@@ -1480,7 +1522,7 @@ const BookingDetails = ({navigation}) => {
         }}
       />
       <WarningModal
-        h1="Are you sure to confirm pickup this booking ?"
+        h1="Are you sure to confirm pickup this booking?"
         open={pickupbtn}
         setopen={setpickup}
         yes={{
@@ -1495,17 +1537,17 @@ const BookingDetails = ({navigation}) => {
         }}
       />
       <WarningModal
-        h1="Are you confirm to return this booking ?"
+        h1="Are you sure to confirm return this booking?"
         open={returnbtn}
         setopen={setreturnbtn}
         yes={{
-          name: 'Confirm',
+          name: 'Yes',
           onPress: () => {
             console.log('Confirm');
           },
         }}
         no={{
-          name: 'Cancel',
+          name: 'No',
         }}
       />
       {/* Pickup Modal */}
