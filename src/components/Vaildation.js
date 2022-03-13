@@ -12,7 +12,7 @@ const Vaildation = ({errormsg = '', txtStyle}) => {
     <View
       style={{
         flexDirection: 'row',
-        alignItems: 'center',
+        // alignItems: 'center',
         paddingHorizontal: wp(10),
         margin: 5,
       }}>

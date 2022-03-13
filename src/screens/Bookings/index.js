@@ -224,6 +224,7 @@ const Booking = () => {
           if (res?.data?.status === 'Success') {
             setmodal(true);
             setmodalData(res?.data?.data);
+            setBtnLoader(false);
           } else {
             setaddBiookingStatus(res?.data?.message);
             console.log(res?.data?.message);
@@ -756,6 +757,9 @@ const Booking = () => {
             <Button
               onPress={() => {
                 PersonalCheck();
+                // setView0(!view0);
+                // setnext1(true);
+                // setView1(true);
               }}
               btnStyle={{
                 height: hp(6),

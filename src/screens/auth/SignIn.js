@@ -107,7 +107,7 @@ const SignIn = ({navigation}) => {
       </Text> */}
       <View
         style={{
-          height: hp(5),
+          height: hp(7),
           alignItems: 'center',
         }}>
         {status ? (

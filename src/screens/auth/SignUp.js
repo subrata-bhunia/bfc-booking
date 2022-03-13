@@ -103,7 +103,7 @@ const SignUp = ({navigation}) => {
       <BlankSpace height={hp(2)} />
       <View
         style={{
-          height: hp(5),
+          height: hp(7),
           alignItems: 'center',
         }}>
         {status ? (
