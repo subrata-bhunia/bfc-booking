@@ -34,6 +34,23 @@ import {RadioButton} from 'react-native-simple-radio-button';
 import RadioForm from 'react-native-simple-radio-button';
 
 const BookingDetails = ({navigation}) => {
+  //--------Whatsapp Msg------------- //
+  const sendWPsms = (phone, msg) => {
+    var phone_n = phone.split(' ').join('').replace('+91', '');
+    var phone_new = phone_n.charAt(0) === '0' ? phone_n.substring(1) : phone_n;
+    Linking.openURL(
+      'whatsapp://send?text=' + msg + '&phone=91' + phone_new,
+    ).catch(err =>
+      ToastAndroid.show(
+        "Can't Open Whatsapp.",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      ),
+    );
+    // console.log("WP")
+  };
+  //--------------------- //
+
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(false);
   const [view2, setView2] = useState(false);
@@ -70,20 +87,7 @@ const BookingDetails = ({navigation}) => {
   const [pickupitem, setpickupitem] = useState([]);
   const [pickupitemRes, setpickupitemRes] = useState([]);
   const [pickuppayment, setpickuppayment] = useState('');
-  const sendWPsms = (phone, msg) => {
-    var phone_n = phone.split(' ').join('').replace('+91', '');
-    var phone_new = phone_n.charAt(0) === '0' ? phone_n.substring(1) : phone_n;
-    Linking.openURL(
-      'whatsapp://send?text=' + msg + '&phone=91' + phone_new,
-    ).catch(err =>
-      ToastAndroid.show(
-        "Can't Open Whatsapp.",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER,
-      ),
-    );
-    // console.log("WP")
-  };
+
   const CancelClick = () => {
     setShow(true);
     setopenCancelModal(false);
@@ -143,6 +147,12 @@ const BookingDetails = ({navigation}) => {
   useEffect(() => {
     if (resReturnData?.status === 'Pickup') {
       setView1(true);
+      console.log(resReturnData?.items);
+      const takenItems = new Object();
+      resReturnData?.items?.map((item, index) => {
+        takenItems[item[2].item_id] = item[2].taken;
+      });
+      setpickupitem(takenItems);
     }
   }, [resReturnData]);
 
@@ -162,7 +172,7 @@ const BookingDetails = ({navigation}) => {
   const [nextModal, setnextModal] = useState(false);
   const [nextModalres, setnextModalres] = useState([]);
   const NextButtonClick = () => {
-    setpickupitem;
+    setpickupitem(obj1);
     console.log(obj1);
     if (resReturnData?.status === 'Pickup') {
       setnextLoader(true);
@@ -624,6 +634,7 @@ const BookingDetails = ({navigation}) => {
                             style={styles.head}
                             textStyle={styles.text}
                           />
+                          {/* Check By Kaustav Da */}
                           {tableData.map((rowData, index) => (
                             <TableWrapper key={index} style={styles.row}>
                               {rowData.map((cellData, cellIndex) => (
@@ -633,11 +644,15 @@ const BookingDetails = ({navigation}) => {
                                     cellIndex === 2 ? (
                                       <Input
                                         placeholder={`${cellData.taken}`}
+                                        clearTextOnFocus
+                                        onFocus={e => e.target}
                                         placeholderTextColor={Colors.text}
-                                        // value={}
                                         defaultValue={
                                           pickupitem[cellData?.item_id]
                                         }
+                                        // defaultValue={
+                                        //   pickupitem[cellData?.item_id]
+                                        // }
                                         textAlign="center"
                                         onChangeText={txt =>
                                           AddItems(cellData?.item_id, txt)
@@ -658,6 +673,7 @@ const BookingDetails = ({navigation}) => {
                       <Button
                         onPress={() => {
                           NextButtonClick();
+                          setpickupitem(obj1);
                         }}
                         isLoader={nextLoader}
                         btnStyle={{
@@ -1348,7 +1364,7 @@ const BookingDetails = ({navigation}) => {
                   color: '#fff',
                   fontSize: 16,
                 }}
-                disabled={returnBtnDisable}
+                disabled={returnBtnDisable || view1 ? true : false}
                 btnName="RETURN"
               />
             </View>

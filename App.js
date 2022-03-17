@@ -60,6 +60,10 @@ export default function App() {
     signOut: () => {
       AsyncStorage.clear();
       setlogin(false);
+      UIStore.update(s => {
+        s.userId = '';
+        s.userName = '';
+      });
     },
     signUp: status => {
       if (status !== undefined) {
