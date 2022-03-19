@@ -25,6 +25,7 @@ import {
   checkReturnItems,
   getReturnBookingById,
   pickupBooking,
+  ReturnBooking,
 } from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
@@ -133,6 +134,7 @@ const BookingDetails = ({navigation}) => {
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
   const [returnBtnDisable, setreturnBtnDisable] = useState(true);
+  // const [returnPayment,setreturnPayment]=useState(0)
   // -------------- Due ------------------- //
   // const [modifybtn,setmodifybtn] = useState(false)
   // const [modifybtn,setmodifybtn] = useState(false)
@@ -193,9 +195,34 @@ const BookingDetails = ({navigation}) => {
     }
   };
   var radio_props = [
-    {label: 'Extra Charge', value: 0},
+    {label: 'Product Price', value: 0},
     {label: 'Products', value: 1},
   ];
+  const [chooseByUser, setchooseByuser] = useState('Product Price');
+  const [Discount, setDiscount] = useState(0);
+  const [ReturnModal, setReturnModal] = useState(false);
+  const [extra, setextra] = useState(0);
+  const ReturnClick = () => {
+    setreturnbtn(false);
+    setShow(true);
+    ReturnBooking({
+      user_id: user_id,
+      booking_id: booking_id,
+      settled_by: chooseByUser,
+      payment: pickuppayment,
+      discount: Discount,
+      extra_charges: extra,
+    })
+      .then(res => {
+        setShow(false);
+        setReturnModal(true);
+        setmodalRes(res?.data?.data);
+        setpickupitemRes(res?.data?.data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
   return (
     <>
       {resReturnData === null ? (
@@ -658,6 +685,7 @@ const BookingDetails = ({navigation}) => {
                       <Button
                         onPress={() => {
                           NextButtonClick();
+                          setpickupitem(obj1);
                         }}
                         isLoader={nextLoader}
                         btnStyle={{
@@ -816,7 +844,7 @@ const BookingDetails = ({navigation}) => {
                             width: wp(40),
                             textAlign: 'right',
                           }}>
-                          Extra Charges :
+                          Product Prices :
                         </Text>
                         <Input
                           defaultValue={'0'}
@@ -830,6 +858,7 @@ const BookingDetails = ({navigation}) => {
                           }}
                         />
                       </View>
+
                       <View
                         style={{
                           borderBottomWidth: 1,
@@ -1084,7 +1113,7 @@ const BookingDetails = ({navigation}) => {
                           Extra Charges :
                         </Text>
                         <Input
-                          defaultValue={`${resReturnData?.extra_charges}`}
+                          value={`${extra}`}
                           keyboardType="number-pad"
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
@@ -1120,7 +1149,10 @@ const BookingDetails = ({navigation}) => {
                         </Text>
                         <Input
                           disabled
-                          defaultValue={`${resReturnData.total_amount}`}
+                          defaultValue={`${
+                            parseInt(resReturnData.total_amount) +
+                            parseInt(extra)
+                          }`}
                           containerStyle={{width: wp(40), height: hp(10)}}
                           leftIcon={
                             <Icon name="inr" type="fontisto" size={15} />
@@ -1188,6 +1220,39 @@ const BookingDetails = ({navigation}) => {
                           }}
                         />
                       </View>
+                      {/* Discount */}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: -wp(4),
+                        }}>
+                        <Text
+                          style={{
+                            fontFamily: Fonts.semibold,
+                            fontSize: wp(4),
+                            width: wp(40),
+                            textAlign: 'right',
+                          }}>
+                          Discount :
+                        </Text>
+                        <Input
+                          value={Discount}
+                          onChangeText={txt => {
+                            setDiscount(txt);
+                          }}
+                          keyboardType="number-pad"
+                          containerStyle={{width: wp(40), height: hp(10)}}
+                          leftIcon={
+                            <Icon name="inr" type="fontisto" size={15} />
+                          }
+                          inputStyle={{
+                            fontSize: wp(4),
+                          }}
+                          placeholder={'0'}
+                        />
+                      </View>
                       {/* Payment*/}
                       <View
                         style={{
@@ -1215,6 +1280,7 @@ const BookingDetails = ({navigation}) => {
                           inputStyle={{
                             fontSize: wp(4),
                           }}
+                          placeholder={'0'}
                           value={pickuppayment}
                           onChangeText={txt => {
                             setpickuppayment(txt);
@@ -1553,7 +1619,7 @@ const BookingDetails = ({navigation}) => {
         yes={{
           name: 'Yes',
           onPress: () => {
-            console.log('Confirm');
+            ReturnClick();
           },
         }}
         no={{
@@ -1858,6 +1924,136 @@ const BookingDetails = ({navigation}) => {
           </View>
         </View>
       </Model>
+      {/* Return Modal */}
+      <Model
+        isVisible={ReturnModal}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setReturnModal(false);
+          // navigation.navigate('Home');
+        }}
+        avoidKeyboard>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+            paddingTop: hp(3.5),
+          }}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 1,
+            }}>
+            Return Successful
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+          </View>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>{modalRes?.date}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Payment</Text>
+              <Text style={styles.h3}>{modalRes?.payment} /-</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            {modalRes?.have_whatsapp == 1 ? (
+              <Button
+                onPress={() => {
+                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
+                }}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  marginVertical: hp(4),
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Share on Whatsapp"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
+            <TouchableOpacity
+              onPress={() => {
+                setReturnModal(false);
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  borderColor: Colors.red,
+                  borderWidth: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.red}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Model>
       {/* Retrun Missing Modal */}
       <Model isVisible={nextModal}>
         <View
@@ -1935,8 +2131,8 @@ const BookingDetails = ({navigation}) => {
               buttonColor={Colors.disable}
               onPress={val => {
                 val === 0
-                  ? console.log('Extra Charge')
-                  : console.log('Products');
+                  ? setchooseByuser('Product Price')
+                  : setchooseByuser('Products');
               }}
             />
           </View>
@@ -1947,6 +2143,8 @@ const BookingDetails = ({navigation}) => {
               setView1(false);
               setView2(true);
               setnext2(true);
+              setreturnBtnDisable(false);
+              setextra(nextModalres?.missing_charge);
             }}>
             <View
               style={{

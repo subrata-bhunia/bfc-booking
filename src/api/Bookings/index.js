@@ -24,3 +24,7 @@ export const pickupBooking = data => {
 export const checkReturnItems = data => {
   return axios.post('/check-return-items', data);
 };
+
+export const ReturnBooking = data => {
+  return axios.post('/return-booking', data);
+};
