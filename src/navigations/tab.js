@@ -13,6 +13,8 @@ import AllBookings from '../screens/AllBookings';
 import ContactList from '../screens/Contacts';
 import Events from '../screens/Events';
 import Stacks from './stack';
+import Modify from '../screens/Modify/Modify';
+
 const Tab = createBottomTabNavigator();
 const CustomTabBarButton = ({children, onPress}) => (
   <TouchableOpacity
@@ -152,7 +154,8 @@ const Tabs = () => {
       />
       <Tab.Screen
         name="Event"
-        component={Events}
+        component={Modify}
+        // component={Events}
         options={{
           tabBarIcon: ({focused}) => (
             <View style={{alignItems: 'center'}}>
