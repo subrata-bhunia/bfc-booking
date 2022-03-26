@@ -115,8 +115,8 @@ const Tabs = () => {
                 name="plus"
                 type="antdesign"
                 reverse
-                color={!focused ? Colors.white : 'red'}
-                reverseColor={!focused ? 'red' : Colors.white}
+                color={!focused ? Colors.red : Colors.white}
+                reverseColor={!focused ? Colors.white : Colors.red}
                 size={30}
                 style={{elevation: 5}}
               />
