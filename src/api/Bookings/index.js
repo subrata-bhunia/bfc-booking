@@ -21,6 +21,7 @@ export const cancelBooking = data => {
 export const pickupBooking = data => {
   return axios.post('/pickup-booking', data);
 };
+
 export const checkReturnItems = data => {
   return axios.post('/check-return-items', data);
 };
