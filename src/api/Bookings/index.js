@@ -26,6 +26,6 @@ export const checkReturnItems = data => {
   return axios.post('/check-return-items', data);
 };
 
-export const returnBooking = data => {
+export const ReturnBooking = data => {
   return axios.post('/return-booking', data);
 };

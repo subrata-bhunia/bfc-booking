@@ -29,7 +29,7 @@ build/
 local.properties
 *.iml
 *.hprof
-
+android/app/src/main/assets/index.android.bundle
 # node.js
 #
 node_modules/
