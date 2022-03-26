@@ -89,6 +89,8 @@ const BookingDetails = ({navigation}) => {
   const [pickupitemRes, setpickupitemRes] = useState([]);
   const [pickuppayment, setpickuppayment] = useState('');
 
+  const [returnItems, setreturnItems] = useState([]);
+
   const CancelClick = () => {
     setShow(true);
     setopenCancelModal(false);
@@ -108,12 +110,14 @@ const BookingDetails = ({navigation}) => {
       });
   };
 
-  // console.log(modalRes);
-  const obj1 = new Object();
-  const arr = new Array();
   const AddItems = (key, value) => {
-    obj1[key] = value;
-    arr.push(obj1);
+    var oldReturnItems = returnItems;
+    for (var i = 0; i < tableData.length; i++) {
+      if (tableData[i][2].item_id == key) {
+        oldReturnItems[key] = value;
+      }
+    }
+    setreturnItems(oldReturnItems);
   };
   const PickupClick = () => {
     setpickup(false);
@@ -171,16 +175,45 @@ const BookingDetails = ({navigation}) => {
     });
   };
   // ----------------- Next ----------- //
+  const setValueOnReturnItems = () => {
+    var newObj = new Object();
+    for (var i = 0; i < tableData.length; i++) {
+      var key = tableData[i][2].item_id;
+      var value = tableData[i][1];
+
+      newObj[key] = value;
+    }
+    setreturnItems(newObj);
+  };
+
+  useEffect(() => {
+    setValueOnReturnItems();
+  }, []);
+  const resetInput = index => {
+    var newArr = [];
+    for (var i = 0; i < tableData.length; i++) {
+      if (index == i) {
+        var tmpData = [
+          tableData[i][0],
+          tableData[i][1],
+          {item_id: tableData[i][2].item_id, taken: ''},
+        ];
+        newArr.push(tmpData);
+      } else {
+        newArr.push(tableData[i]);
+      }
+    }
+    setTableData(newArr);
+  };
   const [nextModal, setnextModal] = useState(false);
   const [nextModalres, setnextModalres] = useState([]);
   const NextButtonClick = () => {
-    setpickupitem(obj1);
-    console.log(obj1);
+    setpickupitem(returnItems);
     if (resReturnData?.status === 'Pickup') {
       setnextLoader(true);
       checkReturnItems({
         booking_id: booking_id,
-        items: obj1,
+        items: returnItems,
       })
         .then(res => {
           if (res?.data?.status === 'Missing') {
@@ -674,6 +707,7 @@ const BookingDetails = ({navigation}) => {
                                         clearTextOnFocus
                                         onFocus={e => e.target}
                                         placeholderTextColor={Colors.text}
+                                        onPressIn={() => resetInput(index)}
                                         defaultValue={
                                           pickupitem[cellData?.item_id]
                                         }
@@ -700,7 +734,7 @@ const BookingDetails = ({navigation}) => {
                       <Button
                         onPress={() => {
                           NextButtonClick();
-                          setpickupitem(obj1);
+                          setpickupitem(returnItems);
                         }}
                         isLoader={nextLoader}
                         btnStyle={{
