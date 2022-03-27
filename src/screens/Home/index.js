@@ -6,9 +6,10 @@ import {
   StatusBar,
   ScrollView,
   ToastAndroid,
+  TouchableOpacity,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
-import {getDate} from 'bangla-calendar';
+import {getDate, getMonth} from 'bangla-calendar';
 import {Colors, Fonts} from '../../constants';
 import Model from 'react-native-modal';
 import {
@@ -68,13 +69,18 @@ const Home = () => {
   const _date = new Date();
   const getBengaliDate = date => {
     var dd = new Date(date);
-    var array = date.split('-');
-    var day = array[2];
-    var month = parseInt(array[1]) - 1;
-    var year = array[0];
-    setben(getDate(dd, {format: 'D MMMM, YYYY \neeee'}));
-    setSelectDate(`${day} ${months[month]},${year}`);
+    return getDate(dd, {format: 'D'});
   };
+  const getBengaliMonth = date => {
+    var dd = new Date('Tue Mar 01 2022 00:00:00 GMT+0530');
+    var firstDay = new Date(dd.getFullYear(), dd.getMonth(), 1);
+    var lastDay = new Date(dd.getFullYear(), dd.getMonth() + 1, 0);
+    console.log(firstDay + 1, lastDay + 1);
+    return `${getMonth(dd, {
+      format: 'mm',
+    })}-${getDate(lastDay, {format: 'MMMM'})}`;
+  };
+  // console.log(getBengaliMonth(new Date()));
   var date_arr = [];
   const dates = {};
   for (let i = 0; i < booked.length; i++) {
@@ -177,7 +183,7 @@ const Home = () => {
         flex: 1,
       }}>
       {/* Header */}
-      <StaticHeader userName="Subrata" />
+      <StaticHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Modal */}
         <Model
@@ -255,10 +261,10 @@ const Home = () => {
         {/* Calender */}
         <Calendar
           markingType={'custom'}
-          onDayPress={date => {
-            getBengaliDate(date?.dateString);
-            setmodal(true);
-          }}
+          // onDayPress={date => {
+          //   getBengaliDate(date?.dateString);
+          //   setmodal(true);
+          // }}
           theme={{
             backgroundColor: '#ffffff',
             textSectionTitleColor: '#b6c1cd',
@@ -291,6 +297,64 @@ const Home = () => {
               // width: wp(90),
               // backgroundColor: Colors.disable,
             },
+          }}
+          renderHeader={date => {
+            return (
+              <View>
+                {console.log(date)}
+                <Text>
+                  {months[date.getMonth()]} {date.getFullYear()}{' '}
+                  {getBengaliMonth(date)}
+                </Text>
+              </View>
+            );
+          }}
+          dayComponent={({date, state}) => {
+            return (
+              <TouchableOpacity
+                activeOpacity={0.5}
+                style={{
+                  height: 50,
+                  width: 50,
+                  backgroundColor:
+                    state === 'today' ? Colors.primary : undefined,
+                  borderColor: Colors.primary,
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  justifyContent: 'center',
+                  padding: 5,
+                }}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    fontFamily: Fonts.semibold,
+                    color:
+                      state === 'disabled'
+                        ? 'gray'
+                        : state === 'selected'
+                        ? 'red'
+                        : state === 'today'
+                        ? '#fff'
+                        : '#000',
+                  }}>
+                  {date.day}
+                </Text>
+                <Text
+                  style={{
+                    textAlign: 'left',
+                    color:
+                      state === 'disabled'
+                        ? 'gray'
+                        : state === 'selected'
+                        ? 'red'
+                        : state === 'today'
+                        ? '#fff'
+                        : '#000',
+                  }}>
+                  {getBengaliDate(date.dateString)}
+                </Text>
+              </TouchableOpacity>
+            );
           }}
           hideArrows={true}
           enableSwipeMonths

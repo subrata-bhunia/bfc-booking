@@ -38,7 +38,7 @@ export default function App() {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-    }, 3000);
+    }, 1000);
   }, []);
   // -------------- //
 
