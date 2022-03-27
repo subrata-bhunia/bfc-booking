@@ -2,7 +2,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import React, {useEffect, useState} from 'react';
 
-import {StatusBar, ToastAndroid} from 'react-native';
+import {LogBox, StatusBar, ToastAndroid} from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -40,6 +40,7 @@ export default function App() {
       SplashScreen.hide();
     }, 1000);
   }, []);
+  LogBox.ignoreAllLogs();
   // -------------- //
 
   const authContext = React.useMemo(() => ({

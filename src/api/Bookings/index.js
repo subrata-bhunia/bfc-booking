@@ -12,6 +12,10 @@ export const upComingBookingList = data => {
   return axios.post('/upcoming-booking', data);
 };
 
+export const dueBookings = data => {
+  return axios.post('/due-booking', data);
+};
+
 export const allBookingList = data => {
   return axios.post('/all-booking', data);
 };
@@ -28,4 +32,7 @@ export const checkReturnItems = data => {
 
 export const ReturnBooking = data => {
   return axios.post('/return-booking', data);
+};
+export const calenderBooking = data => {
+  return axios.post('/calender-booking', data);
 };

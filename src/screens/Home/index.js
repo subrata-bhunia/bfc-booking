@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
-import {getDate, getMonth} from 'bangla-calendar';
+import {getDate, getMonth} from '../../helper/bangla-calendar/cjs/index';
 import {Colors, Fonts} from '../../constants';
 import Model from 'react-native-modal';
 import {
@@ -23,7 +23,11 @@ import dummyUpcoming from '../../data/dummy.upcoming';
 import axios from 'axios';
 import StaticHeader from '../../components/StaticHeader';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
-import {upComingBookingList} from '../../api/Bookings';
+import {
+  calenderBooking,
+  dueBookings,
+  upComingBookingList,
+} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {AuthContext} from '../../components/context';
 import {UserInfo} from '../../api/Users';
@@ -32,17 +36,12 @@ const Home = () => {
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
-  const [fullDate, setfull] = useState(['2022-03-02', '2022-03-30']);
-  const [booked, setBooked] = useState([
-    '2022-03-28',
-    '2022-03-02',
-    '2022-03-30',
-    '2022-03-31',
-  ]);
+  const [fullDate, setfull] = useState([]);
+  const [booked, setBooked] = useState([]);
   const [modal, setmodal] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [upComingbookingsList, setupComingbookingsList] = useState([]);
-  const [pastbookingList, setpastbookingList] = useState([]);
+  const [dueBookingList, setdueBookingList] = useState([]);
   const months = [
     'January',
     'February',
@@ -57,46 +56,12 @@ const Home = () => {
     'November',
     'December',
   ];
-  var dayNames = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
+
   const _date = new Date();
   const getBengaliDate = date => {
     var dd = new Date(date);
-    return getDate(dd, {format: 'D'});
+    return getDate(dd, {format: 'D mm'});
   };
-  const getBengaliMonth = date => {
-    var dd = new Date('Tue Mar 01 2022 00:00:00 GMT+0530');
-    var firstDay = new Date(dd.getFullYear(), dd.getMonth(), 1);
-    var lastDay = new Date(dd.getFullYear(), dd.getMonth() + 1, 0);
-    console.log(firstDay + 1, lastDay + 1);
-    return `${getMonth(dd, {
-      format: 'mm',
-    })}-${getDate(lastDay, {format: 'MMMM'})}`;
-  };
-  // console.log(getBengaliMonth(new Date()));
-  var date_arr = [];
-  const dates = {};
-  for (let i = 0; i < booked.length; i++) {
-    var key = booked[i];
-    dates[`${key}`] = {
-      customStyles: {
-        container: {
-          backgroundColor: fullDate.includes(key) ? 'red' : Colors.primary,
-        },
-        text: {
-          color: 'white',
-          fontFamily: Fonts.regular,
-        },
-      },
-    };
-  }
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   // --------------------- //
@@ -172,8 +137,29 @@ const Home = () => {
       }
     });
   };
+  const getDueList = () => {
+    dueBookings({user_id: user_id}).then(res => {
+      setloader(true);
+      if (res?.data?.status === 'Success') {
+        setdueBookingList(res?.data?.data);
+        // setfull;
+        // setloader(false);
+      }
+    });
+  };
+  const CalendarData = () => {
+    calenderBooking({user_id: user_id}).then(res => {
+      // setloader(true);
+      if (res?.data?.status === 'Success') {
+        console.log(res?.data?.booked);
+        setfull(res?.data?.full);
+      }
+    });
+  };
   useEffect(() => {
     getUpcomingList();
+    getDueList();
+    CalendarData();
   }, [isFocused]);
   return (
     <View
@@ -260,11 +246,6 @@ const Home = () => {
         </Model>
         {/* Calender */}
         <Calendar
-          markingType={'custom'}
-          // onDayPress={date => {
-          //   getBengaliDate(date?.dateString);
-          //   setmodal(true);
-          // }}
           theme={{
             backgroundColor: '#ffffff',
             textSectionTitleColor: '#b6c1cd',
@@ -285,26 +266,27 @@ const Home = () => {
             textDayHeaderFontFamily: Fonts.medium,
             textDayFontSize: 16,
             textMonthFontSize: 20,
-            textDayHeaderFontSize: wp(3.3),
+            textDayHeaderFontSize: wp(3.2),
             weekVerticalMargin: 5,
             'stylesheet.calendar.header': {
               header: {
                 alignItems: 'flex-start',
               },
             },
-            contentStyle: {
-              // height: hp(80),
-              // width: wp(90),
-              // backgroundColor: Colors.disable,
-            },
           }}
           renderHeader={date => {
             return (
-              <View>
-                {console.log(date)}
-                <Text>
-                  {months[date.getMonth()]} {date.getFullYear()}{' '}
-                  {getBengaliMonth(date)}
+              <View
+                style={{
+                  paddingHorizontal: wp(2),
+                }}>
+                <Text
+                  style={{
+                    fontFamily: Fonts.bold,
+                    fontSize: 22,
+                    color: Colors.primary,
+                  }}>
+                  {months[date.getMonth()]} {date.getFullYear()}
                 </Text>
               </View>
             );
@@ -317,16 +299,49 @@ const Home = () => {
                   height: 50,
                   width: 50,
                   backgroundColor:
-                    state === 'today' ? Colors.primary : undefined,
-                  borderColor: Colors.primary,
-                  borderWidth: 1,
+                    state === 'today'
+                      ? Colors.primary
+                      : booked.includes(date.dateString)
+                      ? Colors.yellow
+                      : fullDate.includes(date.dateString)
+                      ? Colors.red
+                      : '#eee',
                   borderRadius: 10,
                   justifyContent: 'center',
                   padding: 5,
+                  elevation: 2,
                 }}>
+                {state === 'today' ? (
+                  booked.includes(date.dateString) ? (
+                    <View
+                      style={{
+                        backgroundColor: Colors.yellow,
+                        position: 'absolute',
+                        height: 15,
+                        width: 15,
+                        borderRadius: 10,
+                        top: -7,
+                        right: -2,
+                      }}
+                    />
+                  ) : fullDate.includes(date.dateString) ? (
+                    <View
+                      style={{
+                        backgroundColor: Colors.red,
+                        position: 'absolute',
+                        height: 15,
+                        width: 15,
+                        borderRadius: 10,
+                        top: -7,
+                        right: -2,
+                      }}
+                    />
+                  ) : null
+                ) : null}
                 <Text
                   style={{
                     textAlign: 'center',
+                    fontSize: wp(6),
                     fontFamily: Fonts.semibold,
                     color:
                       state === 'disabled'
@@ -335,6 +350,10 @@ const Home = () => {
                         ? 'red'
                         : state === 'today'
                         ? '#fff'
+                        : booked.includes(date.dateString)
+                        ? Colors.white
+                        : fullDate.includes(date.dateString)
+                        ? Colors.white
                         : '#000',
                   }}>
                   {date.day}
@@ -349,6 +368,10 @@ const Home = () => {
                         ? 'red'
                         : state === 'today'
                         ? '#fff'
+                        : booked.includes(date.dateString)
+                        ? Colors.white
+                        : fullDate.includes(date.dateString)
+                        ? Colors.white
                         : '#000',
                   }}>
                   {getBengaliDate(date.dateString)}
@@ -358,18 +381,17 @@ const Home = () => {
           }}
           hideArrows={true}
           enableSwipeMonths
-          markedDates={dates}
         />
         <View style={{marginTop: 20}}>
           <FlatListWithHeader
-            title={'Upcoming Bookings'}
+            title={`Upcoming Bookings (${upComingbookingsList.length})`}
             items={upComingbookingsList}
             horizontal={true}
             isloader={loader}
           />
           <FlatListWithHeader
-            title={'Due Bookings'}
-            items={pastbookingList}
+            title={`Due Bookings (${dueBookingList.length})`}
+            items={dueBookingList}
             horizontal={true}
             isloader={loader}
           />

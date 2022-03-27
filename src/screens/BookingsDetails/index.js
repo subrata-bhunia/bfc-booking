@@ -142,10 +142,7 @@ const BookingDetails = ({navigation}) => {
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
   const [returnBtnDisable, setreturnBtnDisable] = useState(true);
-  // const [returnPayment,setreturnPayment]=useState(0)
-  // -------------- Due ------------------- //
-  // const [modifybtn,setmodifybtn] = useState(false)
-  // const [modifybtn,setmodifybtn] = useState(false)
+
   useEffect(() => {
     handleGetBookingDetails();
     setpickuppayment('');
@@ -1518,7 +1515,7 @@ const BookingDetails = ({navigation}) => {
                   borderRadius: wp(66),
                 }}
                 onPress={() => {
-                  setreturnbtn(true);
+                  // setreturnbtn(true);
                 }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
@@ -1614,7 +1611,7 @@ const BookingDetails = ({navigation}) => {
                   borderRadius: wp(66),
                 }}
                 onPress={() => {
-                  setreturnbtn(true);
+                  // setreturnbtn(true);
                 }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
