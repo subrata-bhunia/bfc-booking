@@ -42,6 +42,8 @@ const Home = () => {
   const [bookings, setBookings] = useState([]);
   const [upComingbookingsList, setupComingbookingsList] = useState([]);
   const [dueBookingList, setdueBookingList] = useState([]);
+  const [fullColor, setFullColor] = useState('');
+  const [bookedColor, setBookedColor] = useState('');
   const months = [
     'January',
     'February',
@@ -142,20 +144,26 @@ const Home = () => {
       setloader(true);
       if (res?.data?.status === 'Success') {
         setdueBookingList(res?.data?.data);
-        // setfull;
-        // setloader(false);
       }
     });
   };
   const CalendarData = () => {
-    calenderBooking({user_id: user_id}).then(res => {
-      // setloader(true);
-      if (res?.data?.status === 'Success') {
-        console.log(res?.data?.booked);
-        setfull(res?.data?.full);
-      }
-    });
+    calenderBooking({user_id: user_id})
+      .then(res => {
+        // setloader(true);
+        if (res?.data?.status === 'Success') {
+          // console.log('eee', res?.data);
+          setfull(res?.data?.full);
+          setBooked(res?.data?.semi_full);
+          setBookedColor(res?.data?.colors[1]);
+          setFullColor(res?.data?.colors[0]);
+        }
+      })
+      .catch(err => {
+        console.log(JSON.stringify(err));
+      });
   };
+  console.log('colors from api', bookedColor, fullColor);
   useEffect(() => {
     getUpcomingList();
     getDueList();
@@ -300,7 +308,11 @@ const Home = () => {
                   width: 50,
                   backgroundColor:
                     state === 'today'
-                      ? Colors.primary
+                      ? booked.includes(date.dateString)
+                        ? Colors.yellow
+                        : fullDate.includes(date.dateString)
+                        ? Colors.red
+                        : Colors.primary
                       : booked.includes(date.dateString)
                       ? Colors.yellow
                       : fullDate.includes(date.dateString)
@@ -315,7 +327,7 @@ const Home = () => {
                   booked.includes(date.dateString) ? (
                     <View
                       style={{
-                        backgroundColor: Colors.yellow,
+                        backgroundColor: Colors.primary,
                         position: 'absolute',
                         height: 15,
                         width: 15,
@@ -327,7 +339,7 @@ const Home = () => {
                   ) : fullDate.includes(date.dateString) ? (
                     <View
                       style={{
-                        backgroundColor: Colors.red,
+                        backgroundColor: Colors.primary,
                         position: 'absolute',
                         height: 15,
                         width: 15,
