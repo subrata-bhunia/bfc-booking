@@ -29,3 +29,10 @@ export const checkReturnItems = data => {
 export const ReturnBooking = data => {
   return axios.post('/return-booking', data);
 };
+
+export const getModifyBookingInfo = data => {
+  return axios.post('/modify-booking-info', data);
+};
+export const UpdateBooking = data => {
+  return axios.post('/update-booking', data);
+};
