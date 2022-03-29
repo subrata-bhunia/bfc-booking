@@ -42,8 +42,8 @@ const Home = () => {
   const [bookings, setBookings] = useState([]);
   const [upComingbookingsList, setupComingbookingsList] = useState([]);
   const [dueBookingList, setdueBookingList] = useState([]);
-  const [fullColor, setFullColor] = useState('');
-  const [bookedColor, setBookedColor] = useState('');
+  const [fullColor, setFullColor] = useState('#eee');
+  const [bookedColor, setBookedColor] = useState('#eee');
   const months = [
     'January',
     'February',
@@ -309,14 +309,14 @@ const Home = () => {
                   backgroundColor:
                     state === 'today'
                       ? booked.includes(date.dateString)
-                        ? Colors.yellow
+                        ? bookedColor
                         : fullDate.includes(date.dateString)
-                        ? Colors.red
+                        ? fullColor
                         : Colors.primary
                       : booked.includes(date.dateString)
-                      ? Colors.yellow
+                      ? bookedColor
                       : fullDate.includes(date.dateString)
-                      ? Colors.red
+                      ? fullColor
                       : '#eee',
                   borderRadius: 10,
                   justifyContent: 'center',
