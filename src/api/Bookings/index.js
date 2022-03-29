@@ -36,3 +36,9 @@ export const ReturnBooking = data => {
 export const calenderBooking = data => {
   return axios.post('/calender-booking', data);
 };
+export const getModifyBookingInfo = data => {
+  return axios.post('/modify-booking-info', data);
+};
+export const UpdateBooking = data => {
+  return axios.post('/update-booking', data);
+};

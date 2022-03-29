@@ -9,6 +9,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthContext} from './src/components/context';
 import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
+import {Provider} from 'react-redux';
+import {store} from './src/redux/store/store';
 
 export default function App() {
   const [login, setlogin] = useState(false);
@@ -82,15 +84,17 @@ export default function App() {
     },
   }));
   return (
-    <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
-        <StatusBar
-          translucent
-          backgroundColor={'transparent'}
-          barStyle="dark-content"
-        />
-        {login ? <Stacks /> : <AuthStackScreen />}
-      </NavigationContainer>
-    </AuthContext.Provider>
+    <Provider store={store}>
+      <AuthContext.Provider value={authContext}>
+        <NavigationContainer>
+          <StatusBar
+            translucent
+            backgroundColor={'transparent'}
+            barStyle="dark-content"
+          />
+          {login ? <Stacks /> : <AuthStackScreen />}
+        </NavigationContainer>
+      </AuthContext.Provider>
+    </Provider>
   );
 }

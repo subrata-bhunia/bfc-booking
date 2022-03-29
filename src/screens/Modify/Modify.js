@@ -7,11 +7,12 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   View,
+  Image,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Colors, Fonts} from '../../constants';
+import {Colors, Fonts, Icons, statusIcon} from '../../constants';
 import {CheckBox, Icon, Input} from 'react-native-elements';
-import {TouchableOpacity} from 'react-native';
+import {TouchableOpacity, ActivityIndicator} from 'react-native';
 import Button from '../../components/Button';
 import {
   heightPercentageToDP as hp,
@@ -26,7 +27,11 @@ import AnimatedLottieView from 'lottie-react-native';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {AvailableItems} from '../../api/Inventory';
 import Vaildation from '../../components/Vaildation';
-import {UpdateBooking} from '../../api/Bookings';
+import {
+  UpdateBooking,
+  getReturnBookingById,
+  getModifyBookingInfo,
+} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 import LinearGradient from 'react-native-linear-gradient';
@@ -41,25 +46,36 @@ const Modify = () => {
   const [modal, setmodal] = useState(false);
   const [pickupdate, setpickupdate] = useState(null);
   const [returndate, setreturndate] = useState(null);
+  const [resReturnData, setResReturnData] = useState(null);
   const [pickupdateV, setpickupdateV] = useState(true);
   const [returndateV, setreturndateV] = useState(true);
-  const TableHead = ['Item Name', 'Stock', 'Need'];
+  const TableHead = ['Item Name', 'Stock', 'Taken', 'Need'];
   const [tableData, setTableDate] = useState([]);
   const [addBiookingStatus, setaddBiookingStatus] = useState(null);
   const [modalData, setmodalData] = useState(null);
   const userId = UIStore.useState(s => s.userId);
   const [btnLoader, setBtnLoader] = useState(false);
+  const booking_id = 'ORD1646999431';
+
+  console.log('tableData', tableData);
 
   //------- API ----------- //
-  const getInventory = () => {
-    AvailableItems().then(res => {
-      if (res.data?.status === 'Success') {
-        setTableDate(res?.data?.data);
-      }
-    });
+  const handleGetBookingDetails = async () => {
+    // setShow(true);
+    getModifyBookingInfo({booking_id: booking_id})
+      .then(res => {
+        const {data, status} = res.data;
+        if (status === 'Success') {
+          // setShow(false);
+          setResReturnData(data);
+          setTableDate(res.data.data.items);
+        }
+        console.log('getData', data);
+      })
+      .catch(err => console.log('-----', JSON.stringify(err)));
   };
   useEffect(() => {
-    getInventory();
+    handleGetBookingDetails();
   }, [isFocused]);
   // ------------------ //
   const isFocused = useIsFocused();
@@ -102,6 +118,10 @@ const Modify = () => {
   const [rentV, setrentV] = useState(true);
   const [book_items, setbook_items] = useState([]);
 
+  const [returnItems, setreturnItems] = useState([]);
+
+  console.log('returnItems', returnItems);
+
   // ------------- //
   useEffect(() => {
     // ------ Style ---------- //
@@ -134,117 +154,66 @@ const Modify = () => {
     setPending(Advanced && rent === 0 ? 0 : total - Advanced);
   }, [rent, extra, cat_rate, Advanced, total, Pending]);
 
+  const AddItems = (key, value) => {
+    var oldReturnItems = returnItems;
+    for (var i = 0; i < tableData.length; i++) {
+      if (tableData[i][3] == key) {
+        oldReturnItems[key] = value;
+      }
+    }
+    setreturnItems(oldReturnItems);
+  };
+
+  const setValueOnReturnItems = () => {
+    var newObj = new Object();
+    for (var i = 0; i < tableData.length; i++) {
+      var key = tableData[i][3];
+      var value = 0;
+
+      newObj[key] = value;
+    }
+    setreturnItems(newObj);
+    console.log('newObj', newObj);
+  };
+
+  useEffect(() => {
+    setValueOnReturnItems();
+  }, [tableData]);
+
   const obj1 = new Object();
   const arr = new Array();
-  const AddItems = (key, value) => {
-    obj1[key] = value;
-    arr.push(obj1);
-  };
-  const PersonalCheck = () => {
-    if (
-      pickupdate !== null ||
-      returndate !== null ||
-      value !== null ||
-      rvalue !== null ||
-      cname.length > 3 ||
-      cadd.length > 3 ||
-      cphone.length == 10 ||
-      gathering.length > 1
-    ) {
-      if (pickupdate !== null) {
-        if (returndate !== null) {
-          if (value !== null) {
-            if (rvalue !== null) {
-              if (cname.length > 3) {
-                if (cphone.length == 10) {
-                  if (cadd.length > 3) {
-                    if (gathering.length > 1) {
-                      setView0(!view0);
-                      setnext1(true);
-                      setView1(true);
-                    } else {
-                      setgatheringV(false);
-                    }
-                  } else {
-                    setcaddV(false);
-                  }
-                } else {
-                  setcphoneV(false);
-                }
-              } else {
-                setcnameV(false);
-              }
-            } else {
-              setrvalueV(false);
-            }
-          } else {
-            setValueV(false);
-          }
-        } else {
-          setreturndateV(false);
-        }
-      } else {
-        setpickupdateV(false);
-      }
-    } else {
-      setpickupdateV(false);
-      setValueV(false);
-      setrvalueV(false);
-      setreturndateV(false);
-      setcaddV(false);
-      setcnameV(false);
-      setcphoneV(false);
-      setgatheringV(false);
-    }
-  };
+
   const _UpdateBooking = () => {
-    if (rent > 0) {
-      console.log(book_items);
-      setBtnLoader(true);
-      console.log('userId', userId);
-      UpdateBooking({
-        pickup_date: pickupdate,
-        pickup_time: value,
-        return_date: returndate,
-        return_time: rvalue,
-        customer_name: cname,
-        customer_phone: cphone,
-        whatsapp: whp,
-        customer_address: cadd,
-        items: book_items,
-        gathering: gathering,
-        rent: rent,
-        advanced: Advanced,
-        caterers: caterersvalue,
-        caterer_charge: cat_rate,
-        extra_charges: extra,
-        total_amount: total,
-        user_id: userId,
-      })
-        .then(res => {
-          if (res?.data?.status === 'Success') {
-            setmodal(true);
-            setmodalData(res?.data?.data);
-            setBtnLoader(false);
-          } else {
-            setaddBiookingStatus(res?.data?.message);
-            console.log(res?.data?.message);
-            setBtnLoader(false);
-            setTimeout(() => {
-              setaddBiookingStatus(null);
-            }, 5000);
-          }
-        })
-        .catch(err => {
-          console.log(err, 'TTTT');
+    console.log(book_items);
+    setBtnLoader(true);
+    console.log('userId', userId);
+    UpdateBooking({
+      items: returnItems,
+      booking_id: booking_id,
+      user_id: userId,
+    })
+      .then(res => {
+        // console.log('res', res);
+        if (res?.data?.status === 'Success') {
+          setmodal(true);
+          setmodalData(res?.data?.data);
+          setBtnLoader(false);
+        } else {
+          setaddBiookingStatus(res?.data?.message);
+          console.log(res?.data?.message);
           setBtnLoader(false);
           setTimeout(() => {
             setaddBiookingStatus(null);
           }, 5000);
-        });
-    } else {
-      setrentV(false);
-    }
+        }
+      })
+      .catch(err => {
+        console.log(err, 'TTTT');
+        setBtnLoader(false);
+        setTimeout(() => {
+          setaddBiookingStatus(null);
+        }, 5000);
+      });
   };
   return (
     <ScrollView
@@ -256,6 +225,173 @@ const Modify = () => {
       }}
       keyboardDismissMode="interactive">
       {/* Personal */}
+
+      <View>
+        <TouchableOpacity style={{alignSelf: 'center'}} activeOpacity={10}>
+          <LinearGradient
+            colors={['#eee', '#eee', '#fff']}
+            style={{
+              // height: hp(30),
+              paddingVertical: hp(3),
+              width: wp(90),
+              elevation: 2,
+              borderRadius: hp(1),
+              margin: 10,
+              opacity: 1,
+              padding: 10,
+              paddingHorizontal: wp(6),
+            }}>
+            {/* 1st */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <View>
+                  <Text style={styles.textH1}>Pickup</Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    <Text style={styles.date}>
+                      {resReturnData?.pickup_date}
+                    </Text>
+                  </View>
+                </View>
+                {resReturnData?.pickup_time === 'Morning' ? (
+                  <Icon name="sunny-sharp" type="ionicon" raised size={20} />
+                ) : (
+                  <Icon name="moon" type="ionicon" reverse size={20} />
+                )}
+              </View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <View>
+                  <Text style={styles.textH1}>Return</Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    <Text style={styles.date}>
+                      {resReturnData?.return_date}
+                    </Text>
+                  </View>
+                </View>
+                {resReturnData?.return_time === 'Morning' ? (
+                  <Icon name="sunny-sharp" type="ionicon" raised size={20} />
+                ) : (
+                  <Icon name="moon" type="ionicon" reverse size={20} />
+                )}
+              </View>
+            </View>
+            {/* 2nd */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}>
+              <View style={{width: '75%'}}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 5,
+                  }}>
+                  <Icon name="person" />
+                  <Text
+                    style={
+                      styles.textH2
+                    }>{`${resReturnData?.customer_name}`}</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 5,
+                  }}>
+                  <Icon name="home" />
+                  <Text
+                    style={
+                      styles.textH2
+                    }>{`${resReturnData?.customer_address}`}</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    width: '70%',
+                    marginTop: 5,
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      // width: wp(19),
+                      // justifyContent: 'space-between',
+                    }}>
+                    <Icon name="users" type="font-awesome-5" size={20} />
+                    <Text style={styles.textH2}>
+                      {' '}
+                      {resReturnData?.gathering}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      width: wp(15),
+                      justifyContent: 'space-between',
+                    }}>
+                    <Image
+                      source={Icons.catering}
+                      style={{
+                        height: 25,
+                        width: 25,
+                      }}
+                    />
+                    <Text style={styles.textH2}>{resReturnData?.caterers}</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={{width: '50%', alignSelf: 'flex-end'}}>
+                <Image
+                  source={
+                    resReturnData?.status === 'Confirm'
+                      ? statusIcon.booked
+                      : resReturnData?.status === 'Pickup'
+                      ? statusIcon.pickup
+                      : resReturnData?.status === 'Due'
+                      ? statusIcon.due
+                      : resReturnData?.status === 'Paid'
+                      ? statusIcon.paid
+                      : resReturnData?.status === 'Missing'
+                      ? statusIcon.missing
+                      : resReturnData?.status === 'Cancel'
+                      ? statusIcon.cancel
+                      : statusIcon.booked
+                  }
+                  style={{
+                    height: hp(11),
+                    resizeMode: 'center',
+                    width: hp(11),
+                    marginBottom: -hp(1),
+                  }}
+                  PlaceholderContent={
+                    <ActivityIndicator
+                      size={30}
+                      color={Colors.yellow}
+                      style={{alignSelf: 'center'}}
+                    />
+                  }
+                />
+              </View>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
       {/* items */}
       {/* 2nd  Items*/}
@@ -342,10 +478,10 @@ const Modify = () => {
                           <Cell
                             key={cellIndex}
                             data={
-                              cellIndex === 2 ? (
+                              cellIndex === 3 ? (
                                 <Input
                                   placeholder="0"
-                                  defaultValue={book_items[cellData]}
+                                  defaultValue={returnItems[cellData]}
                                   textAlign="center"
                                   onChangeText={txt => AddItems(cellData, txt)}
                                   keyboardType="numeric"
@@ -692,7 +828,13 @@ const Modify = () => {
       <Model
         isVisible={modal}
         statusBarTranslucent
-        // onBackdropPress={() => setmodal(!modal)}
+        onBackdropPress={() => {
+          setmodal(false);
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Home'}],
+          });
+        }}
         backdropOpacity={0.6}
         focusable
         onBackButtonPress={() => {
@@ -860,7 +1002,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   container: {flex: 1, padding: 16, paddingTop: 30, backgroundColor: '#fff'},
-  head: {height: 40, backgroundColor: '#808B97', textAlign: 'center'},
+  head: {backgroundColor: '#808B97', textAlign: 'center'},
   text: {margin: 6, textAlign: 'center', fontFamily: Fonts.bold},
   row: {flexDirection: 'row', backgroundColor: '#fff'},
   btn: {width: 58, height: 18, backgroundColor: '#78B7BB', borderRadius: 2},
@@ -876,5 +1018,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     // fontFamily: Fonts.medium,
     // fontSize: 15,
+  },
+  textH1: {
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+    fontSize: 16,
+    textAlign: 'left',
+  },
+  date: {
+    fontFamily: Fonts.medium,
+  },
+  textH2: {
+    fontFamily: Fonts.semibold,
   },
 });
