@@ -33,7 +33,7 @@ const Events = () => {
       <Text style={{fontFamily: Fonts.medium, fontSize: 20}}>
         No Events Found
       </Text>
-      <Button
+      {/* <Button
         onPress={() => {
           sendWPsms('7318915280', '10th March, 2022 (Morning)');
         }}
@@ -58,7 +58,7 @@ const Events = () => {
           fontSize: widthPercentageToDP(4),
         }}
         btnName="Whatsapp"
-      />
+      /> */}
     </View>
   );
 };

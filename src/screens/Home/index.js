@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
-import {getDate, getMonth} from '../../helper/bangla-calendar/cjs/index';
+import {getDate} from '../../helper/bangla-calendar/cjs/index';
 import {Colors, Fonts} from '../../constants';
 import Model from 'react-native-modal';
 import {
@@ -17,10 +17,7 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import Button from '../../components/Button';
-import {Icon, Image} from 'react-native-elements';
 import FlatListWithHeader from '../../components/FlatListWithHeader';
-import dummyUpcoming from '../../data/dummy.upcoming';
-import axios from 'axios';
 import StaticHeader from '../../components/StaticHeader';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
@@ -80,7 +77,6 @@ const Home = () => {
     'December',
   ];
 
-  const _date = new Date();
   const getBengaliDate = date => {
     var dd = new Date(date);
     return getDate(dd, {format: 'D mm'});
@@ -374,7 +370,7 @@ const Home = () => {
                 <Text
                   style={{
                     textAlign: 'center',
-                    fontSize: wp(6),
+                    fontSize: wp(5),
                     fontFamily: Fonts.semibold,
                     color:
                       state === 'disabled'
@@ -394,6 +390,7 @@ const Home = () => {
                 <Text
                   style={{
                     textAlign: 'left',
+                    fontSize: wp(3),
                     color:
                       state === 'disabled'
                         ? 'gray'

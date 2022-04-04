@@ -154,7 +154,7 @@ const Tabs = () => {
       />
       <Tab.Screen
         name="Event"
-        component={Modify}
+        component={Events}
         // component={Events}
         options={{
           tabBarIcon: ({focused}) => (

@@ -1429,11 +1429,14 @@ const BookingDetails = ({navigation}) => {
                   marginRight: wp(2),
                   borderRadius: wp(66),
                 }}
-                disabled={true}
+                // disabled={true}
                 textStyle={{
                   fontFamily: Fonts.semibold,
                   color: '#000',
                   fontSize: 16,
+                }}
+                onPress={() => {
+                  navigation.navigate('modifyBooking', {booking_id});
                 }}
                 btnName="MODIFY"
               />
