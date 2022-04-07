@@ -1,30 +1,26 @@
-const handleCalCulatePrice = (state = {userId: 0, totalAmount: 0}, action) => {
+const handleCalCulatePrice = (
+  state = {uniqueId: 0, totalAmount: 0},
+  action,
+) => {
   switch (action.type) {
     case 'CALCULATE_PRICE':
       var total = 0;
-      for (var i = 0; i < action.payload.data.length; i++) {
-        if (action.payload.data[i][action.payload.itemIdPosition] == 'ITM019') {
-          //   state =
-          //     state +
-          //     action.payload.data[action.payload.itemIdPosition.qtyPosition];
-          console.log(
-            '=====+++++',
-            action.payload.data[i][action.payload.qtyPosition],
-          );
-          total += action.payload.data[i][action.payload.qtyPosition] * 3;
-        } else if (
-          (action.payload.data[i][action.payload.itemIdPosition] = 'ITM018')
-        ) {
-          console.log(
-            '=====+++++',
-            action.payload.data[i][action.payload.qtyPosition],
-          );
-          total += action.payload.data[i][action.payload.qtyPosition] * 2;
-        }
+      const itemRents = action.payload?.rent;
+      for (var i = 0; i < Object.keys(action.payload.data).length; i++) {
+        let itemId = Object.keys(action.payload.data)[i];
+
+        total +=
+          parseInt(action.payload.data[itemId]) * parseInt(itemRents[itemId]);
+
+        // if ( == 'ITM001') {
+        //   total += action.payload.data.ITM001 * 50;
+        // } else {
+        //   total;
+        // }
       }
-      console.log('=====', action.payload);
+      console.log('=====Fun value', action.payload);
       console.log('===----==', total);
-      return (state = {userId: action.payload.userId, totalAmount: total});
+      return (state = {uniqueId: action.payload.uniqueId, totalAmount: total});
     //   for (var i = 0; i < action.payload.data.length; i++) {
     //     if (action.payload.data[action.payload.itemIdPosition] == 'ITM018') {
     //       state =

@@ -29,8 +29,11 @@ import Vaildation from '../../components/Vaildation';
 import {AddBooking} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
+import {useDispatch, useSelector} from 'react-redux';
+import {calculateAction} from '../../redux/action';
 
 const Booking = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
@@ -48,12 +51,15 @@ const Booking = () => {
   const [modalData, setmodalData] = useState(null);
   const userId = UIStore.useState(s => s.userId);
   const [btnLoader, setBtnLoader] = useState(false);
+  const [itemsRent, setItemsRent] = useState({});
 
   //------- API ----------- //
   const getInventory = () => {
     AvailableItems().then(res => {
       if (res.data?.status === 'Success') {
         setTableDate(res?.data?.data);
+        console.log('AvailableItems :', res.data);
+        setItemsRent(res.data?.rent);
       }
     });
   };
@@ -97,6 +103,7 @@ const Booking = () => {
   const [extra, setextra] = useState(0);
   const [Advanced, setAdvanced] = useState(0);
   const [total, settotal] = useState(0);
+  const [Discount, setDiscount] = useState(0);
   const [Pending, setPending] = useState(0);
   const [rentV, setrentV] = useState(true);
   const [book_items, setbook_items] = useState({});
@@ -132,9 +139,13 @@ const Booking = () => {
     setextra(0);
   }, [isFocused]);
   useEffect(() => {
-    settotal(rent === 0 ? 0 : rent + extra + cat_rate);
-    setPending(Advanced && rent === 0 ? 0 : total - Advanced);
-  }, [rent, extra, cat_rate, Advanced, total, Pending]);
+    let _Advanced = Advanced == '' || Advanced == 0 ? 0 : parseInt(Advanced);
+    let _Discount = Discount == '' || Discount == 0 ? 0 : parseInt(Discount);
+    let _cat_rate = cat_rate == '' || cat_rate == 0 ? 0 : parseInt(cat_rate);
+    settotal(rent == 0 ? 0 : rent + extra + _cat_rate);
+
+    setPending(rent == 0 ? 0 : parseInt(total) - (_Advanced + _Discount));
+  }, [rent, extra, cat_rate, Advanced, total, Pending, Discount]);
 
   useEffect(() => {
     setbook_items({});
@@ -145,6 +156,7 @@ const Booking = () => {
     setbook_items(oldSelected);
     // setrent(0);
   };
+  console.log('Enter Items are :', book_items);
   const PersonalCheck = () => {
     if (
       pickupdate !== null ||
@@ -225,6 +237,7 @@ const Booking = () => {
         extra_charges: extra,
         total_amount: total,
         user_id: userId,
+        discount: Discount,
       })
         .then(res => {
           if (res?.data?.status === 'Success') {
@@ -251,6 +264,13 @@ const Booking = () => {
       setrentV(false);
     }
   };
+
+  const autoCalculateData = useSelector(state => state.handleCalCulatePrice);
+  console.log('Total Price', autoCalculateData);
+
+  useEffect(() => {
+    setrent(autoCalculateData.totalAmount);
+  }, [autoCalculateData]);
   return (
     <ScrollView
       style={{
@@ -901,6 +921,9 @@ const Booking = () => {
                   setnext2(true);
                   setView2(true);
                   // setbook_items(book_items);
+                  dispatch(
+                    calculateAction('createBooking', book_items, itemsRent),
+                  );
                 }}
                 btnStyle={{
                   height: hp(6),
@@ -1000,22 +1023,24 @@ const Booking = () => {
                   Rent :
                 </Text>
                 <Input
-                  placeholder={`${stockValue.stockRent}`}
+                  // placeholder={`${stockValue.stockRent}`}
                   keyboardType="number-pad"
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                  value={rent}
-                  onChangeText={txt => {
-                    setrent(parseInt(txt));
-                    setrentV(true);
-                  }}
-                  onEndEditing={() =>
-                    setStockValue({...stockValue, stockRent: rent})
-                  }
-                  onFocus={() => setStockValue({...stockValue, stockRent: ''})}
+                  value={rent.toString()}
+                  // defaultValue={0}
+                  // onChangeText={txt => {
+                  //   setrent(parseInt(txt));
+                  //   setrentV(true);
+                  // }}
+                  // onEndEditing={() =>
+                  //   setStockValue({...stockValue, stockRent: rent})
+                  // }
+                  // onFocus={() => setStockValue({...stockValue, stockRent: ''})}
                   inputStyle={{
                     fontSize: 20,
                   }}
+                  disabled={true}
                 />
               </View>
               <View
@@ -1049,7 +1074,7 @@ const Booking = () => {
                   keyboardType="number-pad"
                   value={cat_rate}
                   onChangeText={txt => {
-                    setcat_rate(parseInt(txt));
+                    setcat_rate(txt);
                   }}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -1123,6 +1148,36 @@ const Booking = () => {
                   }}
                 />
               </View>
+              {/* Discount */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <Text
+                  style={{
+                    fontFamily: Fonts.semibold,
+                    fontSize: 20,
+                    width: wp(40),
+                    textAlign: 'right',
+                  }}>
+                  Discount :
+                </Text>
+                <Input
+                  value={Discount}
+                  onChangeText={txt => {
+                    setDiscount(txt);
+                  }}
+                  keyboardType="number-pad"
+                  containerStyle={{width: wp(40)}}
+                  leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                  inputStyle={{
+                    fontSize: 20,
+                  }}
+                  placeholder={'0'}
+                />
+              </View>
               {/* Advanced */}
               <View
                 style={{
@@ -1140,16 +1195,12 @@ const Booking = () => {
                   Advanced :
                 </Text>
                 <Input
-                  placeholder={`${stockValue.stoctAdv}`}
                   value={Advanced}
                   keyboardType="number-pad"
+                  placeholder={'0'}
                   onChangeText={txt => {
-                    setAdvanced(parseInt(txt));
+                    setAdvanced(txt);
                   }}
-                  onEndEditing={() =>
-                    setStockValue({...stockValue, stoctAdv: Advanced})
-                  }
-                  onFocus={() => setStockValue({...stockValue, stoctAdv: ''})}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{

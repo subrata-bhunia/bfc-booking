@@ -32,25 +32,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSelector, useDispatch} from 'react-redux';
 import {calculateAction} from '../../redux/action';
 const Home = () => {
-  console.log(
-    'Total Price',
-    useSelector(state => state.handleCalCulatePrice),
-  );
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(
-      calculateAction(
-        '8207',
-        [
-          ['ITM019', 10],
-          ['ITM018', 20],
-        ],
-        0,
-        1,
-      ),
-    );
-  }, []);
-
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
@@ -147,20 +128,25 @@ const Home = () => {
   }, []);
   // --------------- UPCOMING BOOK LIST ----------- //
   const [loader, setloader] = useState(true);
+  const [loader2, setloader2] = useState(true);
   const getUpcomingList = () => {
-    upComingBookingList({user_id: user_id}).then(res => {
-      setloader(true);
-      if (res?.data?.status === 'Success') {
-        setupComingbookingsList(res?.data?.data);
-        setloader(false);
-      }
-    });
+    upComingBookingList({user_id: user_id})
+      .then(res => {
+        setloader(true);
+        if (res?.data?.status === 'Success') {
+          setupComingbookingsList(res?.data?.data);
+          setloader(false);
+        }
+        console.log('Res of get upcoming list :', res?.data);
+      })
+      .catch(err => console.log('Err of get upcoming list :', err));
   };
   const getDueList = () => {
     dueBookings({user_id: user_id}).then(res => {
-      setloader(true);
+      setloader2(true);
       if (res?.data?.status === 'Success') {
         setdueBookingList(res?.data?.data);
+        setloader2(false);
       }
     });
   };
@@ -423,7 +409,7 @@ const Home = () => {
             title={`Due Bookings (${dueBookingList.length})`}
             items={dueBookingList}
             horizontal={true}
-            isloader={loader}
+            isloader={loader2}
           />
         </View>
         <View style={{height: hp(13)}} />

@@ -34,8 +34,11 @@ import {UIStore} from '../../UIStore';
 import {RadioButton} from 'react-native-simple-radio-button';
 import RadioForm from 'react-native-simple-radio-button';
 import {SkypeIndicator} from 'react-native-indicators';
+import {useDispatch, useSelector} from 'react-redux';
+import {calculateAction} from '../../redux/action';
 
-const BookingDetails = ({navigation}) => {
+const PickupBooking = ({navigation}) => {
+  const dispatch = useDispatch();
   //--------Whatsapp Msg------------- //
   const sendWPsms = (phone, msg) => {
     var phone_n = phone.split(' ').join('').replace('+91', '');
@@ -54,7 +57,7 @@ const BookingDetails = ({navigation}) => {
   //--------------------- //
 
   const [view0, setView0] = useState(true);
-  const [view1, setView1] = useState(false);
+  const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(false);
   const [next1, setnext1] = useState(true);
   const [next2, setnext2] = useState(true);
@@ -67,7 +70,7 @@ const BookingDetails = ({navigation}) => {
   //Activity Indicator
   const [show, setShow] = useState(false);
   // setDate from backend
-  const [resReturnData, setResReturnData] = useState(null);
+  const [resPickupData, setResPickupData] = useState(null);
   const [returndate, setreturndate] = useState(null);
   const TableHead2 = ['Item Name', 'Stock', 'Need'];
   const TableHead = ['Item Name', 'Taken', 'Return'];
@@ -86,10 +89,47 @@ const BookingDetails = ({navigation}) => {
   const [pickupitemRes, setpickupitemRes] = useState([]);
   const [pickuppayment, setpickuppayment] = useState('');
 
-  const [returnItems, setreturnItems] = useState([]);
+  //Rent Variable
+  const [Discount, setDiscount] = useState(0);
+  const [rent, setRent] = useState(0);
+  const [payment, setPayment] = useState(0);
+  const [costOfItems, setCostOfItems] = useState({});
 
-  const CancelClick = () => {
+  // To get Booking Details (API CALL)
+  useEffect(() => {
+    handleGetBookingDetails();
+  }, []);
+
+  const handleGetBookingDetails = async () => {
     setShow(true);
+    getReturnBookingById({booking_id: booking_id}).then(res => {
+      const {data, status, rent} = res.data;
+      if (status === 'Success') {
+        const items = res.data.data.items;
+        setShow(false);
+        setResPickupData(data);
+        setRent(data.rent);
+        setDiscount(parseInt(data.discount));
+        setTableData(items);
+        console.log('rent of items :', rent);
+        setCostOfItems(rent);
+        var newObj = new Object();
+        for (var i = 0; i < items.length; i++) {
+          var key = items[i][2].item_id;
+          var value = items[i][2].taken;
+          if (value != 0) {
+            newObj[key] = value;
+          }
+        }
+        setpickupitem(newObj);
+      }
+      // console.log('getData', data);
+    });
+  };
+
+  // To Cancle Booking (API CALL)
+  const CancelClick = () => {
+    //  setShow(true);
     setopenCancelModal(false);
     cancelBooking({
       booking_id: booking_id,
@@ -103,88 +143,36 @@ const BookingDetails = ({navigation}) => {
         }
       })
       .catch(err => {
-        console.log(err);
+        console.log('Err of Cancel', err);
       });
   };
 
-  const AddItems = (key, value) => {
-    var oldReturnItems = returnItems;
-    for (var i = 0; i < tableData.length; i++) {
-      if (tableData[i][2].item_id == key) {
-        oldReturnItems[key] = value;
-      }
-    }
-    setreturnItems(oldReturnItems);
-  };
+  // handle Pickup (API CALL)
   const PickupClick = () => {
     setpickup(false);
-    setShow(true);
+    // setShow(true);
     pickupBooking({
       user_id: user_id,
       booking_id: booking_id,
       items: pickupitem,
-      payment: pickuppayment,
+      payment: payment,
+      discount: Discount,
+      rent: rent,
     })
       .then(res => {
         if (res?.data?.status === 'Success') {
           setpickupitemRes(res?.data?.data);
           setmodal(true);
           setmodalRes(res?.data?.data);
+          console.log('Pickup Click Res :', res?.data);
         }
       })
       .catch(err => {
-        console.log(err);
+        console.log('Err of PickupBooking', err);
       });
   };
 
-  console.log('pickupitem :', returnItems);
-  //--------------- Pickup ----------- //
-  const [returnbtn, setreturnbtn] = useState(false);
-  const [returnBtnDisable, setreturnBtnDisable] = useState(true);
-
-  useEffect(() => {
-    handleGetBookingDetails();
-    setpickuppayment('');
-  }, [canclebtn, pickupitemRes]);
-  useEffect(() => {
-    if (resReturnData?.status === 'Pickup') {
-      setView1(true);
-      console.log(resReturnData?.items);
-      const takenItems = new Object();
-      resReturnData?.items?.map((item, index) => {
-        takenItems[item[2].item_id] = item[2].taken;
-      });
-      setpickupitem(takenItems);
-    }
-  }, [resReturnData]);
-
-  const handleGetBookingDetails = async () => {
-    setShow(true);
-    getReturnBookingById({booking_id: booking_id}).then(res => {
-      const {data, status} = res.data;
-      if (status === 'Success') {
-        setShow(false);
-        setResReturnData(data);
-        setTableData(res.data.data.items);
-      }
-      // console.log('getData', data);
-    });
-  };
-  // ----------------- Next ----------- //
-  const setValueOnReturnItems = () => {
-    var newObj = new Object();
-    for (var i = 0; i < tableData.length; i++) {
-      var key = tableData[i][2].item_id;
-      var value = tableData[i][1];
-
-      newObj[key] = value;
-    }
-    setreturnItems(newObj);
-  };
-
-  useEffect(() => {
-    setValueOnReturnItems();
-  }, []);
+  //To reset Input value
   const resetInput = index => {
     var newArr = [];
     for (var i = 0; i < tableData.length; i++) {
@@ -195,117 +183,74 @@ const BookingDetails = ({navigation}) => {
           {item_id: tableData[i][2].item_id, taken: ''},
         ];
         newArr.push(tmpData);
+      } else if (tableData[i][2].taken == '') {
+        var tmpData = [
+          tableData[i][0],
+          tableData[i][1],
+          {item_id: tableData[i][2].item_id, taken: 0},
+        ];
+        newArr.push(tmpData);
       } else {
         newArr.push(tableData[i]);
       }
     }
     setTableData(newArr);
   };
-  const [nextModal, setnextModal] = useState(false);
-  const [nextModalres, setnextModalres] = useState([]);
-  const NextButtonClick = () => {
-    setpickupitem(returnItems);
-    if (resReturnData?.status === 'Pickup') {
-      setnextLoader(true);
-      checkReturnItems({
-        booking_id: booking_id,
-        items: returnItems,
-      })
-        .then(res => {
-          if (res?.data?.status === 'Missing') {
-            setnextModalres(res?.data?.data);
-            setnextLoader(false);
-            setnextModal(true);
-          } else {
-            setView1(!view1);
-            setnext2(true);
-            setView2(true);
-            setnextLoader(false);
-            setreturnBtnDisable(false);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    } else {
-      setView1(!view1);
-      setnext2(true);
-      setView2(true);
+
+  // Add Table Value changes with old data
+  const AddItems = (key, value) => {
+    var oldPickupItems = pickupitem;
+    for (var i = 0; i < tableData.length; i++) {
+      if (tableData[i][2].item_id == key) {
+        if (value != 0 || value != '') {
+          oldPickupItems[key] = value;
+        } else {
+          delete oldPickupItems[key];
+        }
+      }
     }
-  };
-  var radio_props = [
-    {label: 'Product Price', value: 0},
-    {label: 'Products', value: 1},
-  ];
-  const [chooseByUser, setchooseByuser] = useState('Product Price');
-  const [Discount, setDiscount] = useState(0);
-  const [ReturnModal, setReturnModal] = useState(false);
-  const [extra, setextra] = useState(0);
-  const ReturnClick = () => {
-    setreturnbtn(false);
-    setShow(true);
-    ReturnBooking({
-      user_id: user_id,
-      booking_id: booking_id,
-      settled_by: chooseByUser,
-      payment: pickuppayment,
-      discount: Discount,
-      extra_charges: extra,
-    })
-      .then(res => {
-        setShow(false);
-        setReturnModal(true);
-        setmodalRes(res?.data?.data);
-        setpickupitemRes(res?.data?.data);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    setpickupitem(oldPickupItems);
   };
 
-  const TodayDate = `${new Date().getFullYear()}-${
-    new Date().getMonth() + 1 < 10
-      ? '0' + (new Date().getMonth() + 1)
-      : new Date().getMonth() + 1
-  }-${
-    new Date().getDate() < 10
-      ? '0' + new Date().getDate()
-      : new Date().getDate()
-  }`;
-  // console.log('TodayDate',TodayDate);
+  console.log('Pickupup item :', pickupitem);
+  console.log('ResData item :', resPickupData);
+
+  // Rent Calculation
+
+  const reduxData = useSelector(state => state.handleCalCulatePrice);
+  console.log('Total Price', reduxData);
+
+  useEffect(() => {
+    if (reduxData.uniqueId == booking_id) {
+      setRent(reduxData.totalAmount);
+    }
+  }, [reduxData]);
+
   return (
     <>
-      {resReturnData === null ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
-        </View>
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: Colors.secondary,
-            // paddingTop: StatusBar.currentHeight,
-            padding: 10,
-          }}>
-          <Header name="Booking Details" backBtn={true} />
-          {show ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
-            </View>
-          ) : (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.secondary,
+          // paddingTop: StatusBar.currentHeight,
+          padding: 10,
+        }}>
+        <Header name="Booking Details" backBtn={true} />
+        {show ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
+          </View>
+        ) : (
+          <>
             <ScrollView
               keyboardDismissMode="interactive"
-              showsVerticalScrollIndicator={false}>
+              showsVerticalScrollIndicator={false}
+              style={{flex: 1}}>
               {/* Personal */}
               <View>
                 <TouchableOpacity
@@ -324,7 +269,7 @@ const BookingDetails = ({navigation}) => {
                       padding: 10,
                       paddingHorizontal: wp(6),
                     }}>
-                    {/* 1st */}
+                    {/* personal first sec */}
                     <View
                       style={{
                         flexDirection: 'row',
@@ -341,11 +286,11 @@ const BookingDetails = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <Text style={styles.date}>
-                              {resReturnData?.pickup_date}
+                              {resPickupData?.pickup_date}
                             </Text>
                           </View>
                         </View>
-                        {resReturnData?.pickup_time === 'Morning' ? (
+                        {resPickupData?.pickup_time === 'Morning' ? (
                           <Icon
                             name="sunny-sharp"
                             type="ionicon"
@@ -366,11 +311,11 @@ const BookingDetails = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <Text style={styles.date}>
-                              {resReturnData?.return_date}
+                              {resPickupData?.return_date}
                             </Text>
                           </View>
                         </View>
-                        {resReturnData?.return_time === 'Morning' ? (
+                        {resPickupData?.return_time === 'Morning' ? (
                           <Icon
                             name="sunny-sharp"
                             type="ionicon"
@@ -382,7 +327,7 @@ const BookingDetails = ({navigation}) => {
                         )}
                       </View>
                     </View>
-                    {/* 2nd */}
+                    {/* Personal second sec */}
                     <View
                       style={{
                         flexDirection: 'row',
@@ -399,7 +344,7 @@ const BookingDetails = ({navigation}) => {
                           <Text
                             style={
                               styles.textH2
-                            }>{`${resReturnData?.customer_name}`}</Text>
+                            }>{`${resPickupData?.customer_name}`}</Text>
                         </View>
                         <View
                           style={{
@@ -411,7 +356,7 @@ const BookingDetails = ({navigation}) => {
                           <Text
                             style={
                               styles.textH2
-                            }>{`${resReturnData?.customer_address}`}</Text>
+                            }>{`${resPickupData?.customer_address}`}</Text>
                         </View>
                         <View
                           style={{
@@ -434,7 +379,7 @@ const BookingDetails = ({navigation}) => {
                             />
                             <Text style={styles.textH2}>
                               {' '}
-                              {resReturnData?.gathering}
+                              {resPickupData?.gathering}
                             </Text>
                           </View>
                           <View
@@ -452,7 +397,7 @@ const BookingDetails = ({navigation}) => {
                               }}
                             />
                             <Text style={styles.textH2}>
-                              {resReturnData?.caterers}
+                              {resPickupData?.caterers}
                             </Text>
                           </View>
                         </View>
@@ -460,17 +405,17 @@ const BookingDetails = ({navigation}) => {
                       <View style={{width: '50%', alignSelf: 'flex-end'}}>
                         <Image
                           source={
-                            resReturnData?.status === 'Confirm'
+                            resPickupData?.status === 'Confirm'
                               ? statusIcon.booked
-                              : resReturnData?.status === 'Pickup'
+                              : resPickupData?.status === 'Pickup'
                               ? statusIcon.pickup
-                              : resReturnData?.status === 'Due'
+                              : resPickupData?.status === 'Due'
                               ? statusIcon.due
-                              : resReturnData?.status === 'Paid'
+                              : resPickupData?.status === 'Paid'
                               ? statusIcon.paid
-                              : resReturnData?.status === 'Missing'
+                              : resPickupData?.status === 'Missing'
                               ? statusIcon.missing
-                              : resReturnData?.status === 'Cancel'
+                              : resPickupData?.status === 'Cancel'
                               ? statusIcon.cancel
                               : statusIcon.booked
                           }
@@ -495,10 +440,10 @@ const BookingDetails = ({navigation}) => {
               </View>
 
               {/* 2nd  Items*/}
+
               <View>
                 <TouchableOpacity
                   onPress={() => {
-                    setView0(false);
                     setView1(!view1);
                     setView2(false);
                   }}
@@ -563,7 +508,7 @@ const BookingDetails = ({navigation}) => {
                         style={{}}>
                         <Row
                           data={
-                            resReturnData?.status === 'Confirm'
+                            resPickupData?.status === 'Confirm'
                               ? TableHead2
                               : TableHead
                           }
@@ -587,9 +532,6 @@ const BookingDetails = ({navigation}) => {
                                       defaultValue={
                                         pickupitem[cellData?.item_id]
                                       }
-                                      // defaultValue={
-                                      //   pickupitem[cellData?.item_id]
-                                      // }
                                       textAlign="center"
                                       onChangeText={txt =>
                                         AddItems(cellData?.item_id, txt)
@@ -609,8 +551,15 @@ const BookingDetails = ({navigation}) => {
                     </View>
                     <Button
                       onPress={() => {
-                        NextButtonClick();
-                        setpickupitem(returnItems);
+                        setView1(!view1);
+                        setnext2(true);
+                        setView2(true);
+                        // NextButtonClick();
+                        // setpickupitem(returnItems);
+                        console.log('Pickupup item :', pickupitem);
+                        dispatch(
+                          calculateAction(booking_id, pickupitem, costOfItems),
+                        );
                       }}
                       isLoader={nextLoader}
                       btnStyle={{
@@ -638,7 +587,9 @@ const BookingDetails = ({navigation}) => {
                   </View>
                 ) : null}
               </View>
+
               {/* 3rd */}
+
               <View>
                 <TouchableOpacity
                   onPress={() => {
@@ -664,6 +615,7 @@ const BookingDetails = ({navigation}) => {
                     elevation: 10,
                     width: wp(93),
                     alignSelf: 'center',
+                    // marginBottom: hp(2),
                   }}>
                   <View style={{width: wp(70)}}>
                     <Text style={styles.h1}>Payment Details</Text>
@@ -712,7 +664,7 @@ const BookingDetails = ({navigation}) => {
                         Rent :
                       </Text>
                       <Input
-                        defaultValue={`${resReturnData.rent}`}
+                        defaultValue={`${rent}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -721,60 +673,43 @@ const BookingDetails = ({navigation}) => {
                         disabled
                       />
                     </View>
-                    {/* Caterer Charge */}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: -wp(4),
-                      }}>
-                      <Text
+
+                    {/* Caterers Charges */}
+                    {resPickupData?.caterer_charge ? (
+                      <View
                         style={{
-                          fontFamily: Fonts.semibold,
-                          fontSize: wp(4),
-                          width: wp(40),
-                          textAlign: 'right',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: -wp(4),
+                          // display: caterersvalue === 'Yes' ? 'flex' : 'none',
                         }}>
-                        Caterer Charge :
-                      </Text>
-                      <Input
-                        defaultValue={`${resReturnData.caterer_charge}`}
-                        containerStyle={{width: wp(40), height: hp(10)}}
-                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                        inputStyle={{
-                          fontSize: wp(4),
-                        }}
-                        disabled
-                      />
-                    </View>
-                    {/* Extra */}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: -wp(4),
-                      }}>
-                      <Text
-                        style={{
-                          fontFamily: Fonts.semibold,
-                          fontSize: wp(4),
-                          width: wp(40),
-                          textAlign: 'right',
-                        }}>
-                        Extra Charges :
-                      </Text>
-                      <Input
-                        value={`${extra}`}
-                        keyboardType="number-pad"
-                        containerStyle={{width: wp(40), height: hp(10)}}
-                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                        inputStyle={{
-                          fontSize: wp(4),
-                        }}
-                      />
-                    </View>
+                        <Text
+                          style={{
+                            fontFamily: Fonts.semibold,
+                            fontSize: wp(4),
+                            width: wp(40),
+                            textAlign: 'right',
+                          }}>
+                          Caterer Charge :
+                        </Text>
+                        <Input
+                          //   placeholder={'0'}
+                          keyboardType="number-pad"
+                          defaultValue={`${resPickupData.caterer_charge}`}
+                          containerStyle={{width: wp(40), height: hp(10)}}
+                          leftIcon={
+                            <Icon name="inr" type="fontisto" size={15} />
+                          }
+                          inputStyle={{
+                            fontSize: wp(4),
+                          }}
+                          disabled
+                        />
+                        {console.log(resPickupData?.caterer_charge)}
+                      </View>
+                    ) : null}
+
                     <View
                       style={{
                         borderBottomWidth: 1,
@@ -782,6 +717,7 @@ const BookingDetails = ({navigation}) => {
                         opacity: 0.1,
                       }}
                     />
+
                     {/* Total */}
                     <View
                       style={{
@@ -801,7 +737,8 @@ const BookingDetails = ({navigation}) => {
                       <Input
                         disabled
                         defaultValue={`${
-                          parseInt(resReturnData.total_amount) + parseInt(extra)
+                          parseInt(rent) +
+                          parseInt(resPickupData?.caterer_charge)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -810,6 +747,40 @@ const BookingDetails = ({navigation}) => {
                         }}
                       />
                     </View>
+
+                    {/* Discount */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: -wp(4),
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(4),
+                          width: wp(40),
+                          textAlign: 'right',
+                        }}>
+                        Discount :
+                      </Text>
+                      <Input
+                        defaultValue={`${Discount}`}
+                        value={Discount}
+                        onChangeText={txt => {
+                          setDiscount(txt);
+                        }}
+                        keyboardType="number-pad"
+                        containerStyle={{width: wp(40), height: hp(10)}}
+                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                        inputStyle={{
+                          fontSize: wp(4),
+                        }}
+                        placeholder={'0'}
+                      />
+                    </View>
+
                     {/* Advanced */}
                     <View
                       style={{
@@ -828,7 +799,7 @@ const BookingDetails = ({navigation}) => {
                         Advanced :
                       </Text>
                       <Input
-                        defaultValue={`${resReturnData.advanced}`}
+                        defaultValue={`${resPickupData.advanced}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -837,6 +808,7 @@ const BookingDetails = ({navigation}) => {
                         disabled
                       />
                     </View>
+
                     {/* Pending Amount */}
                     <View
                       style={{
@@ -856,7 +828,12 @@ const BookingDetails = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={`${resReturnData.pending_payment}`}
+                        defaultValue={`${
+                          parseInt(rent) +
+                          parseInt(resPickupData?.caterer_charge) -
+                          parseInt(resPickupData.advanced) -
+                          (parseInt(Discount) ? parseInt(Discount) : 0)
+                        }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -864,37 +841,7 @@ const BookingDetails = ({navigation}) => {
                         }}
                       />
                     </View>
-                    {/* Discount */}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: -wp(4),
-                      }}>
-                      <Text
-                        style={{
-                          fontFamily: Fonts.semibold,
-                          fontSize: wp(4),
-                          width: wp(40),
-                          textAlign: 'right',
-                        }}>
-                        Discount :
-                      </Text>
-                      <Input
-                        value={Discount}
-                        onChangeText={txt => {
-                          setDiscount(txt);
-                        }}
-                        keyboardType="number-pad"
-                        containerStyle={{width: wp(40), height: hp(10)}}
-                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                        inputStyle={{
-                          fontSize: wp(4),
-                        }}
-                        placeholder={'0'}
-                      />
-                    </View>
+
                     {/* Payment*/}
                     <View
                       style={{
@@ -921,23 +868,21 @@ const BookingDetails = ({navigation}) => {
                           fontSize: wp(4),
                         }}
                         placeholder={'0'}
-                        value={pickuppayment}
+                        value={payment}
                         onChangeText={txt => {
-                          setpickuppayment(txt);
+                          setPayment(txt);
                         }}
                       />
                     </View>
                   </View>
                 ) : null}
               </View>
-
               <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
 
               {/* </KeyboardAvoidingView> */}
             </ScrollView>
-          )}
-          {/* Bottons */}
-          {resReturnData?.status === 'Confirm' ? (
+            {/* Two Button */}
+
             <View
               style={{
                 position: 'absolute',
@@ -961,78 +906,14 @@ const BookingDetails = ({navigation}) => {
                   marginRight: wp(2),
                   borderRadius: wp(66),
                 }}
-                onPress={() => {
-                  setopenCancelModal(true);
-                }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
                   color: '#000',
                   fontSize: 16,
                 }}
+                disabled={view1 ? true : false}
                 btnName="CANCEL"
-              />
-              <Button
-                onPress={() => {
-                  setpickup(true);
-                  console.log(pickupitem);
-                }}
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(45),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                btnName="PICKUP"
-                disabled={TodayDate == resReturnData.pickup_date ? false : true}
-              />
-            </View>
-          ) : resReturnData?.status === 'Pickup' ? (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(45),
-                  backgroundColor: '#fff',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  marginRight: wp(2),
-                  borderRadius: wp(66),
-                }}
-                // disabled={true}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                  fontSize: 16,
-                }}
-                onPress={() => {
-                  navigation.navigate('modifyBooking', {booking_id});
-                }}
-                btnName="MODIFY"
+                onPress={() => setopenCancelModal(true)}
               />
               <Button
                 btnStyle={{
@@ -1049,183 +930,32 @@ const BookingDetails = ({navigation}) => {
                   elevation: 10,
                   borderRadius: wp(66),
                 }}
-                onPress={() => {
-                  setreturnbtn(true);
-                }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
                   color: '#fff',
                   fontSize: 16,
                 }}
-                disabled={returnBtnDisable || view1 ? true : false}
-                btnName="RETURN"
+                disabled={
+                  resPickupData?.pickup_left_day > 0
+                    ? true
+                    : view1
+                    ? true
+                    : false
+                }
+                btnName={
+                  resPickupData?.pickup_left_day > 0
+                    ? `${resPickupData?.pickup_left_day} DAYS LEFT`
+                    : 'PICKUP'
+                }
+                onPress={() => PickupClick()}
               />
+              {console.log('----', resPickupData?.pickup_left_day)}
             </View>
-          ) : resReturnData?.status === 'Due' ? (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(35),
-                  backgroundColor: '#fff',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  marginRight: wp(2),
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                  fontSize: 16,
-                }}
-                btnName="REMIND"
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                }}
-              />
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(55),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                onPress={() => {
-                  // setreturnbtn(true);
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                btnName="PAYMENT RECIVED"
-              />
-            </View>
-          ) : resReturnData?.status === 'Missing' ? (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(35),
-                  backgroundColor: '#fff',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  marginRight: wp(2),
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                  fontSize: 16,
-                }}
-                btnName="REMIND"
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                }}
-              />
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(55),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                onPress={() => {
-                  setreturnbtn(true);
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                btnName="ITEM RECIVED"
-              />
-            </View>
-          ) : resReturnData?.status === 'Paid' ? (
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-                alignSelf: 'center',
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(55),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                onPress={() => {
-                  // setreturnbtn(true);
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                  color: Colors.white,
-                }}
-                btnName="SHARE INVOICE"
-              />
-            </View>
-          ) : null}
-        </View>
-      )}
+          </>
+        )}
+      </View>
+
+      {/* Cancel Warn */}
       <WarningModal
         h1="Are you want to cancel this booking?"
         open={openCancelModal}
@@ -1240,35 +970,7 @@ const BookingDetails = ({navigation}) => {
           name: 'No',
         }}
       />
-      <WarningModal
-        h1="Are you sure to confirm pickup this booking?"
-        open={pickupbtn}
-        setopen={setpickup}
-        yes={{
-          name: 'Yes',
-          onPress: () => {
-            setpickup(!pickupbtn);
-            PickupClick();
-          },
-        }}
-        no={{
-          name: 'No',
-        }}
-      />
-      <WarningModal
-        h1="Are you sure to confirm return this booking?"
-        open={returnbtn}
-        setopen={setreturnbtn}
-        yes={{
-          name: 'Yes',
-          onPress: () => {
-            ReturnClick();
-          },
-        }}
-        no={{
-          name: 'No',
-        }}
-      />
+
       {/* Pickup Modal */}
       <Model
         isVisible={modal}
@@ -1356,17 +1058,6 @@ const BookingDetails = ({navigation}) => {
           </View>
           {/*  */}
           <View>
-            {/* <Text
-              style={[
-                styles.h1,
-                {
-                  textAlign: 'center',
-                  marginVertical: hp(7),
-                  fontSize: 30,
-                },
-              ]}>
-              {modalRes?.pending_amount} /-
-            </Text> */}
             {modalRes?.have_whatsapp == 1 ? (
               <Button
                 onPress={() => {
@@ -1394,6 +1085,7 @@ const BookingDetails = ({navigation}) => {
             <TouchableOpacity
               onPress={() => {
                 setmodal(false);
+                navigation.navigate('Home');
               }}>
               <View
                 style={{
@@ -1418,6 +1110,7 @@ const BookingDetails = ({navigation}) => {
           </View>
         </View>
       </Model>
+
       {/* Cancel Modal */}
       <Model
         isVisible={modalCancel}
@@ -1543,6 +1236,7 @@ const BookingDetails = ({navigation}) => {
             <TouchableOpacity
               onPress={() => {
                 setmodalCancel(false);
+                navigation.navigate('Home');
               }}>
               <View
                 style={{
@@ -1565,257 +1259,13 @@ const BookingDetails = ({navigation}) => {
               </View>
             </TouchableOpacity>
           </View>
-        </View>
-      </Model>
-      {/* Return Modal */}
-      <Model
-        isVisible={ReturnModal}
-        statusBarTranslucent
-        // onBackdropPress={() => setmodal(!modal)}
-        backdropOpacity={0.6}
-        focusable
-        onBackButtonPress={() => {
-          setReturnModal(false);
-          // navigation.navigate('Home');
-        }}
-        avoidKeyboard>
-        <View
-          style={{
-            backgroundColor: 'white',
-            padding: 10,
-            borderRadius: 10,
-            paddingTop: hp(3.5),
-          }}>
-          <Text
-            style={{
-              fontFamily: Fonts.bold,
-              fontSize: 22,
-              textAlign: 'center',
-              letterSpacing: 1,
-            }}>
-            Return Successful
-          </Text>
-          <View style={{alignItems: 'center'}}>
-            <AnimatedLottieView
-              autoPlay
-              loop={false}
-              style={{
-                height: hp(20),
-                width: wp(10),
-              }}
-              source={require('./complete.json')}
-            />
-          </View>
-          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Date</Text>
-              <Text style={styles.h3}>{modalRes?.date}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Booking Id</Text>
-              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Payment</Text>
-              <Text style={styles.h3}>{modalRes?.payment} /-</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Total Amount</Text>
-              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
-            </View>
-          </View>
-          {/*  */}
-          <View>
-            {modalRes?.have_whatsapp == 1 ? (
-              <Button
-                onPress={() => {
-                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
-                }}
-                btnStyle={{
-                  height: 50,
-                  width: wp(60),
-                  borderRadius: 10,
-                  marginVertical: hp(4),
-                  backgroundColor: Colors.secondary,
-                  // marginVertical: hp(2),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                }}
-                btnName="Share on Whatsapp"
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                }}
-              />
-            ) : null}
-            <TouchableOpacity
-              onPress={() => {
-                setReturnModal(false);
-              }}>
-              <View
-                style={{
-                  height: wp(15),
-                  width: wp(15),
-                  borderRadius: wp(7.5),
-                  borderColor: Colors.red,
-                  borderWidth: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                  margin: 20,
-                }}>
-                <Icon
-                  name="cross"
-                  type="entypo"
-                  color={Colors.red}
-                  size={wp(10)}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Model>
-      {/* Retrun Missing Modal */}
-      <Model isVisible={nextModal}>
-        <View
-          style={{
-            // height: hp(80),
-            backgroundColor: Colors.white,
-            borderRadius: 10,
-            padding: 10,
-            paddingTop: hp(3.5),
-          }}>
-          {/* msg */}
-          <Text
-            style={{
-              fontFamily: Fonts.bold,
-              fontSize: 22,
-              textAlign: 'center',
-              letterSpacing: 1,
-            }}>
-            Missing Item Details
-          </Text>
-          {/* Missing Table */}
-          <View
-            style={{
-              marginVertical: 20,
-            }}>
-            <Table
-              borderStyle={{
-                borderColor: Colors.secondary,
-                borderWidth: 2,
-              }}
-              style={{}}>
-              <Row
-                data={TableHead3}
-                style={styles.head}
-                textStyle={styles.text}
-              />
-              {nextModalres?.missing_items?.map((rowData, index) => (
-                <TableWrapper key={index} style={styles.row}>
-                  {rowData.map((cellData, cellIndex) => (
-                    <Cell
-                      key={cellIndex}
-                      data={cellData}
-                      textStyle={[styles.text, {padding: 10}]}
-                    />
-                  ))}
-                </TableWrapper>
-              ))}
-            </Table>
-            <Table
-              borderStyle={{
-                borderColor: Colors.disable,
-                borderWidth: 2,
-                borderTopColor: '#000',
-              }}
-              style={{
-                marginVertical: 10,
-              }}>
-              <Row
-                data={['Total', nextModalres?.missing_charge]}
-                style={{height: 30}}
-                textStyle={styles.text}
-              />
-            </Table>
-          </View>
-          {/* Choose  */}
-          <View>
-            <Text style={[styles.h3, {marginBottom: 20}]}>
-              What You choose?
-            </Text>
-            <RadioForm
-              accessibilityLabel="Test"
-              animation={true}
-              radio_props={radio_props}
-              initial={0}
-              buttonColor={Colors.disable}
-              onPress={val => {
-                val === 0
-                  ? setchooseByuser('Product Price')
-                  : setchooseByuser('Products');
-              }}
-            />
-          </View>
-          {/* Button */}
-          <TouchableOpacity
-            onPress={() => {
-              setnextModal(false);
-              setView1(false);
-              setView2(true);
-              setnext2(true);
-              setreturnBtnDisable(false);
-              setextra(nextModalres?.missing_charge);
-            }}>
-            <View
-              style={{
-                height: wp(15),
-                width: wp(15),
-                borderRadius: wp(7.5),
-                borderColor: Colors.red,
-                borderWidth: 2,
-                alignItems: 'center',
-                justifyContent: 'center',
-                alignSelf: 'center',
-                margin: 20,
-              }}>
-              <Icon
-                name="cross"
-                type="entypo"
-                color={Colors.red}
-                size={wp(10)}
-              />
-            </View>
-          </TouchableOpacity>
         </View>
       </Model>
     </>
   );
 };
 
-export default BookingDetails;
+export default PickupBooking;
 
 const styles = StyleSheet.create({
   h1: {

@@ -1,11 +1,10 @@
-export const calculateAction = (userId, data, itemIdPosition, qtyPosition) => {
+export const calculateAction = (uniqueId, data, rent) => {
   return {
     type: 'CALCULATE_PRICE',
     payload: {
-      userId,
+      uniqueId,
       data: data,
-      itemIdPosition: itemIdPosition,
-      qtyPosition: qtyPosition,
+      rent,
     },
   };
 };

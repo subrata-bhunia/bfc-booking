@@ -1,4 +1,10 @@
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import FlatListWithHeader from '../../components/FlatListWithHeader';
 import {
@@ -21,15 +27,17 @@ const AllBookings = () => {
   const [filterModel, setfilterModel] = useState(false);
   // ---------- DropDown ----------- //
   const [items, setItems] = useState([
+    {label: 'All', value: ''},
     {label: 'Confirm', value: 'Confirm'},
     {label: 'Pickup', value: 'Pickup'},
+    {label: 'Due', value: 'Due'},
     {label: 'Cancel', value: 'Cancel'},
     {label: 'Paid', value: 'Paid'},
-    {label: 'Due', value: 'Due'},
     {label: 'Missing', value: 'Missing'},
   ]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const [status, setStatus] = useState(0);
   //  --------- Filter Function ------ //
 
   const FilterWithStatus = text => {
@@ -57,6 +65,53 @@ const AllBookings = () => {
       }}>
       {/* Header */}
       <StaticHeader />
+      <View
+        style={{
+          height: 1,
+          backgroundColor: Colors.disable,
+          width: wp(100),
+        }}
+      />
+      <View>
+        <ScrollView
+          horizontal={true}
+          style={{
+            marginLeft: wp(5),
+          }}
+          showsHorizontalScrollIndicator={false}>
+          {items.map((val, ind) => {
+            const active = status == ind;
+            return (
+              <TouchableOpacity
+                style={{
+                  height: wp(8),
+                  // paddingHorizontal: wp(3),
+                  width: wp(25),
+                  backgroundColor: active ? Colors.primary : Colors.white,
+                  marginRight: wp(4),
+                  marginVertical: hp(2),
+                  borderRadius: wp(2),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderColor: Colors.primary,
+                  borderWidth: active ? 0 : 1,
+                }}
+                onPress={() => {
+                  FilterWithStatus(val.value), setStatus(ind);
+                }}>
+                <Text
+                  style={{
+                    fontFamily: Fonts.semibold,
+                    fontSize: wp(4),
+                    color: active ? Colors.white : Colors.primary,
+                  }}>
+                  {val.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
       <ScrollView>
         <FlatListWithHeader
           items={filterallBooking === null ? allBooking : filterallBooking}
@@ -64,7 +119,7 @@ const AllBookings = () => {
         />
         <View style={{height: hp(9) + hp(4)}} />
       </ScrollView>
-      <FAB
+      {/* <FAB
         visible={true}
         onPress={() => {
           setfilterModel(!filterModel);
@@ -77,8 +132,8 @@ const AllBookings = () => {
         icon={{name: 'filter', color: 'white', type: 'ionicon'}}
         color={Colors.red}
         type="outline"
-      />
-      <Model
+      /> */}
+      {/* <Model
         isVisible={filterModel}
         onBackdropPress={() => {
           setfilterModel(!filterModel);
@@ -130,7 +185,7 @@ const AllBookings = () => {
             }}
           />
         </View>
-      </Model>
+      </Model> */}
     </View>
   );
 };

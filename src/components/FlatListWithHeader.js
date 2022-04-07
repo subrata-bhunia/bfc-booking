@@ -15,6 +15,7 @@ import {
 } from 'react-native-responsive-screen';
 import {Icon, Image} from 'react-native-elements';
 import {useNavigation} from '@react-navigation/native';
+import {SkypeIndicator} from 'react-native-indicators';
 
 /**
  *
@@ -54,10 +55,10 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
                     justifyContent: 'center',
                     width: wp(100),
                   }}>
-                  <ActivityIndicator
-                    size={30}
-                    color={Colors.primary}
-                    style={{alignSelf: 'center'}}
+                  <SkypeIndicator
+                    color={Colors.botton}
+                    count={5}
+                    size={wp(12)}
                   />
                 </View>
               ) : _horizontal == true ? (
@@ -95,11 +96,15 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
             <TouchableOpacity
               style={{alignSelf: 'center'}}
               activeOpacity={0.7}
-              onPress={() =>
-                navigation.navigate('bookingDetails', {
-                  booking_id: item?.booking_id,
-                })
-              }>
+              onPress={() => {
+                item?.status == 'Confirm'
+                  ? navigation.navigate('pickupBooking', {
+                      booking_id: item?.booking_id,
+                    })
+                  : navigation.navigate('bookingDetails', {
+                      booking_id: item?.booking_id,
+                    });
+              }}>
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{

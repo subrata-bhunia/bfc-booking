@@ -821,7 +821,7 @@ const Modify = () => {
                         color: '#fff',
                         fontSize: 20,
                       }}
-                      btnName="Add Book"
+                      btnName="Update Booking"
                       isLoader={btnLoader}
                     />
                   </>
