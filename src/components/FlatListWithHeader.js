@@ -25,6 +25,26 @@ import {SkypeIndicator} from 'react-native-indicators';
  */
 const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
   const navigation = useNavigation();
+
+  const handleNavigation = item => {
+    if (item?.status == 'Confirm') {
+      navigation.navigate('pickupBooking', {
+        booking_id: item?.booking_id,
+      });
+    } else if (item?.status == 'Due') {
+      navigation.navigate('dueBooking', {
+        booking_id: item?.booking_id,
+      });
+    } else if (item?.status == 'Missing') {
+      navigation.navigate('missingBooking', {
+        booking_id: item?.booking_id,
+      });
+    } else {
+      navigation.navigate('bookingDetails', {
+        booking_id: item?.booking_id,
+      });
+    }
+  };
   var _horizontal = horizontal || false;
   var isLoader = isloader || false;
   return (
@@ -96,15 +116,7 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
             <TouchableOpacity
               style={{alignSelf: 'center'}}
               activeOpacity={0.7}
-              onPress={() => {
-                item?.status == 'Confirm'
-                  ? navigation.navigate('pickupBooking', {
-                      booking_id: item?.booking_id,
-                    })
-                  : navigation.navigate('bookingDetails', {
-                      booking_id: item?.booking_id,
-                    });
-              }}>
+              onPress={() => handleNavigation(item)}>
               <LinearGradient
                 colors={['#eee', '#eee', '#fff']}
                 style={{
