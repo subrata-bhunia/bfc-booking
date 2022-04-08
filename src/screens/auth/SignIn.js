@@ -92,7 +92,7 @@ const SignIn = ({navigation}) => {
           fontFamily: Fonts.regular,
           textAlign: 'center',
         }}>
-        Keep your data safe null null null
+        We Are Verities
       </Text>
       <BlankSpace height={hp(2)} />
 
