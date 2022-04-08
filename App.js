@@ -2,7 +2,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import React, {useEffect, useState} from 'react';
 
-import {LogBox, StatusBar, ToastAndroid} from 'react-native';
+import {LogBox, StatusBar, ToastAndroid, View, Text} from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,9 +11,19 @@ import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store/store';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function App() {
   const [login, setlogin] = useState(false);
+
+  const [netinfo, setNetinfo] = useState(null);
+
+  NetInfo.fetch().then(state => {
+    console.log('Connection type', state.details);
+    console.log('Is connected?', state.isConnected);
+    setNetinfo(state.isConnected);
+  });
+  console.log('----------', netinfo);
   // * Check Login
   const checkLogin = async () => {
     try {
@@ -92,7 +102,32 @@ export default function App() {
             backgroundColor={'transparent'}
             barStyle="dark-content"
           />
-          {login ? <Stacks /> : <AuthStackScreen />}
+          {netinfo ? (
+            login ? (
+              <Stacks />
+            ) : (
+              <AuthStackScreen />
+            )
+          ) : (
+            <View
+              style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+              <Text>Hello No InterNet</Text>
+              <Text
+                style={{
+                  marginTop: 20,
+                  color: 'red',
+                }}
+                onPress={() => {
+                  NetInfo.fetch().then(state => {
+                    console.log('Connection type', state.details);
+                    console.log('Is connected?', state.isConnected);
+                    setNetinfo(state.isConnected);
+                  });
+                }}>
+                Retry
+              </Text>
+            </View>
+          )}
         </NavigationContainer>
       </AuthContext.Provider>
     </Provider>

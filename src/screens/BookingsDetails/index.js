@@ -137,7 +137,7 @@ const BookingDetails = ({navigation}) => {
       });
   };
 
-  console.log('pickupitem :', returnItems);
+  console.log('booking_id :', booking_id);
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
   const [returnBtnDisable, setreturnBtnDisable] = useState(true);
@@ -160,15 +160,17 @@ const BookingDetails = ({navigation}) => {
 
   const handleGetBookingDetails = async () => {
     setShow(true);
-    getReturnBookingById({booking_id: booking_id}).then(res => {
-      const {data, status} = res.data;
-      if (status === 'Success') {
-        setShow(false);
-        setResReturnData(data);
-        setTableData(res.data.data.items);
-      }
-      // console.log('getData', data);
-    });
+    getReturnBookingById({booking_id: booking_id})
+      .then(res => {
+        const {data, status} = res.data;
+        if (status === 'Success') {
+          setShow(false);
+          setResReturnData(data);
+          setTableData(res.data.data.items);
+        }
+        console.log('getBooking info :', data);
+      })
+      .catch(err => console.log('Err of getBooking :', err));
   };
   // ----------------- Next ----------- //
   const setValueOnReturnItems = () => {

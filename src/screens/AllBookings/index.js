@@ -116,6 +116,7 @@ const AllBookings = () => {
         <FlatListWithHeader
           items={filterallBooking === null ? allBooking : filterallBooking}
           isloader={loader}
+          initialNumToRender={10}
         />
         <View style={{height: hp(9) + hp(4)}} />
       </ScrollView>
