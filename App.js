@@ -11,9 +11,11 @@ import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store/store';
+import AnimatedSplash from 'react-native-animated-splash-screen';
 
 export default function App() {
   const [login, setlogin] = useState(false);
+  const [load, setload] = useState(false);
   // * Check Login
   const checkLogin = async () => {
     try {
@@ -38,9 +40,10 @@ export default function App() {
   }, [login]);
   // ----------- //
   useEffect(() => {
-    setTimeout(() => {
-      SplashScreen.hide();
-    }, 1000);
+    setload(true);
+    // setTimeout(() => {
+    //   SplashScreen.hide();
+    // }, 1000);
   }, []);
   LogBox.ignoreAllLogs();
   // -------------- //
@@ -84,17 +87,25 @@ export default function App() {
     },
   }));
   return (
-    <Provider store={store}>
-      <AuthContext.Provider value={authContext}>
-        <NavigationContainer>
-          <StatusBar
-            translucent
-            backgroundColor={'transparent'}
-            barStyle="dark-content"
-          />
-          {login ? <Stacks /> : <AuthStackScreen />}
-        </NavigationContainer>
-      </AuthContext.Provider>
-    </Provider>
+    <AnimatedSplash
+      translucent={true}
+      isLoaded={load}
+      logoImage={require('./assets/bfcLogo.png')}
+      backgroundColor={'#ddb540'}
+      logoHeight={150}
+      logoWidth={150}>
+      <Provider store={store}>
+        <AuthContext.Provider value={authContext}>
+          <NavigationContainer>
+            <StatusBar
+              translucent
+              backgroundColor={'transparent'}
+              barStyle="dark-content"
+            />
+            {login ? <Stacks /> : <AuthStackScreen />}
+          </NavigationContainer>
+        </AuthContext.Provider>
+      </Provider>
+    </AnimatedSplash>
   );
 }
