@@ -80,6 +80,15 @@ const ReturnBookingPage = ({navigation}) => {
   const [returnbtn, setreturnbtn] = useState(false);
   const [returnBtnDisable, setreturnBtnDisable] = useState(true);
 
+  // Calculation
+  const [ProductPrice, setProductPrice] = useState(true);
+  const [Product, setProduct] = useState(false);
+
+  const [chooseByUser, setchooseByuser] = useState('Product Price');
+  const [Discount, setDiscount] = useState(0);
+  const [ReturnModal, setReturnModal] = useState(false);
+  const [extra, setextra] = useState(0);
+
   useEffect(() => {
     handleGetBookingDetails();
   }, []);
@@ -93,6 +102,7 @@ const ReturnBookingPage = ({navigation}) => {
           setShow(false);
           setResReturnData(data);
           setTableData(res.data.data.items);
+          setDiscount(data.discount);
           const takenItems = new Object();
           data?.items?.map((item, index) => {
             takenItems[item[2].item_id] = item[2].taken;
@@ -171,13 +181,7 @@ const ReturnBookingPage = ({navigation}) => {
     {label: 'Product Price', value: 0},
     {label: 'Products', value: 1},
   ];
-  const [ProductPrice, setProductPrice] = useState(true);
-  const [Product, setProduct] = useState(false);
 
-  const [chooseByUser, setchooseByuser] = useState('Product Price');
-  const [Discount, setDiscount] = useState(0);
-  const [ReturnModal, setReturnModal] = useState(false);
-  const [extra, setextra] = useState(0);
   const ReturnClick = () => {
     setreturnbtn(false);
     setShow(true);
@@ -188,6 +192,7 @@ const ReturnBookingPage = ({navigation}) => {
       payment: returnpayment,
       discount: Discount,
       extra_charges: extra,
+      items: returnItems,
     })
       .then(res => {
         setShow(false);
@@ -198,6 +203,8 @@ const ReturnBookingPage = ({navigation}) => {
         console.log(err);
       });
   };
+
+  console.log('returnItems :', returnItems);
 
   const TodayDate = `${new Date().getFullYear()}-${
     new Date().getMonth() + 1 < 10
@@ -753,7 +760,7 @@ const ReturnBookingPage = ({navigation}) => {
                         Discount :
                       </Text>
                       <Input
-                        defaultValue={`${parseInt(resReturnData?.discount)}`}
+                        defaultValue={`${parseInt(Discount)}`}
                         value={Discount}
                         onChangeText={txt => {
                           setDiscount(txt);
@@ -794,6 +801,7 @@ const ReturnBookingPage = ({navigation}) => {
                         disabled
                       />
                     </View>
+
                     {/* Pending Amount */}
                     <View
                       style={{
@@ -813,7 +821,11 @@ const ReturnBookingPage = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={`${resReturnData.pending_payment}`}
+                        defaultValue={`${
+                          parseInt(resReturnData.pending_payment) +
+                          parseInt(extra) -
+                          parseInt(Discount ? Discount : 0)
+                        }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -1049,6 +1061,10 @@ const ReturnBookingPage = ({navigation}) => {
             <TouchableOpacity
               onPress={() => {
                 setReturnModal(false);
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                });
               }}>
               <View
                 style={{
@@ -1158,10 +1174,10 @@ const ReturnBookingPage = ({navigation}) => {
             {/* Dot */}
             <View
               style={{
-                height: 35,
-                width: 35,
+                height: wp(7),
+                width: wp(7),
                 borderRadius: 25,
-                borderWidth: 10,
+                borderWidth: wp(2),
                 position: 'absolute',
                 right: 20,
                 top: 20,
@@ -1231,10 +1247,10 @@ const ReturnBookingPage = ({navigation}) => {
             {/* Dot */}
             <View
               style={{
-                height: 35,
-                width: 35,
+                height: wp(7),
+                width: wp(7),
                 borderRadius: 25,
-                borderWidth: 10,
+                borderWidth: wp(2),
                 // backgroundColor: '#000',
                 position: 'absolute',
                 right: 20,
@@ -1252,7 +1268,7 @@ const ReturnBookingPage = ({navigation}) => {
               setView2(true);
               setnext2(true);
               setreturnBtnDisable(false);
-              setextra(nextModalres?.missing_charge);
+              setextra(Product ? 0 : nextModalres?.missing_charge);
             }}
             textStyle={{
               fontFamily: Fonts.semibold,

@@ -107,7 +107,9 @@ const MissingBookingPage = ({navigation}) => {
           parseInt(data.rent) +
             parseInt(data?.caterer_charge) -
             parseInt(data.advanced) -
-            (parseInt(data.discount) ? parseInt(data.discount) : 0),
+            (parseInt(data.discount) ? parseInt(data.discount) : 0) -
+            parseInt(data.payment) +
+            parseInt(data.extra_charges),
         );
         const rtnItems = new Object();
         data?.items?.map((item, index) => {
@@ -808,6 +810,38 @@ const MissingBookingPage = ({navigation}) => {
                       />
                     </View>
 
+                    {/* Pre Payment */}
+                    {resMissingBookingData.payment != 0 ? (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: -wp(4),
+                        }}>
+                        <Text
+                          style={{
+                            fontFamily: Fonts.semibold,
+                            fontSize: wp(4),
+                            width: wp(40),
+                            textAlign: 'right',
+                          }}>
+                          Previous Payment :
+                        </Text>
+                        <Input
+                          defaultValue={`${resMissingBookingData.payment}`}
+                          containerStyle={{width: wp(40), height: hp(10)}}
+                          leftIcon={
+                            <Icon name="inr" type="fontisto" size={15} />
+                          }
+                          inputStyle={{
+                            fontSize: wp(4),
+                          }}
+                          disabled
+                        />
+                      </View>
+                    ) : null}
+
                     {/* Pending Amount */}
                     <View
                       style={{
@@ -982,6 +1016,7 @@ const MissingBookingPage = ({navigation}) => {
                     color: '#fff',
                     fontSize: 16,
                   }}
+                  disabled={view1 ? true : false}
                   btnName="ITEM RECIVED"
                 />
               )}
