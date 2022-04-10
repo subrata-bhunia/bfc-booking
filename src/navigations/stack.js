@@ -9,6 +9,8 @@ import Modify from '../screens/Modify/Modify';
 import DueBookingPage from '../screens/BookingsDetails/Due';
 import PickupBookingPage from '../screens/BookingsDetails/Pickup';
 import MissingBookingPage from '../screens/BookingsDetails/Missing';
+import CancelBooking from '../screens/BookingsDetails/Cancel';
+import ReturnBookingPage from '../screens/BookingsDetails/Return';
 const Stack = createStackNavigator();
 
 const Stacks = () => {
@@ -19,6 +21,8 @@ const Stacks = () => {
       <Stack.Screen name="pickupBooking" component={PickupBookingPage} />
       <Stack.Screen name="dueBooking" component={DueBookingPage} />
       <Stack.Screen name="missingBooking" component={MissingBookingPage} />
+      <Stack.Screen name="cancelBooking" component={CancelBooking} />
+      <Stack.Screen name="returnBooking" component={ReturnBookingPage} />
       <Stack.Screen name="modifyBooking" component={Modify} />
     </Stack.Navigator>
   );

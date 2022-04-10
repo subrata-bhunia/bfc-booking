@@ -18,21 +18,11 @@ import {
 } from 'react-native-responsive-screen';
 import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import Model from 'react-native-modal';
-import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {
-  cancelBooking,
-  checkReturnItems,
-  getReturnBookingById,
-  pickupBooking,
-  ReturnBooking,
-} from '../../api/Bookings';
+import {getBookingInfoById, checkReturnItems} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
-import WarningModal from '../../components/WarningModal';
 import {UIStore} from '../../UIStore';
-import {RadioButton} from 'react-native-simple-radio-button';
-import RadioForm from 'react-native-simple-radio-button';
 import {SkypeIndicator} from 'react-native-indicators';
 import {useDispatch, useSelector} from 'react-redux';
 import {calculateAction} from '../../redux/action';
@@ -55,15 +45,8 @@ const MissingBookingPage = ({navigation}) => {
     // console.log("WP")
   };
   //--------------------- //
-
-  const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(false);
-  const [next1, setnext1] = useState(true);
-  const [next2, setnext2] = useState(true);
-  const [modal, setmodal] = useState(false);
-  const [modalCancel, setmodalCancel] = useState(false);
-  const [modalRes, setmodalRes] = useState([]);
   const route = useRoute();
   const booking_id = route?.params?.booking_id;
   const user_id = UIStore.useState(s => s.userId);
@@ -71,26 +54,21 @@ const MissingBookingPage = ({navigation}) => {
   const [show, setShow] = useState(true);
   // setDate from backend
   const [resMissingBookingData, setResMissingBookingData] = useState(null);
-  const [returndate, setreturndate] = useState(null);
-  const TableHead2 = ['Item Name', 'Stock', 'Need'];
-  const TableHead = ['Item Name', 'Missing', 'Given'];
-  const TableHead3 = ['Item Name', 'Qty', 'Price'];
+  const TableHead = ['Item Name', 'Taken', 'Given', 'Return'];
   const [tableData, setTableData] = useState([]);
-  // ---------- Drop Down ---------- //
-  const [_return, setreturn] = useState(false);
-  const [_cateres, setcateres] = useState(false);
-  const [nextLoader, setnextLoader] = useState(false);
-
-  // ---------- Confirm -------------- //
-  const [canclebtn, setcancle] = useState([]);
-  const [openCancelModal, setopenCancelModal] = useState(false);
 
   //Rent Variable
   const [Discount, setDiscount] = useState(0);
   const [rent, setRent] = useState(0);
   const [payment, setPayment] = useState(0);
-  const [costOfItems, setCostOfItems] = useState({});
-
+  const [returnItems, setreturnItems] = useState([]);
+  const [paymentMode, setpaymentMode] = useState(false);
+  const [nextModal, setnextModal] = useState(false);
+  const [nextModalres, setnextModalres] = useState([]);
+  const missingModalTableHead = ['Item Name', 'Qty', 'Price'];
+  const [extra, setextra] = useState(0);
+  const [totalAmount, settotalAmount] = useState(0);
+  const [pendingAmount, setpendingAmount] = useState(0);
   // To get Booking Details (API CALL)
   useEffect(() => {
     handleGetBookingDetails();
@@ -98,8 +76,8 @@ const MissingBookingPage = ({navigation}) => {
 
   const handleGetBookingDetails = async () => {
     setShow(true);
-    getReturnBookingById({booking_id: booking_id}).then(res => {
-      const {data, status, rent} = res.data;
+    getBookingInfoById({booking_id: booking_id}).then(res => {
+      const {data, status} = res.data;
       if (status === 'Success') {
         const items = res.data.data.items;
         setShow(false);
@@ -107,35 +85,94 @@ const MissingBookingPage = ({navigation}) => {
         setRent(data.rent);
         setDiscount(parseInt(data.discount));
         setTableData(items);
-        setCostOfItems(rent);
-        var newObj = new Object();
-        for (var i = 0; i < items.length; i++) {
-          var key = items[i][2].item_id;
-          var value = items[i][2].taken;
-          if (value != 0) {
-            newObj[key] = value;
+        settotalAmount(
+          parseInt(data.rent) +
+            parseInt(data?.caterer_charge) +
+            parseInt(data.extra_charges),
+        );
+        setpendingAmount(
+          parseInt(data.rent) +
+            parseInt(data?.caterer_charge) -
+            parseInt(data.advanced) -
+            (parseInt(data.discount) ? parseInt(data.discount) : 0),
+        );
+        const rtnItems = new Object();
+        data?.items?.map((item, index) => {
+          if (item[1] != item[2]) {
+            rtnItems[item[3].item_id] = item[3].missing;
           }
-        }
+        });
+        setreturnItems(rtnItems);
       }
     });
   };
-
-  // handle Payment Accept (API CALL)
-
-  console.log('ResData item :', resMissingBookingData);
-  console.log('tableData item :', tableData);
-
-  // Rent Calculation
-
-  const reduxData = useSelector(state => state.handleCalCulatePrice);
-  console.log('Total Price', reduxData);
-
-  useEffect(() => {
-    if (reduxData.uniqueId == booking_id) {
-      setRent(reduxData.totalAmount);
+  console.log('booking_id', booking_id);
+  const resetInput = index => {
+    var newArr = [];
+    for (var i = 0; i < tableData.length; i++) {
+      if (index == i) {
+        var tmpData = [
+          tableData[i][0],
+          tableData[i][1],
+          tableData[i][2],
+          {item_id: tableData[i][3].item_id, missing: ''},
+        ];
+        newArr.push(tmpData);
+      } else {
+        newArr.push(tableData[i]);
+      }
     }
-  }, [reduxData]);
+    setTableData(newArr);
+  };
+  const AddItems = (key, value) => {
+    var oldReturnItems = returnItems;
+    for (var i = 0; i < tableData.length; i++) {
+      if (tableData[i][3].item_id == key && value != '') {
+        oldReturnItems[key] = parseInt(value);
+      } else if (tableData[i][3].item_id == key && value == '') {
+        oldReturnItems[key] = 0;
+      } else {
+      }
+    }
+    setreturnItems(oldReturnItems);
+  };
+  const checkMissingItems = () => {
+    console.log('returnItems', returnItems);
+    setShow(true);
+    checkReturnItems({
+      booking_id: booking_id,
+      items: returnItems,
+    })
+      .then(res => {
+        if (res?.data?.status == 'Missing') {
+          setnextModalres(res?.data?.data);
+          setShow(false);
+          setnextModal(true);
+          setpaymentMode(true);
+        } else {
+          setView1(!view1);
+          setView2(true);
+          setShow(false);
+          setpaymentMode(false);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
+  const calculateBill = extraCharge => {
+    let ttlAmt = parseInt(totalAmount) + parseInt(extraCharge);
+    settotalAmount(ttlAmt);
+    setpendingAmount(
+      ttlAmt +
+        parseInt(resMissingBookingData?.caterer_charge) -
+        parseInt(resMissingBookingData.advanced) -
+        (parseInt(resMissingBookingData.discount)
+          ? parseInt(resMissingBookingData.discount)
+          : 0),
+    );
+  };
   return (
     <>
       <View
@@ -420,14 +457,41 @@ const MissingBookingPage = ({navigation}) => {
                           data={TableHead}
                           style={styles.head}
                           textStyle={styles.text}
+                          flexArr={[1.5, 1, 1, 1]}
                         />
-                        {/* Check By Kaustav Da */}
                         {tableData.map((rowData, index) => (
                           <TableWrapper key={index} style={styles.row}>
                             {rowData.map((cellData, cellIndex) => (
                               <Cell
+                                style={
+                                  cellIndex == 0
+                                    ? {width: '33.5%'}
+                                    : {width: '22%'}
+                                }
                                 key={cellIndex}
-                                data={cellData}
+                                data={
+                                  cellIndex == 3 ? (
+                                    rowData[1] != rowData[2] ? (
+                                      <Input
+                                        placeholder={`${cellData.missing}`}
+                                        placeholderTextColor={Colors.text}
+                                        textAlign="center"
+                                        onPressIn={() => resetInput(index)}
+                                        defaultValue={`${
+                                          returnItems[cellData?.item_id]
+                                        }`}
+                                        onChangeText={txt =>
+                                          AddItems(cellData?.item_id, txt)
+                                        }
+                                        keyboardType="numeric"
+                                      />
+                                    ) : (
+                                      rowData[1] - rowData[2]
+                                    )
+                                  ) : (
+                                    cellData
+                                  )
+                                }
                                 textStyle={styles.text}
                               />
                             ))}
@@ -438,10 +502,9 @@ const MissingBookingPage = ({navigation}) => {
                     <Button
                       onPress={() => {
                         setView1(!view1);
-                        setnext2(true);
                         setView2(true);
+                        checkMissingItems();
                       }}
-                      isLoader={nextLoader}
                       btnStyle={{
                         height: hp(6),
                         width: wp(80),
@@ -473,7 +536,6 @@ const MissingBookingPage = ({navigation}) => {
               <View>
                 <TouchableOpacity
                   onPress={() => {
-                    setView0(false);
                     setView1(false);
                     setView2(!view2);
                   }}
@@ -583,9 +645,35 @@ const MissingBookingPage = ({navigation}) => {
                         }}
                         disabled
                       />
-                      {console.log(resMissingBookingData?.caterer_charge)}
                     </View>
-
+                    {/* Extra */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: -wp(4),
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(4),
+                          width: wp(40),
+                          textAlign: 'right',
+                        }}>
+                        Extra Charges :
+                      </Text>
+                      <Input
+                        disabled
+                        value={`${extra}`}
+                        keyboardType="number-pad"
+                        containerStyle={{width: wp(40), height: hp(10)}}
+                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                        inputStyle={{
+                          fontSize: wp(4),
+                        }}
+                      />
+                    </View>
                     <View
                       style={{
                         borderBottomWidth: 1,
@@ -612,10 +700,7 @@ const MissingBookingPage = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={`${
-                          parseInt(rent) +
-                          parseInt(resMissingBookingData?.caterer_charge)
-                        }`}
+                        defaultValue={`${totalAmount}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -705,12 +790,7 @@ const MissingBookingPage = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={`${
-                          parseInt(rent) +
-                          parseInt(resMissingBookingData?.caterer_charge) -
-                          parseInt(resMissingBookingData.advanced) -
-                          (parseInt(Discount) ? parseInt(Discount) : 0)
-                        }`}
+                        defaultValue={`${pendingAmount}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -759,70 +839,243 @@ const MissingBookingPage = ({navigation}) => {
               {/* </KeyboardAvoidingView> */}
             </ScrollView>
             {/* Two Button */}
+            {paymentMode ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  flexDirection: 'row',
+                  margin: wp(4),
+                }}>
+                <Button
+                  // onPress={
 
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(35),
-                  backgroundColor: '#fff',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  marginRight: wp(2),
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                  fontSize: 16,
-                }}
-                btnName="REMIND"
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                }}
-              />
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(55),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                onPress={() => {
-                  //   setreturnbtn(true);
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                btnName="ITEM RECIVED"
-              />
-            </View>
+                  // }
+                  btnStyle={{
+                    height: hp(7),
+                    width: wp(35),
+                    backgroundColor: '#fff',
+                    shadowColor: Colors.primary,
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 1,
+                    shadowRadius: 3.5,
+                    elevation: 10,
+                    marginRight: wp(2),
+                    borderRadius: wp(66),
+                  }}
+                  textStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#000',
+                    fontSize: 16,
+                  }}
+                  btnName="CANCEL"
+                />
+                <Button
+                  btnStyle={{
+                    height: hp(7),
+                    width: wp(55),
+                    backgroundColor: '#2196F3',
+                    shadowColor: Colors.primary,
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 1,
+                    shadowRadius: 3.5,
+                    elevation: 10,
+                    borderRadius: wp(66),
+                  }}
+                  onPress={() => {
+                    //   setreturnbtn(true);
+                  }}
+                  textStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#fff',
+                    fontSize: 16,
+                  }}
+                  btnName="PAYMENT RECIVED"
+                />
+              </View>
+            ) : (
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  flexDirection: 'row',
+                  margin: wp(4),
+                }}>
+                <Button
+                  onPress={() => checkMissingItems()}
+                  btnStyle={{
+                    height: hp(7),
+                    width: wp(50),
+                    backgroundColor: '#fff',
+                    shadowColor: Colors.primary,
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 1,
+                    shadowRadius: 3.5,
+                    elevation: 10,
+                    marginRight: wp(2),
+                    borderRadius: wp(66),
+                  }}
+                  textStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#000',
+                    fontSize: 16,
+                  }}
+                  btnName="PAYMENT RECIVED"
+                />
+                <Button
+                  btnStyle={{
+                    height: hp(7),
+                    width: wp(40),
+                    backgroundColor: '#2196F3',
+                    shadowColor: Colors.primary,
+                    shadowOffset: {
+                      width: 0,
+                      height: 10,
+                    },
+                    shadowOpacity: 1,
+                    shadowRadius: 3.5,
+                    elevation: 10,
+                    borderRadius: wp(66),
+                  }}
+                  onPress={() => {
+                    //   setreturnbtn(true);
+                  }}
+                  textStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#fff',
+                    fontSize: 16,
+                  }}
+                  btnName="ITEM RECIVED"
+                />
+              </View>
+            )}
           </>
         )}
       </View>
+
+      {/* Retrun Missing Modal */}
+      <Model isVisible={nextModal}>
+        <View
+          style={{
+            // height: hp(80),
+            backgroundColor: Colors.white,
+            borderRadius: 10,
+            padding: 10,
+            paddingTop: hp(3.5),
+          }}>
+          {/* msg */}
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 1,
+            }}>
+            Missing Item Details
+          </Text>
+          {/* Missing Table */}
+          <View
+            style={{
+              marginVertical: 20,
+              paddingLeft: 15,
+              paddingRight: 15,
+            }}>
+            <Table
+              borderStyle={{
+                borderColor: Colors.secondary,
+                borderWidth: 2,
+              }}
+              style={{}}>
+              <Row
+                data={missingModalTableHead}
+                style={styles.head}
+                textStyle={styles.text}
+              />
+              {nextModalres?.missing_items?.map((rowData, index) => (
+                <TableWrapper key={index} style={styles.row}>
+                  {rowData.map((cellData, cellIndex) => (
+                    <Cell
+                      key={cellIndex}
+                      data={cellData}
+                      textStyle={[styles.text, {padding: 10}]}
+                    />
+                  ))}
+                </TableWrapper>
+              ))}
+            </Table>
+            <Table
+              borderStyle={{
+                borderColor: Colors.disable,
+                borderWidth: 2,
+                borderTopColor: '#000',
+              }}
+              style={{
+                marginVertical: 10,
+              }}>
+              <Row
+                data={['Total', nextModalres?.missing_charge]}
+                style={{height: 30}}
+                textStyle={styles.text}
+              />
+            </Table>
+          </View>
+          {/* Choose  */}
+          <View>
+            <Text
+              style={[styles.p, {marginBottom: 15, color: 'red', padding: 15}]}>
+              Note: Missing product cost added to your bill as an extra charge.
+            </Text>
+          </View>
+          {/* Button */}
+          <Button
+            btnName="Continue to Payment"
+            onPress={() => {
+              setnextModal(false);
+              setView1(false);
+              setView2(true);
+              setpaymentMode(true);
+              setextra(
+                resMissingBookingData?.extra_charges +
+                  nextModalres?.missing_charge,
+              );
+              calculateBill(
+                resMissingBookingData?.extra_charges +
+                  nextModalres?.missing_charge,
+              );
+            }}
+            textStyle={{
+              fontFamily: Fonts.semibold,
+              color: '#fff',
+              fontSize: 16,
+            }}
+            btnStyle={{
+              height: hp(6),
+              width: wp(55),
+              backgroundColor: '#2196F3',
+              shadowColor: Colors.primary,
+              shadowOffset: {
+                width: 0,
+                height: 10,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 3.5,
+              elevation: 10,
+              borderRadius: wp(66),
+              marginTop: 10,
+              marginBottom: 15,
+            }}
+          />
+        </View>
+      </Model>
     </>
   );
 };

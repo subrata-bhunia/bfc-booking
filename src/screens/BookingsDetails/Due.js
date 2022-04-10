@@ -20,13 +20,7 @@ import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {
-  cancelBooking,
-  checkReturnItems,
-  getReturnBookingById,
-  pickupBooking,
-  ReturnBooking,
-} from '../../api/Bookings';
+import {getBookingInfoById} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
@@ -56,13 +50,11 @@ const DueBookingPage = ({navigation}) => {
   };
   //--------------------- //
 
-  const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(false);
   const [next1, setnext1] = useState(true);
   const [next2, setnext2] = useState(true);
   const [modal, setmodal] = useState(false);
-  const [modalCancel, setmodalCancel] = useState(false);
   const [modalRes, setmodalRes] = useState([]);
   const route = useRoute();
   const booking_id = route?.params?.booking_id;
@@ -71,19 +63,10 @@ const DueBookingPage = ({navigation}) => {
   const [show, setShow] = useState(true);
   // setDate from backend
   const [resDueData, setResDueData] = useState(null);
-  const [returndate, setreturndate] = useState(null);
-  const TableHead2 = ['Item Name', 'Stock', 'Need'];
   const TableHead = ['Item Name', 'Taken', 'Return'];
-  const TableHead3 = ['Item Name', 'Qty', 'Price'];
   const [tableData, setTableData] = useState([]);
   // ---------- Drop Down ---------- //
-  const [_return, setreturn] = useState(false);
-  const [_cateres, setcateres] = useState(false);
   const [nextLoader, setnextLoader] = useState(false);
-
-  // ---------- Confirm -------------- //
-  const [canclebtn, setcancle] = useState([]);
-  const [openCancelModal, setopenCancelModal] = useState(false);
 
   //Rent Variable
   const [Discount, setDiscount] = useState(0);
@@ -98,7 +81,7 @@ const DueBookingPage = ({navigation}) => {
 
   const handleGetBookingDetails = async () => {
     setShow(true);
-    getReturnBookingById({booking_id: booking_id}).then(res => {
+    getBookingInfoById({booking_id: booking_id}).then(res => {
       const {data, status, rent} = res.data;
       if (status === 'Success') {
         const items = res.data.data.items;
@@ -121,15 +104,8 @@ const DueBookingPage = ({navigation}) => {
     });
   };
 
-  // handle Payment Accept (API CALL)
-
-  console.log('ResData item :', resDueData);
-
   // Rent Calculation
-
   const reduxData = useSelector(state => state.handleCalCulatePrice);
-  console.log('Total Price', reduxData);
-
   useEffect(() => {
     if (reduxData.uniqueId == booking_id) {
       setRent(reduxData.totalAmount);
@@ -417,11 +393,7 @@ const DueBookingPage = ({navigation}) => {
                         }}
                         style={{}}>
                         <Row
-                          data={
-                            resDueData?.status === 'Confirm'
-                              ? TableHead2
-                              : TableHead
-                          }
+                          data={TableHead}
                           style={styles.head}
                           textStyle={styles.text}
                         />
@@ -477,7 +449,6 @@ const DueBookingPage = ({navigation}) => {
               <View>
                 <TouchableOpacity
                   onPress={() => {
-                    setView0(false);
                     setView1(false);
                     setView2(!view2);
                   }}

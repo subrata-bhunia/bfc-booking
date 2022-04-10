@@ -22,19 +22,20 @@ import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   cancelBooking,
+  checkReturnItems,
   getBookingInfoById,
   pickupBooking,
+  ReturnBooking,
 } from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
 import {UIStore} from '../../UIStore';
+import {RadioButton} from 'react-native-simple-radio-button';
+import RadioForm from 'react-native-simple-radio-button';
 import {SkypeIndicator} from 'react-native-indicators';
-import {useDispatch, useSelector} from 'react-redux';
-import {calculateAction} from '../../redux/action';
 
-const PickupBookingPage = ({navigation}) => {
-  const dispatch = useDispatch();
+const ReturnBookingPage = ({navigation}) => {
   //--------Whatsapp Msg------------- //
   const sendWPsms = (phone, msg) => {
     var phone_n = phone.split(' ').join('').replace('+91', '');
@@ -48,24 +49,22 @@ const PickupBookingPage = ({navigation}) => {
         ToastAndroid.CENTER,
       ),
     );
-    // console.log("WP")
   };
   //--------------------- //
 
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(false);
   const [next2, setnext2] = useState(true);
-  const [modal, setmodal] = useState(false);
-  const [modalCancel, setmodalCancel] = useState(false);
   const [modalRes, setmodalRes] = useState([]);
   const route = useRoute();
   const booking_id = route?.params?.booking_id;
   const user_id = UIStore.useState(s => s.userId);
   //Activity Indicator
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   // setDate from backend
-  const [resPickupData, setResPickupData] = useState(null);
-  const TableHead = ['Item Name', 'Stock', 'Need'];
+  const [resReturnData, setResReturnData] = useState(null);
+  const TableHead = ['Item Name', 'Taken', 'Return'];
+  const TableHead3 = ['Item Name', 'Qty', 'Price'];
   const [tableData, setTableData] = useState([]);
   // ---------- Drop Down ---------- //
   const [_return, setreturn] = useState(false);
@@ -73,96 +72,36 @@ const PickupBookingPage = ({navigation}) => {
   const [nextLoader, setnextLoader] = useState(false);
 
   // ---------- Confirm -------------- //
-  const [canclebtn, setcancle] = useState([]);
-  const [openCancelModal, setopenCancelModal] = useState(false);
-  const [pickupbtn, setpickup] = useState(false);
-  const [pickupitem, setpickupitem] = useState([]);
-  const [pickupitemRes, setpickupitemRes] = useState([]);
+  const [returnpayment, setreturnpayment] = useState('');
+  const [returnItems, setreturnItems] = useState([]);
 
-  //Rent Variable
-  const [Discount, setDiscount] = useState(0);
-  const [rent, setRent] = useState(0);
-  const [payment, setPayment] = useState(0);
-  const [costOfItems, setCostOfItems] = useState({});
+  //--------------- Return ----------- //
+  const [returnbtn, setreturnbtn] = useState(false);
+  const [returnBtnDisable, setreturnBtnDisable] = useState(true);
 
-  // To get Booking Details (API CALL)
   useEffect(() => {
     handleGetBookingDetails();
   }, []);
 
   const handleGetBookingDetails = async () => {
     setShow(true);
-    getBookingInfoById({booking_id: booking_id}).then(res => {
-      const {data, status, rent} = res.data;
-      if (status === 'Success') {
-        const items = res.data.data.items;
-        setShow(false);
-        setResPickupData(data);
-        setRent(data.rent);
-        setDiscount(parseInt(data.discount));
-        setTableData(items);
-        console.log('rent of items :', rent);
-        setCostOfItems(rent);
-        var newObj = new Object();
-        for (var i = 0; i < items.length; i++) {
-          var key = items[i][2].item_id;
-          var value = items[i][2].taken;
-          if (value != 0) {
-            newObj[key] = value;
-          }
-        }
-        setpickupitem(newObj);
-      }
-      // console.log('getData', data);
-    });
-  };
-
-  // To Cancle Booking (API CALL)
-  const CancelClick = () => {
-    //  setShow(true);
-    setopenCancelModal(false);
-    cancelBooking({
-      booking_id: booking_id,
-      user_id: user_id,
-    })
+    getBookingInfoById({booking_id: booking_id})
       .then(res => {
-        if (res?.data?.status === 'Success') {
-          setcancle(res?.data?.data);
-          setmodalCancel(true);
-          setmodalRes(res?.data?.data);
+        const {data, status} = res.data;
+        if (status === 'Success') {
+          setShow(false);
+          setResReturnData(data);
+          setTableData(res.data.data.items);
+          const takenItems = new Object();
+          data?.items?.map((item, index) => {
+            takenItems[item[2].item_id] = item[2].taken;
+          });
+          setreturnItems(takenItems);
         }
       })
-      .catch(err => {
-        console.log('Err of Cancel', err);
-      });
+      .catch(err => console.log('Err of getBooking :', err));
   };
 
-  // handle Pickup (API CALL)
-  const PickupClick = () => {
-    setpickup(false);
-    // setShow(true);
-    pickupBooking({
-      user_id: user_id,
-      booking_id: booking_id,
-      items: pickupitem,
-      payment: payment,
-      discount: Discount,
-      rent: rent,
-    })
-      .then(res => {
-        if (res?.data?.status === 'Success') {
-          setpickupitemRes(res?.data?.data);
-          setmodal(true);
-          setmodalRes(res?.data?.data);
-          console.log('Pickup Click Res :', res?.data);
-        }
-      })
-      .catch(err => {
-        console.log('Err of PickupBooking', err);
-      });
-  };
-
-  //To reset Input value
   const resetInput = index => {
     var newArr = [];
     for (var i = 0; i < tableData.length; i++) {
@@ -177,7 +116,10 @@ const PickupBookingPage = ({navigation}) => {
         var tmpData = [
           tableData[i][0],
           tableData[i][1],
-          {item_id: tableData[i][2].item_id, taken: 0},
+          {
+            item_id: tableData[i][2].item_id,
+            taken: returnItems[tableData[i][2].item_id],
+          },
         ];
         newArr.push(tmpData);
       } else {
@@ -187,60 +129,113 @@ const PickupBookingPage = ({navigation}) => {
     setTableData(newArr);
   };
 
-  // Add Table Value changes with old data
   const AddItems = (key, value) => {
-    var oldPickupItems = pickupitem;
+    var oldReturnItems = returnItems;
     for (var i = 0; i < tableData.length; i++) {
       if (tableData[i][2].item_id == key) {
-        if (value != 0 || value != '') {
-          oldPickupItems[key] = value;
-        } else {
-          delete oldPickupItems[key];
-        }
+        oldReturnItems[key] = value;
       }
     }
-    setpickupitem(oldPickupItems);
+    setreturnItems(oldReturnItems);
   };
 
-  console.log('Pickupup item :', pickupitem);
-  console.log('ResData item :', resPickupData);
+  const [nextModal, setnextModal] = useState(false);
+  const [nextModalres, setnextModalres] = useState([]);
+  const NextButtonClick = () => {
+    setnextLoader(true);
+    checkReturnItems({
+      booking_id: booking_id,
+      items: returnItems,
+    })
+      .then(res => {
+        if (res?.data?.status == 'Missing') {
+          setnextModalres(res?.data?.data);
+          setnextLoader(false);
+          setnextModal(true);
+        } else {
+          setView1(!view1);
+          setnext2(true);
+          setView2(true);
+          setnextLoader(false);
+          setreturnBtnDisable(false);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  var radio_props = [
+    {label: 'Product Price', value: 0},
+    {label: 'Products', value: 1},
+  ];
+  const [chooseByUser, setchooseByuser] = useState('Product Price');
+  const [Discount, setDiscount] = useState(0);
+  const [ReturnModal, setReturnModal] = useState(false);
+  const [extra, setextra] = useState(0);
+  const ReturnClick = () => {
+    setreturnbtn(false);
+    setShow(true);
+    ReturnBooking({
+      user_id: user_id,
+      booking_id: booking_id,
+      settled_by: chooseByUser,
+      payment: returnpayment,
+      discount: Discount,
+      extra_charges: extra,
+    })
+      .then(res => {
+        setShow(false);
+        setReturnModal(true);
+        setmodalRes(res?.data?.data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
-  // Rent Calculation
-
-  const reduxData = useSelector(state => state.handleCalCulatePrice);
-  console.log('Total Price', reduxData);
-
-  useEffect(() => {
-    if (reduxData.uniqueId == booking_id) {
-      setRent(reduxData.totalAmount);
-    }
-  }, [reduxData]);
-
+  const TodayDate = `${new Date().getFullYear()}-${
+    new Date().getMonth() + 1 < 10
+      ? '0' + (new Date().getMonth() + 1)
+      : new Date().getMonth() + 1
+  }-${
+    new Date().getDate() < 10
+      ? '0' + new Date().getDate()
+      : new Date().getDate()
+  }`;
+  // console.log('TodayDate',TodayDate);
   return (
     <>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: Colors.secondary,
-          // paddingTop: StatusBar.currentHeight,
-          padding: 10,
-        }}>
-        <Header name="Pickup Booking Details" backBtn={true} />
-        {show ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
-          </View>
-        ) : (
-          <>
+      {resReturnData === null ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
+        </View>
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: Colors.secondary,
+            // paddingTop: StatusBar.currentHeight,
+            padding: 10,
+          }}>
+          <Header name="Return Booking Details" backBtn={true} />
+          {show ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
+            </View>
+          ) : (
             <ScrollView
               keyboardDismissMode="interactive"
-              showsVerticalScrollIndicator={false}
-              style={{flex: 1}}>
+              showsVerticalScrollIndicator={false}>
               {/* Personal */}
               <View>
                 <TouchableOpacity
@@ -259,7 +254,7 @@ const PickupBookingPage = ({navigation}) => {
                       padding: 10,
                       paddingHorizontal: wp(6),
                     }}>
-                    {/* personal first sec */}
+                    {/* 1st */}
                     <View
                       style={{
                         flexDirection: 'row',
@@ -276,11 +271,11 @@ const PickupBookingPage = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <Text style={styles.date}>
-                              {resPickupData?.pickup_date}
+                              {resReturnData?.pickup_date}
                             </Text>
                           </View>
                         </View>
-                        {resPickupData?.pickup_time === 'Morning' ? (
+                        {resReturnData?.pickup_time === 'Morning' ? (
                           <Icon
                             name="sunny-sharp"
                             type="ionicon"
@@ -301,11 +296,11 @@ const PickupBookingPage = ({navigation}) => {
                               alignItems: 'center',
                             }}>
                             <Text style={styles.date}>
-                              {resPickupData?.return_date}
+                              {resReturnData?.return_date}
                             </Text>
                           </View>
                         </View>
-                        {resPickupData?.return_time === 'Morning' ? (
+                        {resReturnData?.return_time === 'Morning' ? (
                           <Icon
                             name="sunny-sharp"
                             type="ionicon"
@@ -317,7 +312,7 @@ const PickupBookingPage = ({navigation}) => {
                         )}
                       </View>
                     </View>
-                    {/* Personal second sec */}
+                    {/* 2nd */}
                     <View
                       style={{
                         flexDirection: 'row',
@@ -334,7 +329,7 @@ const PickupBookingPage = ({navigation}) => {
                           <Text
                             style={
                               styles.textH2
-                            }>{`${resPickupData?.customer_name}`}</Text>
+                            }>{`${resReturnData?.customer_name}`}</Text>
                         </View>
                         <View
                           style={{
@@ -346,7 +341,7 @@ const PickupBookingPage = ({navigation}) => {
                           <Text
                             style={
                               styles.textH2
-                            }>{`${resPickupData?.customer_address}`}</Text>
+                            }>{`${resReturnData?.customer_address}`}</Text>
                         </View>
                         <View
                           style={{
@@ -369,7 +364,7 @@ const PickupBookingPage = ({navigation}) => {
                             />
                             <Text style={styles.textH2}>
                               {' '}
-                              {resPickupData?.gathering}
+                              {resReturnData?.gathering}
                             </Text>
                           </View>
                           <View
@@ -387,7 +382,7 @@ const PickupBookingPage = ({navigation}) => {
                               }}
                             />
                             <Text style={styles.textH2}>
-                              {resPickupData?.caterers}
+                              {resReturnData?.caterers}
                             </Text>
                           </View>
                         </View>
@@ -395,17 +390,17 @@ const PickupBookingPage = ({navigation}) => {
                       <View style={{width: '50%', alignSelf: 'flex-end'}}>
                         <Image
                           source={
-                            resPickupData?.status === 'Confirm'
+                            resReturnData?.status === 'Confirm'
                               ? statusIcon.booked
-                              : resPickupData?.status === 'Pickup'
+                              : resReturnData?.status === 'Pickup'
                               ? statusIcon.pickup
-                              : resPickupData?.status === 'Due'
+                              : resReturnData?.status === 'Due'
                               ? statusIcon.due
-                              : resPickupData?.status === 'Paid'
+                              : resReturnData?.status === 'Paid'
                               ? statusIcon.paid
-                              : resPickupData?.status === 'Missing'
+                              : resReturnData?.status === 'Missing'
                               ? statusIcon.missing
-                              : resPickupData?.status === 'Cancel'
+                              : resReturnData?.status === 'Cancel'
                               ? statusIcon.cancel
                               : statusIcon.booked
                           }
@@ -430,7 +425,6 @@ const PickupBookingPage = ({navigation}) => {
               </View>
 
               {/* 2nd  Items*/}
-
               <View>
                 <TouchableOpacity
                   onPress={() => {
@@ -501,21 +495,20 @@ const PickupBookingPage = ({navigation}) => {
                           style={styles.head}
                           textStyle={styles.text}
                         />
+
                         {tableData.map((rowData, index) => (
                           <TableWrapper key={index} style={styles.row}>
                             {rowData.map((cellData, cellIndex) => (
                               <Cell
                                 key={cellIndex}
                                 data={
-                                  cellIndex === 2 ? (
+                                  cellIndex == 2 ? (
                                     <Input
                                       placeholder={`${cellData.taken}`}
-                                      clearTextOnFocus
-                                      onFocus={e => e.target}
                                       placeholderTextColor={Colors.text}
                                       onPressIn={() => resetInput(index)}
                                       defaultValue={
-                                        pickupitem[cellData?.item_id]
+                                        returnItems[cellData?.item_id]
                                       }
                                       textAlign="center"
                                       onChangeText={txt =>
@@ -536,12 +529,7 @@ const PickupBookingPage = ({navigation}) => {
                     </View>
                     <Button
                       onPress={() => {
-                        setView1(!view1);
-                        setnext2(true);
-                        setView2(true);
-                        dispatch(
-                          calculateAction(booking_id, pickupitem, costOfItems),
-                        );
+                        NextButtonClick();
                       }}
                       isLoader={nextLoader}
                       btnStyle={{
@@ -564,14 +552,12 @@ const PickupBookingPage = ({navigation}) => {
                         color: '#fff',
                         fontSize: wp(4),
                       }}
-                      btnName="UPDATE ITEMS"
+                      btnName="NEXT"
                     />
                   </View>
                 ) : null}
               </View>
-
               {/* 3rd */}
-
               <View>
                 <TouchableOpacity
                   onPress={() => {
@@ -596,7 +582,6 @@ const PickupBookingPage = ({navigation}) => {
                     elevation: 10,
                     width: wp(93),
                     alignSelf: 'center',
-                    // marginBottom: hp(2),
                   }}>
                   <View style={{width: wp(70)}}>
                     <Text style={styles.h1}>Payment Details</Text>
@@ -645,7 +630,7 @@ const PickupBookingPage = ({navigation}) => {
                         Rent :
                       </Text>
                       <Input
-                        defaultValue={`${rent}`}
+                        defaultValue={`${resReturnData.rent}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -654,43 +639,61 @@ const PickupBookingPage = ({navigation}) => {
                         disabled
                       />
                     </View>
-
-                    {/* Caterers Charges */}
-                    {resPickupData?.caterer_charge ? (
-                      <View
+                    {/* Caterer Charge */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: -wp(4),
+                      }}>
+                      <Text
                         style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginTop: -wp(4),
-                          // display: caterersvalue === 'Yes' ? 'flex' : 'none',
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(4),
+                          width: wp(40),
+                          textAlign: 'right',
                         }}>
-                        <Text
-                          style={{
-                            fontFamily: Fonts.semibold,
-                            fontSize: wp(4),
-                            width: wp(40),
-                            textAlign: 'right',
-                          }}>
-                          Caterer Charge :
-                        </Text>
-                        <Input
-                          //   placeholder={'0'}
-                          keyboardType="number-pad"
-                          defaultValue={`${resPickupData.caterer_charge}`}
-                          containerStyle={{width: wp(40), height: hp(10)}}
-                          leftIcon={
-                            <Icon name="inr" type="fontisto" size={15} />
-                          }
-                          inputStyle={{
-                            fontSize: wp(4),
-                          }}
-                          disabled
-                        />
-                        {console.log(resPickupData?.caterer_charge)}
-                      </View>
-                    ) : null}
-
+                        Caterer Charge :
+                      </Text>
+                      <Input
+                        defaultValue={`${resReturnData.caterer_charge}`}
+                        containerStyle={{width: wp(40), height: hp(10)}}
+                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                        inputStyle={{
+                          fontSize: wp(4),
+                        }}
+                        disabled
+                      />
+                    </View>
+                    {/* Extra */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: -wp(4),
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(4),
+                          width: wp(40),
+                          textAlign: 'right',
+                        }}>
+                        Extra Charges :
+                      </Text>
+                      <Input
+                        disabled
+                        value={`${extra}`}
+                        keyboardType="number-pad"
+                        containerStyle={{width: wp(40), height: hp(10)}}
+                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                        inputStyle={{
+                          fontSize: wp(4),
+                        }}
+                      />
+                    </View>
                     <View
                       style={{
                         borderBottomWidth: 1,
@@ -698,7 +701,6 @@ const PickupBookingPage = ({navigation}) => {
                         opacity: 0.1,
                       }}
                     />
-
                     {/* Total */}
                     <View
                       style={{
@@ -718,8 +720,7 @@ const PickupBookingPage = ({navigation}) => {
                       <Input
                         disabled
                         defaultValue={`${
-                          parseInt(rent) +
-                          parseInt(resPickupData?.caterer_charge)
+                          parseInt(resReturnData.total_amount) + parseInt(extra)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -728,7 +729,6 @@ const PickupBookingPage = ({navigation}) => {
                         }}
                       />
                     </View>
-
                     {/* Discount */}
                     <View
                       style={{
@@ -747,7 +747,7 @@ const PickupBookingPage = ({navigation}) => {
                         Discount :
                       </Text>
                       <Input
-                        defaultValue={`${Discount}`}
+                        defaultValue={`${parseInt(resReturnData?.discount)}`}
                         value={Discount}
                         onChangeText={txt => {
                           setDiscount(txt);
@@ -761,7 +761,6 @@ const PickupBookingPage = ({navigation}) => {
                         placeholder={'0'}
                       />
                     </View>
-
                     {/* Advanced */}
                     <View
                       style={{
@@ -780,7 +779,7 @@ const PickupBookingPage = ({navigation}) => {
                         Advanced :
                       </Text>
                       <Input
-                        defaultValue={`${resPickupData.advanced}`}
+                        defaultValue={`${resReturnData.advanced}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -789,7 +788,6 @@ const PickupBookingPage = ({navigation}) => {
                         disabled
                       />
                     </View>
-
                     {/* Pending Amount */}
                     <View
                       style={{
@@ -809,12 +807,7 @@ const PickupBookingPage = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={`${
-                          parseInt(rent) +
-                          parseInt(resPickupData?.caterer_charge) -
-                          parseInt(resPickupData.advanced) -
-                          (parseInt(Discount) ? parseInt(Discount) : 0)
-                        }`}
+                        defaultValue={`${resReturnData.pending_payment}`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                         inputStyle={{
@@ -849,102 +842,94 @@ const PickupBookingPage = ({navigation}) => {
                           fontSize: wp(4),
                         }}
                         placeholder={'0'}
-                        value={payment}
+                        value={returnpayment}
                         onChangeText={txt => {
-                          setPayment(txt);
+                          setreturnpayment(txt);
                         }}
                       />
                     </View>
                   </View>
                 ) : null}
               </View>
+
               <View style={{height: StatusBar.currentHeight + hp(9) + hp(4)}} />
 
               {/* </KeyboardAvoidingView> */}
             </ScrollView>
-            {/* Two Button */}
+          )}
+          {/* Bottons */}
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              flexDirection: 'row',
+              margin: wp(4),
+            }}>
+            <Button
+              btnStyle={{
+                height: hp(7),
+                width: wp(45),
+                backgroundColor: '#fff',
+                shadowColor: Colors.primary,
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 1,
+                shadowRadius: 3.5,
+                elevation: 10,
+                marginRight: wp(2),
+                borderRadius: wp(66),
+              }}
+              // disabled={true}
+              textStyle={{
+                fontFamily: Fonts.semibold,
+                color: '#000',
+                fontSize: 16,
+              }}
+              onPress={() => {
+                navigation.navigate('modifyBooking', {booking_id});
+              }}
+              btnName="MODIFY"
+            />
+            <Button
+              btnStyle={{
+                height: hp(7),
+                width: wp(45),
+                backgroundColor: '#2196F3',
+                shadowColor: Colors.primary,
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 1,
+                shadowRadius: 3.5,
+                elevation: 10,
+                borderRadius: wp(66),
+              }}
+              onPress={() => {
+                setreturnbtn(true);
+              }}
+              textStyle={{
+                fontFamily: Fonts.semibold,
+                color: '#fff',
+                fontSize: 16,
+              }}
+              disabled={returnBtnDisable || view1 ? true : false}
+              btnName="RETURN"
+            />
+          </View>
+        </View>
+      )}
 
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                flexDirection: 'row',
-                margin: wp(4),
-              }}>
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(45),
-                  backgroundColor: '#fff',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  marginRight: wp(2),
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                  fontSize: 16,
-                }}
-                disabled={view1 ? true : false}
-                btnName="CANCEL"
-                onPress={() => setopenCancelModal(true)}
-              />
-              <Button
-                btnStyle={{
-                  height: hp(7),
-                  width: wp(45),
-                  backgroundColor: '#2196F3',
-                  shadowColor: Colors.primary,
-                  shadowOffset: {
-                    width: 0,
-                    height: 10,
-                  },
-                  shadowOpacity: 1,
-                  shadowRadius: 3.5,
-                  elevation: 10,
-                  borderRadius: wp(66),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#fff',
-                  fontSize: 16,
-                }}
-                disabled={
-                  resPickupData?.pickup_left_day > 0
-                    ? true
-                    : view1
-                    ? true
-                    : false
-                }
-                btnName={
-                  resPickupData?.pickup_left_day > 0
-                    ? `${resPickupData?.pickup_left_day} DAYS LEFT`
-                    : 'PICKUP'
-                }
-                onPress={() => PickupClick()}
-              />
-              {console.log('----', resPickupData?.pickup_left_day)}
-            </View>
-          </>
-        )}
-      </View>
-
-      {/* Cancel Warn */}
       <WarningModal
-        h1="Are you want to cancel this booking?"
-        open={openCancelModal}
-        setopen={setopenCancelModal}
+        h1="Are you sure to confirm return this booking?"
+        open={returnbtn}
+        setopen={setreturnbtn}
         yes={{
           name: 'Yes',
           onPress: () => {
-            CancelClick();
+            ReturnClick();
           },
         }}
         no={{
@@ -952,15 +937,15 @@ const PickupBookingPage = ({navigation}) => {
         }}
       />
 
-      {/* Pickup Modal */}
+      {/* Return Modal */}
       <Model
-        isVisible={modal}
+        isVisible={ReturnModal}
         statusBarTranslucent
         // onBackdropPress={() => setmodal(!modal)}
         backdropOpacity={0.6}
         focusable
         onBackButtonPress={() => {
-          setmodal(false);
+          setReturnModal(false);
           // navigation.navigate('Home');
         }}
         avoidKeyboard>
@@ -978,7 +963,7 @@ const PickupBookingPage = ({navigation}) => {
               textAlign: 'center',
               letterSpacing: 1,
             }}>
-            Pickup Successful
+            Return Successful
           </Text>
           <View style={{alignItems: 'center'}}>
             <AnimatedLottieView
@@ -990,14 +975,6 @@ const PickupBookingPage = ({navigation}) => {
               }}
               source={require('./complete.json')}
             />
-            {/* <Image
-              source={statusIcon.cancel}
-              style={{
-                height: hp(25),
-                width: wp(25),
-                resizeMode: 'center',
-              }}
-            /> */}
           </View>
           <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
             <View
@@ -1024,8 +1001,8 @@ const PickupBookingPage = ({navigation}) => {
                 justifyContent: 'space-between',
                 marginVertical: hp(2),
               }}>
-              <Text style={styles.h2}>Advanced</Text>
-              <Text style={styles.h3}>{modalRes?.advanced} /-</Text>
+              <Text style={styles.h2}>Payment</Text>
+              <Text style={styles.h3}>{modalRes?.payment} /-</Text>
             </View>
             <View
               style={{
@@ -1065,8 +1042,7 @@ const PickupBookingPage = ({navigation}) => {
             ) : null}
             <TouchableOpacity
               onPress={() => {
-                setmodal(false);
-                navigation.navigate('Home');
+                setReturnModal(false);
               }}>
               <View
                 style={{
@@ -1091,26 +1067,17 @@ const PickupBookingPage = ({navigation}) => {
           </View>
         </View>
       </Model>
-
-      {/* Cancel Modal */}
-      <Model
-        isVisible={modalCancel}
-        statusBarTranslucent
-        // onBackdropPress={() => setmodal(!modal)}
-        backdropOpacity={0.6}
-        focusable
-        onBackButtonPress={() => {
-          setmodalCancel(false);
-          // navigation.navigate('Home');
-        }}
-        avoidKeyboard>
+      {/* Retrun Missing Modal */}
+      <Model isVisible={nextModal}>
         <View
           style={{
-            backgroundColor: 'white',
-            padding: 10,
+            // height: hp(80),
+            backgroundColor: Colors.white,
             borderRadius: 10,
+            padding: 10,
             paddingTop: hp(3.5),
           }}>
+          {/* msg */}
           <Text
             style={{
               fontFamily: Fonts.bold,
@@ -1118,135 +1085,110 @@ const PickupBookingPage = ({navigation}) => {
               textAlign: 'center',
               letterSpacing: 1,
             }}>
-            Cancel Successful
+            Missing Item Details
           </Text>
-          <View style={{alignItems: 'center'}}>
-            <AnimatedLottieView
-              autoPlay
-              loop={false}
-              style={{
-                height: hp(20),
-                width: wp(10),
+          {/* Missing Table */}
+          <View
+            style={{
+              marginVertical: 20,
+            }}>
+            <Table
+              borderStyle={{
+                borderColor: Colors.secondary,
+                borderWidth: 2,
               }}
-              source={require('./complete.json')}
-            />
-            {/* <Image
-              source={statusIcon.cancel}
-              style={{
-                height: hp(25),
-                width: wp(25),
-                resizeMode: 'center',
-              }}
-            /> */}
-          </View>
-          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Date</Text>
-              <Text style={styles.h3}>{modalRes?.date}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Booking Id</Text>
-              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Advanced</Text>
-              <Text style={styles.h3}>{modalRes?.advanced} /-</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginVertical: hp(2),
-              }}>
-              <Text style={styles.h2}>Total Amount</Text>
-              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
-            </View>
-          </View>
-          {/*  */}
-          <View>
-            {/* <Text
-              style={[
-                styles.h1,
-                {
-                  textAlign: 'center',
-                  marginVertical: hp(7),
-                  fontSize: 30,
-                },
-              ]}>
-              {modalRes?.pending_amount} /-
-            </Text> */}
-            {modalRes?.have_whatsapp == 1 ? (
-              <Button
-                onPress={() => {
-                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
-                }}
-                btnStyle={{
-                  height: 50,
-                  width: wp(60),
-                  borderRadius: 10,
-                  marginVertical: hp(4),
-                  backgroundColor: Colors.secondary,
-                  // marginVertical: hp(2),
-                }}
-                textStyle={{
-                  fontFamily: Fonts.semibold,
-                  color: '#000',
-                }}
-                btnName="Share on Whatsapp"
-                icon={{
-                  name: 'logo-whatsapp',
-                  type: 'ionicon',
-                }}
+              style={{}}>
+              <Row
+                data={TableHead3}
+                style={styles.head}
+                textStyle={styles.text}
               />
-            ) : null}
-            <TouchableOpacity
-              onPress={() => {
-                setmodalCancel(false);
-                navigation.navigate('Home');
+              {nextModalres?.missing_items?.map((rowData, index) => (
+                <TableWrapper key={index} style={styles.row}>
+                  {rowData.map((cellData, cellIndex) => (
+                    <Cell
+                      key={cellIndex}
+                      data={cellData}
+                      textStyle={[styles.text, {padding: 10}]}
+                    />
+                  ))}
+                </TableWrapper>
+              ))}
+            </Table>
+            <Table
+              borderStyle={{
+                borderColor: Colors.disable,
+                borderWidth: 2,
+                borderTopColor: '#000',
+              }}
+              style={{
+                marginVertical: 10,
               }}>
-              <View
-                style={{
-                  height: wp(15),
-                  width: wp(15),
-                  borderRadius: wp(7.5),
-                  borderColor: Colors.red,
-                  borderWidth: 2,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                  margin: 20,
-                }}>
-                <Icon
-                  name="cross"
-                  type="entypo"
-                  color={Colors.red}
-                  size={wp(10)}
-                />
-              </View>
-            </TouchableOpacity>
+              <Row
+                data={['Total', nextModalres?.missing_charge]}
+                style={{height: 30}}
+                textStyle={styles.text}
+              />
+            </Table>
           </View>
+          {/* Choose  */}
+          <View>
+            <Text style={[styles.h3, {marginBottom: 20}]}>
+              What You choose?
+            </Text>
+            <RadioForm
+              accessibilityLabel="Test"
+              animation={true}
+              radio_props={radio_props}
+              initial={0}
+              buttonColor={Colors.disable}
+              onPress={val => {
+                val === 0
+                  ? setchooseByuser('Product Price')
+                  : setchooseByuser('Products');
+              }}
+            />
+          </View>
+          {/* Button */}
+          <Button
+            btnName="Continue to Return"
+            onPress={() => {
+              setnextModal(false);
+              setView1(false);
+              setView2(true);
+              setnext2(true);
+              setreturnBtnDisable(false);
+              setextra(nextModalres?.missing_charge);
+            }}
+            textStyle={{
+              fontFamily: Fonts.semibold,
+              color: '#fff',
+              fontSize: 16,
+            }}
+            btnStyle={{
+              height: hp(6),
+              width: wp(50),
+              backgroundColor: '#2196F3',
+              shadowColor: Colors.primary,
+              shadowOffset: {
+                width: 0,
+                height: 10,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 3.5,
+              elevation: 10,
+              borderRadius: wp(66),
+              marginTop: 10,
+              marginBottom: 15,
+            }}
+          />
         </View>
       </Model>
     </>
   );
 };
 
-export default PickupBookingPage;
+export default ReturnBookingPage;
 
 const styles = StyleSheet.create({
   h1: {
