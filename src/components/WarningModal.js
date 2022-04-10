@@ -7,6 +7,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
+import {SkypeIndicator} from 'react-native-indicators';
 
 export default function WarningModal({h1, yes, no, open, setopen}) {
   var Heading = h1 || '';
@@ -14,6 +15,7 @@ export default function WarningModal({h1, yes, no, open, setopen}) {
   var No = no?.name || 'No';
   var YesPress = yes?.onPress || console.log('Yes');
   var NoPress = () => no?.onPress || setopen(!open);
+  const [show, setShow] = useState(false);
 
   return (
     <View>
@@ -25,46 +27,67 @@ export default function WarningModal({h1, yes, no, open, setopen}) {
         animationOut="slideOutUp"
         animationInTiming={600}
         animationOutTiming={600}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
         backdropOpacity={0.6}>
-        <View style={styles.Model}>
-          <Text style={styles.text}>{Heading}</Text>
-          <View style={styles.Buttons}>
-            <View>
-              <Button
-                btnName={Yes}
-                onPress={YesPress}
-                textStyle={styles.text1}
-                btnStyle={{
-                  height: 40,
-                  width: wp(25),
-                  padding: 5,
-                  backgroundColor: Colors.white,
-                  borderRadius: 5,
-                  borderColor: Colors.botton,
-                  borderBottomWidth: 1,
-                  borderRightWidth: 1,
-                }}
-              />
-            </View>
-            <View>
-              <Button
-                btnName={No}
-                onPress={NoPress}
-                textStyle={styles.text1}
-                btnStyle={{
-                  height: 40,
-                  width: wp(25),
-                  padding: 5,
-                  backgroundColor: Colors.white,
-                  borderRadius: 5,
-                  borderColor: Colors.error,
-                  borderBottomWidth: 1,
-                  borderRightWidth: 1,
-                }}
-              />
+        {show ? (
+          <SkypeIndicator
+            color={Colors.botton}
+            count={5}
+            size={wp(14)}
+            style={{
+              paddingVertical: hp(3),
+            }}
+          />
+        ) : (
+          <View style={styles.Model}>
+            <Text style={styles.text}>{Heading}</Text>
+            <View style={styles.Buttons}>
+              <View>
+                <Button
+                  btnName={Yes}
+                  onPress={() => {
+                    YesPress(), setShow(true);
+                  }}
+                  textStyle={styles.text1}
+                  btnStyle={{
+                    height: 40,
+                    width: wp(25),
+                    padding: 5,
+                    backgroundColor: Colors.white,
+                    borderRadius: 5,
+                    borderColor: Colors.botton,
+                    borderBottomWidth: 1,
+                    borderRightWidth: 1,
+                  }}
+                />
+              </View>
+              <View>
+                <Button
+                  btnName={No}
+                  onPress={NoPress}
+                  textStyle={styles.text1}
+                  btnStyle={{
+                    height: 40,
+                    width: wp(25),
+                    padding: 5,
+                    backgroundColor: Colors.white,
+                    borderRadius: 5,
+                    borderColor: Colors.error,
+                    borderBottomWidth: 1,
+                    borderRightWidth: 1,
+                  }}
+                />
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </Model>
     </View>
   );

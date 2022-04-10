@@ -19,13 +19,20 @@ import {
 import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import Model from 'react-native-modal';
 import LinearGradient from 'react-native-linear-gradient';
-import {getBookingInfoById, checkReturnItems} from '../../api/Bookings';
+import {
+  getBookingInfoById,
+  checkReturnItems,
+  MissingUpdate,
+} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import {UIStore} from '../../UIStore';
 import {SkypeIndicator} from 'react-native-indicators';
 import {useDispatch, useSelector} from 'react-redux';
 import {calculateAction} from '../../redux/action';
+import {CheckBox} from 'react-native-elements';
+import WarningModal from '../../components/WarningModal';
+import AnimatedLottieView from 'lottie-react-native';
 
 const MissingBookingPage = ({navigation}) => {
   const dispatch = useDispatch();
@@ -52,6 +59,8 @@ const MissingBookingPage = ({navigation}) => {
   const user_id = UIStore.useState(s => s.userId);
   //Activity Indicator
   const [show, setShow] = useState(true);
+  const [check, setCheck] = useState(false);
+
   // setDate from backend
   const [resMissingBookingData, setResMissingBookingData] = useState(null);
   const TableHead = ['Item Name', 'Taken', 'Given', 'Return'];
@@ -69,6 +78,10 @@ const MissingBookingPage = ({navigation}) => {
   const [extra, setextra] = useState(0);
   const [totalAmount, settotalAmount] = useState(0);
   const [pendingAmount, setpendingAmount] = useState(0);
+  const [openMissingWarnModal, setopenMissingWarnModal] = useState(false);
+  const [modal, setmodal] = useState(false);
+  const [modalData, setmodalData] = useState([]);
+
   // To get Booking Details (API CALL)
   useEffect(() => {
     handleGetBookingDetails();
@@ -161,7 +174,29 @@ const MissingBookingPage = ({navigation}) => {
       });
   };
 
+  // missing-update API Call
+  const handleMissingUpdate = async () => {
+    MissingUpdate({
+      user_id,
+      booking_id,
+      payment,
+      items: returnItems,
+      is_full_payment: check,
+    })
+      .then(res => {
+        const {data, status} = res.data;
+        if (status === 'Success') {
+          setmodalData(data);
+          setmodal(true);
+        }
+        console.log('MissingUpdate :', res?.data);
+      })
+      .catch(err => console.log('err of MissingUpdate :', err));
+  };
+  console.log('returnItems :', returnItems);
+
   const calculateBill = extraCharge => {
+    setextra(extraCharge);
     let ttlAmt = parseInt(totalAmount) + parseInt(extraCharge);
     settotalAmount(ttlAmt);
     setpendingAmount(
@@ -173,6 +208,7 @@ const MissingBookingPage = ({navigation}) => {
           : 0),
     );
   };
+
   return (
     <>
       <View
@@ -504,6 +540,7 @@ const MissingBookingPage = ({navigation}) => {
                         setView1(!view1);
                         setView2(true);
                         checkMissingItems();
+                        calculateBill(resMissingBookingData?.extra_charges);
                       }}
                       btnStyle={{
                         height: hp(6),
@@ -831,6 +868,30 @@ const MissingBookingPage = ({navigation}) => {
                         }}
                       />
                     </View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginVertical: hp(3),
+                        // alignSelf: 'center',
+                      }}>
+                      <CheckBox
+                        checked={check}
+                        onPress={() => setCheck(!check)}
+                        containerStyle={{
+                          margin: 0,
+                          padding: 0,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(3.5),
+                          color: Colors.red,
+                        }}>
+                        Mark as payment full
+                      </Text>
+                    </View>
                   </View>
                 ) : null}
               </View>
@@ -839,22 +900,47 @@ const MissingBookingPage = ({navigation}) => {
               {/* </KeyboardAvoidingView> */}
             </ScrollView>
             {/* Two Button */}
-            {paymentMode ? (
-              <View
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  flexDirection: 'row',
-                  margin: wp(4),
-                }}>
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                flexDirection: 'row',
+                margin: wp(4),
+              }}>
+              <Button
+                btnStyle={{
+                  height: hp(7),
+                  width: wp(35),
+                  backgroundColor: '#fff',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 10,
+                  marginRight: wp(2),
+                  borderRadius: wp(66),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                  fontSize: 16,
+                }}
+                btnName="REMIND"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+              {paymentMode ? (
                 <Button
-                  // onPress={
-
-                  // }
+                  onPress={() => setopenMissingWarnModal()}
                   btnStyle={{
                     height: hp(7),
-                    width: wp(35),
-                    backgroundColor: '#fff',
+                    width: wp(55),
+                    backgroundColor: '#2196F3',
                     shadowColor: Colors.primary,
                     shadowOffset: {
                       width: 0,
@@ -863,7 +949,6 @@ const MissingBookingPage = ({navigation}) => {
                     shadowOpacity: 1,
                     shadowRadius: 3.5,
                     elevation: 10,
-                    marginRight: wp(2),
                     borderRadius: wp(66),
                   }}
                   textStyle={{
@@ -871,8 +956,9 @@ const MissingBookingPage = ({navigation}) => {
                     color: '#000',
                     fontSize: 16,
                   }}
-                  btnName="CANCEL"
+                  btnName="PAYMENT RECIVED"
                 />
+              ) : (
                 <Button
                   btnStyle={{
                     height: hp(7),
@@ -889,65 +975,7 @@ const MissingBookingPage = ({navigation}) => {
                     borderRadius: wp(66),
                   }}
                   onPress={() => {
-                    //   setreturnbtn(true);
-                  }}
-                  textStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#fff',
-                    fontSize: 16,
-                  }}
-                  btnName="PAYMENT RECIVED"
-                />
-              </View>
-            ) : (
-              <View
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  flexDirection: 'row',
-                  margin: wp(4),
-                }}>
-                <Button
-                  onPress={() => checkMissingItems()}
-                  btnStyle={{
-                    height: hp(7),
-                    width: wp(50),
-                    backgroundColor: '#fff',
-                    shadowColor: Colors.primary,
-                    shadowOffset: {
-                      width: 0,
-                      height: 10,
-                    },
-                    shadowOpacity: 1,
-                    shadowRadius: 3.5,
-                    elevation: 10,
-                    marginRight: wp(2),
-                    borderRadius: wp(66),
-                  }}
-                  textStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#000',
-                    fontSize: 16,
-                  }}
-                  btnName="PAYMENT RECIVED"
-                />
-                <Button
-                  btnStyle={{
-                    height: hp(7),
-                    width: wp(40),
-                    backgroundColor: '#2196F3',
-                    shadowColor: Colors.primary,
-                    shadowOffset: {
-                      width: 0,
-                      height: 10,
-                    },
-                    shadowOpacity: 1,
-                    shadowRadius: 3.5,
-                    elevation: 10,
-                    borderRadius: wp(66),
-                  }}
-                  onPress={() => {
-                    //   setreturnbtn(true);
+                    setopenMissingWarnModal(true);
                   }}
                   textStyle={{
                     fontFamily: Fonts.semibold,
@@ -956,11 +984,26 @@ const MissingBookingPage = ({navigation}) => {
                   }}
                   btnName="ITEM RECIVED"
                 />
-              </View>
-            )}
+              )}
+            </View>
           </>
         )}
       </View>
+
+      <WarningModal
+        h1="Are you want to Due this booking?"
+        open={openMissingWarnModal}
+        setopen={setopenMissingWarnModal}
+        yes={{
+          name: 'Yes',
+          onPress: () => {
+            handleMissingUpdate();
+          },
+        }}
+        no={{
+          name: 'No',
+        }}
+      />
 
       {/* Retrun Missing Modal */}
       <Model isVisible={nextModal}>
@@ -1043,10 +1086,6 @@ const MissingBookingPage = ({navigation}) => {
               setView1(false);
               setView2(true);
               setpaymentMode(true);
-              setextra(
-                resMissingBookingData?.extra_charges +
-                  nextModalres?.missing_charge,
-              );
               calculateBill(
                 resMissingBookingData?.extra_charges +
                   nextModalres?.missing_charge,
@@ -1074,6 +1113,211 @@ const MissingBookingPage = ({navigation}) => {
               marginBottom: 15,
             }}
           />
+        </View>
+      </Model>
+
+      {/* Missing Modal */}
+      <Model
+        isVisible={modal}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setmodal(false);
+          navigation.goBack();
+        }}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
+        avoidKeyboard>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+            paddingTop: hp(3.5),
+          }}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 1,
+            }}>
+            Payment Successful
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+            {/* <Image
+              source={statusIcon.cancel}
+              style={{
+                height: hp(25),
+                width: wp(25),
+                resizeMode: 'center',
+              }}
+            /> */}
+          </View>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>{modalData?.date}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={[styles.h3]}>{modalData?.booking_id}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.total_amount} /-
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Discount</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.discount} /-
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Total Payment</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.payment} /-
+              </Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            {/* <Text
+              style={[
+                styles.h1,
+                {textAlign: 'center', marginVertical: hp(5), fontSize: 30},
+              ]}>
+              {parseInt(modalData?.total_amount) -
+                parseInt(modalData?.advanced)}{' '}
+              /-
+            </Text> */}
+            {modalData?.have_whatsapp == 1 ? (
+              <Button
+                onPress={() => {
+                  sendWPsms(modalData?.customer_phone, modalData?.wa_message);
+                }}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  marginVertical: hp(4),
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Get Bill And Share"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
+            <TouchableOpacity
+              onPress={event => {
+                setmodal(false);
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                });
+                event.preventDefault();
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  borderColor: Colors.red,
+                  borderWidth: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.red}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </Model>
     </>
