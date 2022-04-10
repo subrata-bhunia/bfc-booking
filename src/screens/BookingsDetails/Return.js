@@ -1,5 +1,6 @@
 import {
   Linking,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -149,6 +150,7 @@ const ReturnBookingPage = ({navigation}) => {
     })
       .then(res => {
         if (res?.data?.status == 'Missing') {
+          // console.log(res?.data);
           setnextModalres(res?.data?.data);
           setnextLoader(false);
           setnextModal(true);
@@ -164,10 +166,14 @@ const ReturnBookingPage = ({navigation}) => {
         console.log(err);
       });
   };
+  console.log(nextModalres);
   var radio_props = [
     {label: 'Product Price', value: 0},
     {label: 'Products', value: 1},
   ];
+  const [ProductPrice, setProductPrice] = useState(true);
+  const [Product, setProduct] = useState(false);
+
   const [chooseByUser, setchooseByuser] = useState('Product Price');
   const [Discount, setDiscount] = useState(0);
   const [ReturnModal, setReturnModal] = useState(false);
@@ -178,7 +184,7 @@ const ReturnBookingPage = ({navigation}) => {
     ReturnBooking({
       user_id: user_id,
       booking_id: booking_id,
-      settled_by: chooseByUser,
+      settled_by: Product ? 'Products' : 'Product Price',
       payment: returnpayment,
       discount: Discount,
       extra_charges: extra,
@@ -1068,87 +1074,175 @@ const ReturnBookingPage = ({navigation}) => {
         </View>
       </Model>
       {/* Retrun Missing Modal */}
-      <Model isVisible={nextModal}>
+      <Model isVisible={nextModal} backdropOpacity={0.4} statusBarTranslucent>
         <View
           style={{
             // height: hp(80),
             backgroundColor: Colors.white,
             borderRadius: 10,
             padding: 10,
-            paddingTop: hp(3.5),
+            paddingTop: hp(2),
+            width: '110%',
+            alignSelf: 'center',
+            position: 'absolute',
+            bottom: -hp(3),
+            marginTop: 100,
           }}>
           {/* msg */}
           <Text
             style={{
-              fontFamily: Fonts.bold,
-              fontSize: 22,
-              textAlign: 'center',
-              letterSpacing: 1,
+              fontFamily: Fonts.semibold,
+              fontSize: 18,
             }}>
-            Missing Item Details
+            What customer choose
           </Text>
-          {/* Missing Table */}
-          <View
+          {/* Price */}
+          <Pressable
+            onPress={() => {
+              setProductPrice(true);
+              setProduct(false);
+            }}
             style={{
-              marginVertical: 20,
+              // height: hp(20),
+              borderWidth: 3,
+              borderColor: ProductPrice ? Colors.primary : Colors.secondary,
+              padding: 10,
+              borderRadius: 10,
+              paddingVertical: 20,
+              marginVertical: 10,
             }}>
-            <Table
-              borderStyle={{
-                borderColor: Colors.secondary,
-                borderWidth: 2,
-              }}
-              style={{}}>
-              <Row
-                data={TableHead3}
-                style={styles.head}
-                textStyle={styles.text}
-              />
-              {nextModalres?.missing_items?.map((rowData, index) => (
-                <TableWrapper key={index} style={styles.row}>
-                  {rowData.map((cellData, cellIndex) => (
-                    <Cell
-                      key={cellIndex}
-                      data={cellData}
-                      textStyle={[styles.text, {padding: 10}]}
-                    />
-                  ))}
-                </TableWrapper>
-              ))}
-            </Table>
-            <Table
-              borderStyle={{
-                borderColor: Colors.disable,
-                borderWidth: 2,
-                borderTopColor: '#000',
-              }}
+            <Text style={styles.H1}>Product Price</Text>
+            {/* Price */}
+            <View
               style={{
-                marginVertical: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 10,
               }}>
-              <Row
-                data={['Total', nextModalres?.missing_charge]}
-                style={{height: 30}}
-                textStyle={styles.text}
-              />
-            </Table>
-          </View>
-          {/* Choose  */}
-          <View>
-            <Text style={[styles.h3, {marginBottom: 20}]}>
-              What You choose?
-            </Text>
-            <RadioForm
-              accessibilityLabel="Test"
-              animation={true}
-              radio_props={radio_props}
-              initial={0}
-              buttonColor={Colors.disable}
-              onPress={val => {
-                val === 0
-                  ? setchooseByuser('Product Price')
-                  : setchooseByuser('Products');
+              <Icon name="inr" type="fontisto" />
+              <Text
+                style={{
+                  fontSize: 20,
+                  marginHorizontal: 5,
+                  fontFamily: Fonts.bold,
+                }}>
+                {nextModalres?.missing_charge} /-
+              </Text>
+            </View>
+            <View
+              style={{
+                padding: 7,
+                backgroundColor: '#eefbf5',
+                marginTop: 10,
+                width: wp(60),
+                borderRadius: 5,
+              }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginHorizontal: 5,
+                  fontFamily: Fonts.bold,
+                  color: '#01a955',
+                }}>
+                Payment within 10 days.
+              </Text>
+            </View>
+            <View style={{marginTop: 10}}>
+              <Text
+                style={{
+                  fontFamily: Fonts.medium,
+                }}>
+                {nextModalres?.fine_description}
+              </Text>
+            </View>
+            {/* Dot */}
+            <View
+              style={{
+                height: 35,
+                width: 35,
+                borderRadius: 25,
+                borderWidth: 10,
+                position: 'absolute',
+                right: 20,
+                top: 20,
+                borderColor: ProductPrice ? Colors.primary : Colors.secondary,
               }}
             />
-          </View>
+          </Pressable>
+          {/* Product */}
+          <Pressable
+            onPress={() => {
+              setProductPrice(false);
+              setProduct(true);
+            }}
+            style={{
+              // height: hp(20),
+              borderWidth: 3,
+              borderColor: Product ? Colors.primary : Colors.secondary,
+              padding: 10,
+              borderRadius: 10,
+              paddingVertical: 20,
+              marginVertical: 10,
+            }}>
+            <Text style={styles.H1}>Product</Text>
+            {/* Price */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 10,
+              }}>
+              <Icon name="shopping-cart" type="entypo" />
+              <Text
+                style={{
+                  fontSize: 20,
+                  marginHorizontal: 5,
+                  fontFamily: Fonts.bold,
+                }}>
+                New Product
+              </Text>
+            </View>
+            <View
+              style={{
+                padding: 7,
+                backgroundColor: '#eefbf5',
+                marginTop: 10,
+                width: wp(70),
+                borderRadius: 5,
+              }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginHorizontal: 5,
+                  fontFamily: Fonts.bold,
+                  color: '#01a955',
+                }}>
+                Product return within 10 days.
+              </Text>
+            </View>
+            <View style={{marginTop: 10}}>
+              <Text
+                style={{
+                  fontFamily: Fonts.medium,
+                }}>
+                {nextModalres?.fine_description}
+              </Text>
+            </View>
+            {/* Dot */}
+            <View
+              style={{
+                height: 35,
+                width: 35,
+                borderRadius: 25,
+                borderWidth: 10,
+                // backgroundColor: '#000',
+                position: 'absolute',
+                right: 20,
+                top: 20,
+                borderColor: Product ? Colors.primary : Colors.secondary,
+              }}
+            />
+          </Pressable>
           {/* Button */}
           <Button
             btnName="Continue to Return"
@@ -1176,7 +1270,7 @@ const ReturnBookingPage = ({navigation}) => {
               },
               shadowOpacity: 1,
               shadowRadius: 3.5,
-              elevation: 10,
+              elevation: 1,
               borderRadius: wp(66),
               marginTop: 10,
               marginBottom: 15,
@@ -1227,5 +1321,11 @@ const styles = StyleSheet.create({
   },
   textH2: {
     fontFamily: Fonts.semibold,
+  },
+  H1: {
+    fontFamily: Fonts.bold,
+    letterSpacing: 1,
+    color: '#999',
+    textTransform: 'uppercase',
   },
 });

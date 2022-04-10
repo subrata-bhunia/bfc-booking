@@ -7,6 +7,8 @@ import {
   ScrollView,
   ToastAndroid,
   TouchableOpacity,
+  Image,
+  Pressable,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {getDate} from '../../helper/bangla-calendar/cjs/index';
@@ -31,6 +33,7 @@ import {UserInfo} from '../../api/Users';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSelector, useDispatch} from 'react-redux';
 import {calculateAction} from '../../redux/action';
+import {Icon} from 'react-native-elements';
 const Home = () => {
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
@@ -126,6 +129,17 @@ const Home = () => {
   useEffect(() => {
     Check();
   }, []);
+  // ------------------- Notice ------------------- //
+  const [apiModal, setapiModal] = useState(true);
+  const data = {
+    image: 'https://source.unsplash.com/random/600x600/?cook',
+    type: 'info',
+    heading: 'Ea anim veniam nulla commodo officia Lorem.',
+    description:
+      'Elit ad incididunt ullamco in dolore enim quis ex nostrud duis.Ex dolor reprehenderit et consequat esse amet tempor voluptate amet.',
+    action: 'https://source.unsplash.com/random/600x600/?cook',
+  };
+
   // --------------- UPCOMING BOOK LIST ----------- //
   const [loader, setloader] = useState(true);
   const [loader2, setloader2] = useState(true);
@@ -166,7 +180,6 @@ const Home = () => {
         console.log(JSON.stringify(err));
       });
   };
-  console.log('colors from api', bookedColor, fullColor);
   useEffect(() => {
     getUpcomingList();
     getDueList();
@@ -414,6 +427,92 @@ const Home = () => {
         </View>
         <View style={{height: hp(13)}} />
       </ScrollView>
+      <Model isVisible={apiModal} statusBarTranslucent>
+        <View
+          style={{
+            backgroundColor: '#fff',
+            // padding: 10,
+            borderRadius: 10,
+            // alignSelf: 'center',
+          }}>
+          {data.image == '' ? null : (
+            <Image
+              source={{uri: data.image}}
+              style={{
+                resizeMode: 'cover',
+                height: hp(30),
+                borderTopLeftRadius: 10,
+              }}
+            />
+          )}
+          {data.heading == '' ? null : (
+            <Text
+              style={{
+                // textAlign: 'center',
+                fontSize: 20,
+                fontFamily: Fonts.semibold,
+                margin: 5,
+              }}>
+              {data.heading}
+            </Text>
+          )}
+
+          {data.description == '' ? null : (
+            <Text
+              style={{
+                // textAlign: 'ceter',
+                fontSize: 16,
+                fontFamily: Fonts.regular,
+                margin: 5,
+              }}>
+              {data.description}
+            </Text>
+          )}
+          {data.action == '' ? null : (
+            <Button
+              btnName={'Goto'}
+              textStyle={{
+                fontFamily: Fonts.semibold,
+                color: '#fff',
+                fontSize: 16,
+              }}
+              btnStyle={{
+                height: hp(6),
+                width: wp(50),
+                backgroundColor: '#2196F3',
+                shadowColor: Colors.primary,
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 1,
+                shadowRadius: 3.5,
+                elevation: 5,
+                borderRadius: wp(66),
+                marginTop: 10,
+                marginBottom: 15,
+              }}
+            />
+          )}
+          <Pressable
+            onPress={() => {
+              setapiModal(false);
+            }}
+            style={{
+              height: 40,
+              width: 40,
+              borderRadius: 30,
+              position: 'absolute',
+              top: -10,
+              right: -10,
+              backgroundColor: '#fff',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon name="cross" type="entypo" size={30} />
+          </Pressable>
+        </View>
+      </Model>
     </View>
   );
 };
