@@ -29,7 +29,7 @@ import {AvailableItems} from '../../api/Inventory';
 import Vaildation from '../../components/Vaildation';
 import {
   UpdateBooking,
-  getReturnBookingById,
+  getBookingInfoById,
   getModifyBookingInfo,
 } from '../../api/Bookings';
 import {UIStore} from '../../UIStore';

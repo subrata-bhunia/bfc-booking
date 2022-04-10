@@ -39,6 +39,14 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
       navigation.navigate('missingBooking', {
         booking_id: item?.booking_id,
       });
+    } else if (item?.status == 'Cancel') {
+      navigation.navigate('cancelBooking', {
+        booking_id: item?.booking_id,
+      });
+    } else if (item?.status == 'Pickup') {
+      navigation.navigate('returnBooking', {
+        booking_id: item?.booking_id,
+      });
     } else {
       navigation.navigate('bookingDetails', {
         booking_id: item?.booking_id,

@@ -4,7 +4,7 @@ export const AddBooking = data => {
   return axios.post('/add-booking', data);
 };
 
-export const getReturnBookingById = data => {
+export const getBookingInfoById = data => {
   return axios.post('/booking-info', data);
 };
 

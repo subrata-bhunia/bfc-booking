@@ -23,7 +23,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {
   cancelBooking,
   checkReturnItems,
-  getReturnBookingById,
+  getBookingInfoById,
   pickupBooking,
   ReturnBooking,
 } from '../../api/Bookings';
@@ -160,7 +160,7 @@ const BookingDetails = ({navigation}) => {
 
   const handleGetBookingDetails = async () => {
     setShow(true);
-    getReturnBookingById({booking_id: booking_id})
+    getBookingInfoById({booking_id: booking_id})
       .then(res => {
         const {data, status} = res.data;
         if (status === 'Success') {
