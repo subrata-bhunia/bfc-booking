@@ -131,7 +131,7 @@ const Home = () => {
     Check();
   }, []);
   // ------------------- Notice ------------------- //
-  const [apiModal, setapiModal] = useState(true);
+  const [apiModal, setapiModal] = useState(false);
   const data = {
     image: 'https://source.unsplash.com/random/600x600/?cook',
     type: 'warm',

@@ -42,3 +42,9 @@ export const getModifyBookingInfo = data => {
 export const UpdateBooking = data => {
   return axios.post('/update-booking', data);
 };
+export const PaymentUpdate = data => {
+  return axios.post('/payment-update', data);
+};
+export const MissingUpdate = data => {
+  return axios.post('/missing-update', data);
+};

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Colors, Fonts, Icons, statusIcon} from '../../constants';
-import {Icon, Input} from 'react-native-elements';
+import {CheckBox, Icon, Input} from 'react-native-elements';
 import {TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import Button from '../../components/Button';
 import {
@@ -20,7 +20,7 @@ import {Table, TableWrapper, Row, Cell} from 'react-native-table-component';
 import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {getBookingInfoById} from '../../api/Bookings';
+import {getBookingInfoById, PaymentUpdate} from '../../api/Bookings';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
@@ -67,12 +67,16 @@ const DueBookingPage = ({navigation}) => {
   const [tableData, setTableData] = useState([]);
   // ---------- Drop Down ---------- //
   const [nextLoader, setnextLoader] = useState(false);
+  const [check, setCheck] = useState(false);
 
   //Rent Variable
   const [Discount, setDiscount] = useState(0);
   const [rent, setRent] = useState(0);
   const [payment, setPayment] = useState(0);
+  const [prePayment, setPrePayment] = useState(0);
   const [costOfItems, setCostOfItems] = useState({});
+  const [modalData, setmodalData] = useState([]);
+  const [openDueWarnModal, setopenDueWarnModal] = useState(false);
 
   // To get Booking Details (API CALL)
   useEffect(() => {
@@ -82,15 +86,16 @@ const DueBookingPage = ({navigation}) => {
   const handleGetBookingDetails = async () => {
     setShow(true);
     getBookingInfoById({booking_id: booking_id}).then(res => {
-      const {data, status, rent} = res.data;
+      const {data, status} = res.data;
       if (status === 'Success') {
         const items = res.data.data.items;
         setShow(false);
         setResDueData(data);
-        setRent(data.rent);
+        setRent(parseInt(data.rent));
         setDiscount(parseInt(data.discount));
+        setPrePayment(parseInt(data.payment));
         setTableData(items);
-        console.log('rent of items :', rent);
+        console.log('handleGetBookingDetails res :', data);
         setCostOfItems(rent);
         var newObj = new Object();
         for (var i = 0; i < items.length; i++) {
@@ -102,6 +107,25 @@ const DueBookingPage = ({navigation}) => {
         }
       }
     });
+  };
+
+  // Payment Update API call
+  const handlePaymentUpdate = async () => {
+    PaymentUpdate({
+      user_id,
+      booking_id,
+      payment,
+      is_full_payment: check,
+    })
+      .then(res => {
+        const {data, status} = res.data;
+        if (status === 'Success') {
+          setmodalData(data);
+          setmodal(true);
+        }
+        console.log('PaymentUpdate :', res?.data);
+      })
+      .catch(err => console.log('err of paymentUpdate :', err));
   };
 
   // Rent Calculation
@@ -561,6 +585,41 @@ const DueBookingPage = ({navigation}) => {
                       {console.log(resDueData?.caterer_charge)}
                     </View>
 
+                    {/* Extra Charges */}
+                    {resDueData.extra_charges != 0 ? (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: -wp(4),
+                          // display: caterersvalue === 'Yes' ? 'flex' : 'none',
+                        }}>
+                        <Text
+                          style={{
+                            fontFamily: Fonts.semibold,
+                            fontSize: wp(4),
+                            width: wp(40),
+                            textAlign: 'right',
+                          }}>
+                          Extra Charge :
+                        </Text>
+                        <Input
+                          //   placeholder={'0'}
+                          keyboardType="number-pad"
+                          defaultValue={`${resDueData.extra_charges}`}
+                          containerStyle={{width: wp(40), height: hp(10)}}
+                          leftIcon={
+                            <Icon name="inr" type="fontisto" size={15} />
+                          }
+                          inputStyle={{
+                            fontSize: wp(4),
+                          }}
+                          disabled
+                        />
+                      </View>
+                    ) : null}
+
                     <View
                       style={{
                         borderBottomWidth: 1,
@@ -588,7 +647,9 @@ const DueBookingPage = ({navigation}) => {
                       <Input
                         disabled
                         defaultValue={`${
-                          parseInt(rent) + parseInt(resDueData?.caterer_charge)
+                          parseInt(rent) +
+                          parseInt(resDueData?.caterer_charge) +
+                          parseInt(resDueData.extra_charges)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -660,6 +721,38 @@ const DueBookingPage = ({navigation}) => {
                       />
                     </View>
 
+                    {/* Pre Payment */}
+                    {resDueData.payment != 0 ? (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: -wp(4),
+                        }}>
+                        <Text
+                          style={{
+                            fontFamily: Fonts.semibold,
+                            fontSize: wp(4),
+                            width: wp(40),
+                            textAlign: 'right',
+                          }}>
+                          Previous Payment :
+                        </Text>
+                        <Input
+                          defaultValue={`${resDueData.payment}`}
+                          containerStyle={{width: wp(40), height: hp(10)}}
+                          leftIcon={
+                            <Icon name="inr" type="fontisto" size={15} />
+                          }
+                          inputStyle={{
+                            fontSize: wp(4),
+                          }}
+                          disabled
+                        />
+                      </View>
+                    ) : null}
+
                     {/* Pending Amount */}
                     <View
                       style={{
@@ -681,9 +774,11 @@ const DueBookingPage = ({navigation}) => {
                         disabled
                         defaultValue={`${
                           parseInt(rent) +
-                          parseInt(resDueData?.caterer_charge) -
+                          parseInt(resDueData?.caterer_charge) +
+                          parseInt(resDueData.extra_charges) -
                           parseInt(resDueData.advanced) -
-                          (parseInt(Discount) ? parseInt(Discount) : 0)
+                          (parseInt(Discount) ? parseInt(Discount) : 0) -
+                          parseInt(resDueData.payment)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -724,6 +819,30 @@ const DueBookingPage = ({navigation}) => {
                           setPayment(txt);
                         }}
                       />
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginVertical: hp(3),
+                        // alignSelf: 'center',
+                      }}>
+                      <CheckBox
+                        checked={check}
+                        onPress={() => setCheck(!check)}
+                        containerStyle={{
+                          margin: 0,
+                          padding: 0,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(3.5),
+                          color: Colors.red,
+                        }}>
+                        Mark as payment full
+                      </Text>
                     </View>
                   </View>
                 ) : null}
@@ -785,6 +904,7 @@ const DueBookingPage = ({navigation}) => {
                 }}
                 onPress={() => {
                   // setreturnbtn(true);
+                  setopenDueWarnModal(true);
                 }}
                 textStyle={{
                   fontFamily: Fonts.semibold,
@@ -792,11 +912,231 @@ const DueBookingPage = ({navigation}) => {
                   fontSize: 16,
                 }}
                 btnName="PAYMENT RECIVED"
+                disabled={payment ? false : true}
               />
             </View>
           </>
         )}
       </View>
+      <WarningModal
+        h1="Are you want to Due this booking?"
+        open={openDueWarnModal}
+        setopen={setopenDueWarnModal}
+        yes={{
+          name: 'Yes',
+          onPress: () => {
+            handlePaymentUpdate();
+          },
+        }}
+        no={{
+          name: 'No',
+        }}
+      />
+
+      {/* Due Modal */}
+      <Model
+        isVisible={modal}
+        statusBarTranslucent
+        // onBackdropPress={() => setmodal(!modal)}
+        backdropOpacity={0.6}
+        focusable
+        onBackButtonPress={() => {
+          setmodal(false);
+          navigation.goBack();
+        }}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
+        avoidKeyboard>
+        <View
+          style={{
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+            paddingTop: hp(3.5),
+          }}>
+          <Text
+            style={{
+              fontFamily: Fonts.bold,
+              fontSize: 22,
+              textAlign: 'center',
+              letterSpacing: 1,
+            }}>
+            Payment Successful
+          </Text>
+          <View style={{alignItems: 'center'}}>
+            <AnimatedLottieView
+              autoPlay
+              loop={false}
+              style={{
+                height: hp(20),
+                width: wp(10),
+              }}
+              source={require('./complete.json')}
+            />
+            {/* <Image
+              source={statusIcon.cancel}
+              style={{
+                height: hp(25),
+                width: wp(25),
+                resizeMode: 'center',
+              }}
+            /> */}
+          </View>
+          <View style={{paddingHorizontal: wp(10), marginTop: -10}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Date</Text>
+              <Text style={styles.h3}>{modalData?.date}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Booking Id</Text>
+              <Text style={[styles.h3]}>{modalData?.booking_id}</Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Total Amount</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.total_amount} /-
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Discount</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.discount} /-
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginVertical: hp(2),
+                alignItems: 'center',
+              }}>
+              <Text style={styles.h2}>Total Payment</Text>
+              <Text style={styles.h3}>
+                <Icon
+                  name="inr"
+                  type="fontisto"
+                  size={wp(3)}
+                  style={{
+                    marginRight: 1,
+                  }}
+                />
+                {modalData?.payment} /-
+              </Text>
+            </View>
+          </View>
+          {/*  */}
+          <View>
+            {/* <Text
+              style={[
+                styles.h1,
+                {textAlign: 'center', marginVertical: hp(5), fontSize: 30},
+              ]}>
+              {parseInt(modalData?.total_amount) -
+                parseInt(modalData?.advanced)}{' '}
+              /-
+            </Text> */}
+            {modalData?.have_whatsapp == 1 ? (
+              <Button
+                onPress={() => {
+                  sendWPsms(modalData?.customer_phone, modalData?.wa_message);
+                }}
+                btnStyle={{
+                  height: 50,
+                  width: wp(60),
+                  borderRadius: 10,
+                  marginVertical: hp(4),
+                  backgroundColor: Colors.secondary,
+                  // marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName="Get Bill And Share"
+                icon={{
+                  name: 'logo-whatsapp',
+                  type: 'ionicon',
+                }}
+              />
+            ) : null}
+            <TouchableOpacity
+              onPress={event => {
+                setmodal(false);
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'Home'}],
+                });
+                event.preventDefault();
+              }}>
+              <View
+                style={{
+                  height: wp(15),
+                  width: wp(15),
+                  borderRadius: wp(7.5),
+                  borderColor: Colors.red,
+                  borderWidth: 2,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  margin: 20,
+                }}>
+                <Icon
+                  name="cross"
+                  type="entypo"
+                  color={Colors.red}
+                  size={wp(10)}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Model>
     </>
   );
 };
