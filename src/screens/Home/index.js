@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
+  Linking,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {getDate} from '../../helper/bangla-calendar/cjs/index';
@@ -133,7 +134,7 @@ const Home = () => {
   const [apiModal, setapiModal] = useState(true);
   const data = {
     image: 'https://source.unsplash.com/random/600x600/?cook',
-    type: 'info',
+    type: 'warm',
     heading: 'Ea anim veniam nulla commodo officia Lorem.',
     description:
       'Elit ad incididunt ullamco in dolore enim quis ex nostrud duis.Ex dolor reprehenderit et consequat esse amet tempor voluptate amet.',
@@ -428,90 +429,169 @@ const Home = () => {
         <View style={{height: hp(13)}} />
       </ScrollView>
       <Model isVisible={apiModal} statusBarTranslucent>
-        <View
-          style={{
-            backgroundColor: '#fff',
-            // padding: 10,
-            borderRadius: 10,
-            // alignSelf: 'center',
-          }}>
-          {data.image == '' ? null : (
-            <Image
-              source={{uri: data.image}}
-              style={{
-                resizeMode: 'cover',
-                height: hp(30),
-                borderTopLeftRadius: 10,
+        {data.type == 'info' ? (
+          <View
+            style={{
+              backgroundColor: '#fff',
+              // padding: 10,
+              borderRadius: 10,
+              // alignSelf: 'center',
+            }}>
+            {data.image == '' ? null : (
+              <Image
+                source={{uri: data.image}}
+                style={{
+                  resizeMode: 'cover',
+                  height: hp(30),
+                  borderTopLeftRadius: 10,
+                }}
+              />
+            )}
+            {data.heading == '' ? null : (
+              <Text
+                style={{
+                  // textAlign: 'center',
+                  fontSize: 20,
+                  fontFamily: Fonts.semibold,
+                  margin: 5,
+                  paddingHorizontal: 10,
+                }}>
+                {data.heading}
+              </Text>
+            )}
+
+            {data.description == '' ? null : (
+              <Text
+                style={{
+                  // textAlign: 'ceter',
+                  fontSize: 16,
+                  fontFamily: Fonts.regular,
+                  margin: 5,
+                  paddingHorizontal: 10,
+                }}>
+                {data.description}
+              </Text>
+            )}
+            {data.action == '' ? null : (
+              <Button
+                btnName={'Goto'}
+                onPress={() => {
+                  Linking.openURL(data.action);
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#fff',
+                  fontSize: 16,
+                }}
+                btnStyle={{
+                  height: hp(6),
+                  width: wp(50),
+                  backgroundColor: '#2196F3',
+                  shadowColor: Colors.primary,
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 1,
+                  shadowRadius: 3.5,
+                  elevation: 5,
+                  borderRadius: wp(66),
+                  marginTop: 10,
+                  marginBottom: 15,
+                }}
+              />
+            )}
+            <Pressable
+              onPress={() => {
+                setapiModal(false);
               }}
-            />
-          )}
-          {data.heading == '' ? null : (
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 30,
+                position: 'absolute',
+                top: -10,
+                right: -10,
+                backgroundColor: '#fff',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Icon name="cross" type="entypo" size={30} />
+            </Pressable>
+          </View>
+        ) : null}
+        {data.type == 'warm' ? (
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 10,
+              padding: 15,
+              paddingVertical: 20,
+            }}>
+            <View
+              style={{
+                height: 75,
+                // width: 75,
+                // borderRadius: 75,
+                backgroundColor: '#fff',
+                // position: 'absolute',
+                alignSelf: 'center',
+                // top: -35,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Icon
+                name="warning"
+                type="antdesign"
+                size={30}
+                color={Colors.red}
+              />
+            </View>
             <Text
               style={{
-                // textAlign: 'center',
-                fontSize: 20,
                 fontFamily: Fonts.semibold,
-                margin: 5,
+                textAlign: 'center',
               }}>
               {data.heading}
             </Text>
-          )}
-
-          {data.description == '' ? null : (
-            <Text
-              style={{
-                // textAlign: 'ceter',
-                fontSize: 16,
-                fontFamily: Fonts.regular,
-                margin: 5,
-              }}>
-              {data.description}
-            </Text>
-          )}
-          {data.action == '' ? null : (
-            <Button
-              btnName={'Goto'}
-              textStyle={{
-                fontFamily: Fonts.semibold,
-                color: '#fff',
-                fontSize: 16,
-              }}
-              btnStyle={{
-                height: hp(6),
-                width: wp(50),
-                backgroundColor: '#2196F3',
-                shadowColor: Colors.primary,
-                shadowOffset: {
-                  width: 0,
-                  height: 10,
-                },
-                shadowOpacity: 1,
-                shadowRadius: 3.5,
-                elevation: 5,
-                borderRadius: wp(66),
-                marginTop: 10,
-                marginBottom: 15,
-              }}
-            />
-          )}
-          <Pressable
-            onPress={() => {
-              setapiModal(false);
-            }}
-            style={{
-              height: 40,
-              width: 40,
-              borderRadius: 30,
-              position: 'absolute',
-              top: -10,
-              right: -10,
-              backgroundColor: '#fff',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Icon name="cross" type="entypo" size={30} />
-          </Pressable>
-        </View>
+            <View style={styles.Buttons}>
+              <View>
+                <Button
+                  btnName={'Yes'}
+                  // onPress={YesPress}
+                  textStyle={styles.text1}
+                  btnStyle={{
+                    height: 40,
+                    width: wp(25),
+                    padding: 5,
+                    backgroundColor: Colors.white,
+                    borderRadius: 5,
+                    borderColor: Colors.botton,
+                    borderBottomWidth: 1,
+                    borderRightWidth: 1,
+                  }}
+                />
+              </View>
+              <View>
+                <Button
+                  btnName={'No'}
+                  // onPress={NoPress}
+                  textStyle={styles.text1}
+                  btnStyle={{
+                    height: 40,
+                    width: wp(25),
+                    padding: 5,
+                    backgroundColor: Colors.white,
+                    borderRadius: 5,
+                    borderColor: Colors.error,
+                    borderBottomWidth: 1,
+                    borderRightWidth: 1,
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        ) : null}
       </Model>
     </View>
   );
@@ -526,5 +606,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderRadius: 20,
+  },
+  Buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '70%',
+    alignSelf: 'flex-end',
+    marginTop: 20,
   },
 });
