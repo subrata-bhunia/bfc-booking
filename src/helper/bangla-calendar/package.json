@@ -1,0 +1,46 @@
+{
+  "name": "bangla-calendar",
+  "version": "3.0.0",
+  "description": "A small library to convert any valid javascript date to Bangla date.",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "scripts": {
+    "prebuild": "npm run test",
+    "build": "rm -rf cjs esm umd && rollup --config",
+    "prepare": "rm -rf cjs esm umd && rollup --config",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  },
+  "files": [
+    "cjs/*",
+    "esm/*",
+    "umd/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sh4hids/bangla-calendar.git"
+  },
+  "keywords": [
+    "Bengali",
+    "date",
+    "bengali calendar",
+    "calendar"
+  ],
+  "author": "Shahidul Islam Majumder <hello@shahid.pro>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sh4hids/bangla-calendar/issues"
+  },
+  "homepage": "https://github.com/sh4hids/bangla-calendar#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "babel-jest": "^27.4.6",
+    "jest": "^27.4.7",
+    "rollup": "^2.66.0",
+    "rollup-plugin-terser": "^7.0.2"
+  }
+}

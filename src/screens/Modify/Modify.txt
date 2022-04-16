@@ -1,0 +1,68 @@
+import {View, Text, TextInput} from 'react-native';
+import React from 'react';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
+
+const Modify = () => {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          height: hp(5),
+          width: wp(43),
+          borderColor: 'green',
+          borderWidth: 1,
+          borderRadius: wp(2),
+        }}>
+        <TextInput
+          style={{
+            height: '100%',
+            width: '25%',
+            textAlign: 'center',
+            paddingHorizontal: 20,
+          }}
+        />
+        <View
+          style={{
+            height: '100%',
+            backgroundColor: 'green',
+            width: '25%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Text>h</Text>
+        </View>
+        <TextInput
+          style={{
+            height: '100%',
+            width: '25%',
+            textAlign: 'center',
+            paddingHorizontal: 20,
+          }}
+        />
+        <View
+          style={{
+            height: '100%',
+            backgroundColor: 'green',
+            width: '25%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderTopRightRadius: wp(2),
+            borderBottomRightRadius: wp(2),
+          }}>
+          <Text>m</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default Modify;

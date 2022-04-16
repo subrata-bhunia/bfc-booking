@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "918613957615",
+    "project_id": "debpurbfc",
+    "storage_bucket": "debpurbfc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918613957615:android:4132ba8d4a33254e88b41a",
+        "android_client_info": {
+          "package_name": "com.debpurbfc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "918613957615-1dkigolulo5v018ntjhhqjnj695kn1mg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKEBsrtMxEtk48-AC5TAqC7wOqs-oLhZE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "918613957615-1dkigolulo5v018ntjhhqjnj695kn1mg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
