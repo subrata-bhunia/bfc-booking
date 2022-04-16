@@ -18,6 +18,7 @@ import {
   Android,
 } from 'react-native-firebase-push-notifications';
 import {useDispatch} from 'react-redux';
+
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [phone, setPhone] = useState('');

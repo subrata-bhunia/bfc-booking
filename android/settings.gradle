@@ -1,6 +1,5 @@
 rootProject.name = 'bfc'
-include ':@notifee_react-native'
-project(':@notifee_react-native').projectDir = new File(rootProject.projectDir, '../node_modules/@notifee/react-native/android')
+
 include ':react-native-firebase-push-notifications'
 project(':react-native-firebase-push-notifications').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase-push-notifications/android')
 include ':react-native-firebase-push-notifications'
