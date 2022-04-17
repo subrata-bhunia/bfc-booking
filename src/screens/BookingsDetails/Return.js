@@ -966,6 +966,14 @@ const ReturnBookingPage = ({navigation}) => {
           setReturnModal(false);
           // navigation.navigate('Home');
         }}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
         avoidKeyboard>
         <View
           style={{
@@ -1090,7 +1098,18 @@ const ReturnBookingPage = ({navigation}) => {
         </View>
       </Model>
       {/* Retrun Missing Modal */}
-      <Model isVisible={nextModal} backdropOpacity={0.4} statusBarTranslucent>
+      <Model
+        isVisible={nextModal}
+        backdropOpacity={0.4}
+        statusBarTranslucent
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }>
         <View
           style={{
             // height: hp(80),

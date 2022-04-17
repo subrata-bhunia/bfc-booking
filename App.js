@@ -11,7 +11,7 @@ import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store/store';
-import AnimatedSplash from 'react-native-animated-splash-screen';
+import AnimatedSplash from './src/helper/react-native-animated-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
 import messaging from '@react-native-firebase/messaging';
 import {
@@ -25,7 +25,7 @@ function AppZ({props}) {
   console.log('Props', props);
   const [login, setlogin] = useState(false);
   const [load, setload] = useState(false);
-  const [netinfo, setNetinfo] = useState(null);
+  const [netinfo, setNetinfo] = useState(true);
 
   NetInfo.fetch().then(state => {
     // console.log('Connection type', state.details);

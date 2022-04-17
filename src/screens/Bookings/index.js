@@ -48,9 +48,11 @@ const Booking = () => {
   const TableHead = ['Item Name', 'Stock', 'Need'];
   const [tableData, setTableDate] = useState([]);
   const [addBiookingStatus, setaddBiookingStatus] = useState(null);
+  const [checkAvailabilityMsg, setCheckAvailabilityMsg] = useState(null);
   const [modalData, setmodalData] = useState(null);
   const userId = UIStore.useState(s => s.userId);
   const [btnLoader, setBtnLoader] = useState(false);
+  const [btnLoader2, setBtnLoader2] = useState(false);
   const [itemsRent, setItemsRent] = useState({});
 
   //------- API ----------- //
@@ -157,6 +159,36 @@ const Booking = () => {
     // setrent(0);
   };
   console.log('Enter Items are :', book_items);
+
+  // check-availability Api Call
+  const handleChackOrdar = () => {
+    setBtnLoader2(true);
+    CheckForOrder({
+      pickup_date: pickupdate,
+      return_date: returndate,
+      gathering,
+    })
+      .then(res => {
+        console.log('success of ChackOrdarAvail', res.data);
+        const {status, message} = res.data;
+        if (status == 'Success') {
+          setView0(!view0);
+          setnext1(true);
+          setView1(true);
+        } else {
+          setCheckAvailabilityMsg(message);
+        }
+        setBtnLoader2(false);
+      })
+      .catch(err => {
+        console.log('Err Of ChackOrdarAvail :', err);
+        setBtnLoader2(false);
+      });
+    setTimeout(() => {
+      setCheckAvailabilityMsg(null);
+    }, 5000);
+  };
+
   const PersonalCheck = () => {
     if (
       pickupdate !== null ||
@@ -176,9 +208,7 @@ const Booking = () => {
                 if (cphone.length == 10) {
                   if (cadd.length > 3) {
                     if (gathering.length > 1) {
-                      setView0(!view0);
-                      setnext1(true);
-                      setView1(true);
+                      handleChackOrdar();
                     } else {
                       setgatheringV(false);
                     }
@@ -265,27 +295,23 @@ const Booking = () => {
     }
   };
 
-  // check-availability Api Call
-  const handleChackOrdar = () => {
-    CheckForOrder({
-      pickup_date: pickupdate,
-      return_date: returndate,
-      gathering,
-    })
-      .then(res => {
-        console.log('success of ChackOrdarAvail', res.data);
-      })
-      .catch(err => {
-        console.log('Err Of ChackOrdarAvail :', err);
-      });
-  };
-
   const autoCalculateData = useSelector(state => state.handleCalCulatePrice);
   console.log('Total Price', autoCalculateData);
 
   useEffect(() => {
     setrent(autoCalculateData.totalAmount);
   }, [autoCalculateData]);
+
+  const StructuralDate = date =>
+    `${
+      new Date(date).getDate() < 10
+        ? '0' + new Date(date).getDate()
+        : new Date(date).getDate()
+    }-${
+      new Date(date).getMonth() + 1 < 10
+        ? '0' + (new Date(date).getMonth() + 1)
+        : new Date(date).getMonth() + 1
+    }-${new Date(date).getFullYear()}`;
   return (
     <ScrollView
       style={{
@@ -303,6 +329,8 @@ const Booking = () => {
             setView0(!view0);
             setView1(false);
             setView2(false);
+            setnext1(false);
+            setnext2(false);
           }}
           style={{
             flexDirection: 'row',
@@ -368,9 +396,9 @@ const Booking = () => {
                       marginLeft: 10,
                     }}
                     value={
-                      pickupdate === null
-                        ? null
-                        : getDate(pickupdate, {format: 'D MMMM, YYYY'})
+                      pickupdate === null ? null : StructuralDate(pickupdate)
+
+                      // : getDate(pickupdate, {format: 'D MMMM, YYYY'})
                     }
                     containerStyle={{
                       width: wp(55),
@@ -393,6 +421,7 @@ const Booking = () => {
                       />
                     }
                   />
+                  {console.log('pickupdate', pickupdate)}
                 </TouchableOpacity>
                 <DropDownPicker
                   open={open}
@@ -469,9 +498,8 @@ const Booking = () => {
                       marginLeft: 10,
                     }}
                     value={
-                      returndate === null
-                        ? null
-                        : getDate(returndate, {format: 'D MMMM, YYYY'})
+                      returndate === null ? null : StructuralDate(returndate)
+                      // : getDate(returndate, {format: 'D MMMM, YYYY'})
                     }
                     onChangeText={txt => {
                       // setcadd(txt);
@@ -795,13 +823,15 @@ const Booking = () => {
               }}
               onCancel={() => setDatePickerVisibilityR(false)}
             />
+            {checkAvailabilityMsg === null ? null : (
+              <Vaildation errormsg={checkAvailabilityMsg} />
+            )}
             <Button
               onPress={() => {
                 PersonalCheck();
                 // setView0(!view0);
                 // setnext1(true);
                 // setView1(true);
-                handleChackOrdar();
               }}
               btnStyle={{
                 height: hp(6),
@@ -824,6 +854,7 @@ const Booking = () => {
                 fontSize: 20,
               }}
               btnName="Next"
+              isLoader={btnLoader2}
             />
           </View>
         ) : null}
@@ -837,6 +868,7 @@ const Booking = () => {
               setView0(false);
               setView1(!view1);
               setView2(false);
+              setnext2(false);
             }}
             style={{
               flexDirection: 'row',
@@ -1303,6 +1335,14 @@ const Booking = () => {
         // onBackdropPress={() => setmodal(!modal)}
         backdropOpacity={0.6}
         focusable
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
         onBackButtonPress={() => {
           setmodal(false);
           navigation.navigate('Home');
