@@ -32,10 +32,40 @@ import {UIStore} from '../../UIStore';
 import {AuthContext} from '../../components/context';
 import {UserInfo} from '../../api/Users';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {useSelector, useDispatch} from 'react-redux';
-// import {calculateAction} from '../../redux/action';
+import {useSelector, useDispatch} from 'react-redux';
 import {Icon} from 'react-native-elements';
+import {
+  notifications,
+  NotificationMessage,
+  Android,
+} from 'react-native-firebase-push-notifications';
 const Home = () => {
+  const getInit = async () => {
+    const noti = await notifications.getInitialNotification();
+    console.log('noti', noti);
+  };
+  const localNotification = async () => {
+    //required for Android
+    const channel = new Android.Channel(
+      'test-channel',
+      'Test Channel',
+      Android.Importance.Max,
+    ).setDescription('My apps test channel');
+
+    // for android create the channel
+    notifications.android().createChannel(channel);
+    await notifications.displayNotification(
+      new NotificationMessage()
+        .setNotificationId('notification-id')
+        .setTitle('Notification title')
+        .setBody('Notification body')
+        .setData({
+          key1: 'key1',
+          key2: 'key2',
+        })
+        .android.setChannelId('test-channel'), //required for android
+    );
+  };
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
@@ -68,18 +98,23 @@ const Home = () => {
   };
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+
   // --------------------- //
   const {signOut} = React.useContext(AuthContext);
   const Check = async () => {
-    console.log('user_id', user_id);
+    // console.log('user_id', user_id);
     if (user_id === '') {
       try {
         const userId = await AsyncStorage.getItem('userId');
         UIStore.update(s => {
           s.userId = userId;
         });
+        const token = await notifications.getToken();
+        // dispatch(fcmSet(userId, token));
         UserInfo({
           user_id: userId,
+          fcm_token: token,
         })
           .then(res => {
             if (res.data?.data?.status == 'Active') {
@@ -101,11 +136,14 @@ const Home = () => {
           });
       } catch (err) {
         console.log(err);
-        alert(`Error In Home`);
+        // alert(`Error In Home`);
       }
     } else {
+      const token = await notifications.getToken();
+      // dispatch(fcmSet(user_id, token));
       UserInfo({
-        user_id: user_id,
+        user_id,
+        fcm_token: token,
       })
         .then(res => {
           if (res.data?.data?.status == 'Active') {
@@ -124,12 +162,19 @@ const Home = () => {
         })
         .catch(err => {
           console.log(err);
+          alert('Home');
         });
     }
   };
   useEffect(() => {
     Check();
+    getInit();
   }, []);
+  const dataRedux = useSelector(state => {
+    return state.fcmToken;
+  });
+  // console.log(dataRedux);
+
   // ------------------- Notice ------------------- //
   const [apiModal, setapiModal] = useState(false);
   const data = {
@@ -320,6 +365,9 @@ const Home = () => {
             return (
               <TouchableOpacity
                 activeOpacity={0.5}
+                onPress={() => {
+                  localNotification();
+                }}
                 style={{
                   height: 50,
                   width: 50,

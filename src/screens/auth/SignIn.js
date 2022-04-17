@@ -12,6 +12,12 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Vaildation from '../../components/Vaildation';
 import {AuthContext} from '../../components/context';
 import {SignInUser} from '../../api/Users';
+import {
+  notifications,
+  NotificationMessage,
+  Android,
+} from 'react-native-firebase-push-notifications';
+import {useDispatch} from 'react-redux';
 
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -27,6 +33,8 @@ const SignIn = ({navigation}) => {
   useEffect(() => {
     setstatus(false);
   }, [password, phone]);
+  const dispatch = useDispatch();
+
   const _SignIn = () => {
     if (phone.length == 10 || password.length >= 6) {
       if (phone.length == 10) {

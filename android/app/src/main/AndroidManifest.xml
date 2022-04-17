@@ -2,6 +2,8 @@
   package="com.debpurbfc">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
       android:name=".MainApplication"
@@ -10,6 +12,26 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
+      <receiver android:name="com.afrihost.firebase.notifications.RNFirebaseNotificationReceiver"/>
+  <receiver android:enabled="true" android:exported="true"  android:name="com.afrihost.firebase.notifications.RNFirebaseNotificationsRebootReceiver">
+    <intent-filter>
+      <action android:name="android.intent.action.BOOT_COMPLETED"/>
+      <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+      <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+      <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
+  </receiver>
+  
+    <service
+        android:name="com.afrihost.firebase.notifications.RNFirebaseMessagingService"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
+
+    <service android:name="com.afrihost.firebase.notifications.RNFirebaseBackgroundMessagingService" />
+
 <!--        <activity-->
 <!--            android:name=".SplashActivity"-->
 <!--            android:label="@string/app_name"-->
