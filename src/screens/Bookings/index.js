@@ -26,7 +26,7 @@ import AnimatedLottieView from 'lottie-react-native';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {AvailableItems} from '../../api/Inventory';
 import Vaildation from '../../components/Vaildation';
-import {AddBooking} from '../../api/Bookings';
+import {AddBooking, CheckForOrder} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 import {useDispatch, useSelector} from 'react-redux';
@@ -263,6 +263,21 @@ const Booking = () => {
     } else {
       setrentV(false);
     }
+  };
+
+  // check-availability Api Call
+  const handleChackOrdar = () => {
+    CheckForOrder({
+      pickup_date: pickupdate,
+      return_date: returndate,
+      gathering,
+    })
+      .then(res => {
+        console.log('success of ChackOrdarAvail', res.data);
+      })
+      .catch(err => {
+        console.log('Err Of ChackOrdarAvail :', err);
+      });
   };
 
   const autoCalculateData = useSelector(state => state.handleCalCulatePrice);
@@ -786,6 +801,7 @@ const Booking = () => {
                 // setView0(!view0);
                 // setnext1(true);
                 // setView1(true);
+                handleChackOrdar();
               }}
               btnStyle={{
                 height: hp(6),

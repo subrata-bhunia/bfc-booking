@@ -48,3 +48,6 @@ export const PaymentUpdate = data => {
 export const MissingUpdate = data => {
   return axios.post('/missing-update', data);
 };
+export const CheckForOrder = data => {
+  return axios.post('/check-availability', data);
+};
