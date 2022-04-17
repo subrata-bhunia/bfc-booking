@@ -32,8 +32,8 @@ import {UIStore} from '../../UIStore';
 import {AuthContext} from '../../components/context';
 import {UserInfo} from '../../api/Users';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useSelector, useDispatch} from 'react-redux';
-import {calculateAction} from '../../redux/action';
+// import {useSelector, useDispatch} from 'react-redux';
+// import {calculateAction} from '../../redux/action';
 import {Icon} from 'react-native-elements';
 const Home = () => {
   const user_id = UIStore.useState(s => s.userId);
