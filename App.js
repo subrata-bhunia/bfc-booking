@@ -11,13 +11,13 @@ import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
 import {Provider} from 'react-redux';
 import {store} from './src/redux/store/store';
-import AnimatedSplash from 'react-native-animated-splash-screen';
+import AnimatedSplash from './src/helper/react-native-animated-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
 
 export default function App() {
   const [login, setlogin] = useState(false);
   const [load, setload] = useState(false);
-  const [netinfo, setNetinfo] = useState(null);
+  const [netinfo, setNetinfo] = useState(true);
 
   NetInfo.fetch().then(state => {
     console.log('Connection type', state.details);

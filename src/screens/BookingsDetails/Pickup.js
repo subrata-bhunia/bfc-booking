@@ -963,6 +963,14 @@ const PickupBookingPage = ({navigation}) => {
           setmodal(false);
           // navigation.navigate('Home');
         }}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
         avoidKeyboard>
         <View
           style={{
@@ -1103,6 +1111,14 @@ const PickupBookingPage = ({navigation}) => {
           setmodalCancel(false);
           // navigation.navigate('Home');
         }}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }
         avoidKeyboard>
         <View
           style={{

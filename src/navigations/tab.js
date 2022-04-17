@@ -23,7 +23,7 @@ const CustomTabBarButton = ({children, onPress}) => (
     style={{
       alignItems: 'center',
       justifyContent: 'center',
-      top: -30,
+      top: -hp(3.5),
       shadowColor: Colors.primary,
       ...styles.shadow,
       marginHorizontal: wp(3),
@@ -42,7 +42,8 @@ const Tabs = () => {
         style: {
           position: 'absolute',
           height: hp(9),
-          backgroundColor: 'rgba(240,240,240,1)',
+          // backgroundColor: 'rgba(240,240,240,1)',
+          backgroundColor: '#fff',
           bottom: hp(2),
           left: wp(5),
           right: wp(5),
@@ -110,16 +111,44 @@ const Tabs = () => {
         component={Booking}
         options={{
           tabBarIcon: ({focused}) => (
-            <View>
-              <Icon
-                name="plus"
-                type="antdesign"
-                reverse
-                color={!focused ? Colors.red : Colors.white}
-                reverseColor={!focused ? Colors.white : Colors.red}
-                size={30}
-                style={{elevation: 5}}
-              />
+            <View
+              style={{
+                // height: wp(14),
+                // width: wp(14),
+                // borderRadius: wp(100),
+                // backgroundColor: !focused ? Colors.white : Colors.red,
+                // borderWidth: 1,
+                borderColor: Colors.disable,
+                // borderColor: !focused ? '#cfcfcf' : '#ff9494',
+                // borderColor: 'red',
+                backgroundColor: '#eee',
+                height: wp(15),
+                width: wp(15),
+                borderRadius: wp(100),
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <View
+                style={{
+                  height: wp(13),
+                  width: wp(13),
+                  borderRadius: wp(100),
+                  backgroundColor: !focused ? Colors.white : Colors.red,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  // borderWidth: 1,
+                  borderColor: !focused ? '#cfcfcf' : '#ff9494',
+                }}>
+                <Icon
+                  name="plus"
+                  type="octicon"
+                  // reverse
+                  color={!focused ? Colors.red : Colors.white}
+                  // reverseColor={!focused ? Colors.white : Colors.red}
+                  size={wp(6)}
+                  style={{elevation: 5}}
+                />
+              </View>
             </View>
           ),
           tabBarButton: props => <CustomTabBarButton {...props} />,

@@ -1041,7 +1041,16 @@ const MissingBookingPage = ({navigation}) => {
       />
 
       {/* Retrun Missing Modal */}
-      <Model isVisible={nextModal}>
+      <Model
+        isVisible={nextModal}
+        customBackdrop={
+          <View
+            style={{
+              backgroundColor: '#000',
+              height: hp(200),
+            }}
+          />
+        }>
         <View
           style={{
             // height: hp(80),
