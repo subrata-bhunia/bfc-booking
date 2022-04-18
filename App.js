@@ -169,7 +169,6 @@ export default class App extends React.Component {
     this.onTokenRefreshListener();
   }
   componentWillUnmount() {}
-
   getToken = async () => {
     //get the messeging token
     const token = await notifications.getToken();
@@ -190,7 +189,6 @@ export default class App extends React.Component {
     this.removeOnNotificationOpened = notifications.onNotificationOpened(
       notification => {
         console.log('onNotificationOpened', notification);
-        //do something with the notification
       },
     );
   };

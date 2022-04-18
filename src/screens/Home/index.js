@@ -40,9 +40,40 @@ import {
   Android,
 } from 'react-native-firebase-push-notifications';
 const Home = () => {
+  //  --------- Notifications --------- //
   const getInit = async () => {
-    const noti = await notifications.getInitialNotification();
-    console.log('noti', noti);
+    const noti = await (
+      await notifications.getInitialNotification()
+    ).notification;
+    if (noti?._data?.type == 'order') {
+      if (noti?._data?.status == 'Confirm') {
+        navigation.navigate('pickupBooking', {
+          booking_id: noti?._data?.booking_id,
+        });
+      } else if (noti?._data?.status == 'Due') {
+        navigation.navigate('dueBooking', {
+          booking_id: noti?._data?.booking_id,
+        });
+      } else if (noti?._data?.status == 'Missing') {
+        navigation.navigate('missingBooking', {
+          booking_id: noti?._data?.booking_id,
+        });
+      } else if (noti?._data?.status == 'Cancel') {
+        navigation.navigate('cancelBooking', {
+          booking_id: noti?._data?.booking_id,
+        });
+      } else if (noti?._data?.status == 'Pickup') {
+        navigation.navigate('returnBooking', {
+          booking_id: noti?._data?.booking_id,
+        });
+      } else {
+        navigation.navigate('bookingDetails', {
+          booking_id: noti?._data?.booking_id,
+        });
+      }
+    } else {
+      console.log('Inital_Notifications', noti);
+    }
   };
   const localNotification = async () => {
     //required for Android
@@ -51,7 +82,6 @@ const Home = () => {
       'Test Channel',
       Android.Importance.Max,
     ).setDescription('My apps test channel');
-
     // for android create the channel
     notifications.android().createChannel(channel);
     await notifications.displayNotification(
@@ -66,6 +96,41 @@ const Home = () => {
         .android.setChannelId('test-channel'), //required for android
     );
   };
+  useEffect(() => {
+    notifications.onNotificationOpened(noti => {
+      if (noti?._data?.type == 'order') {
+        if (noti?._data?.status == 'Confirm') {
+          navigation.navigate('pickupBooking', {
+            booking_id: noti?._data?.booking_id,
+          });
+        } else if (noti?._data?.status == 'Due') {
+          navigation.navigate('dueBooking', {
+            booking_id: noti?._data?.booking_id,
+          });
+        } else if (noti?._data?.status == 'Missing') {
+          navigation.navigate('missingBooking', {
+            booking_id: noti?._data?.booking_id,
+          });
+        } else if (noti?._data?.status == 'Cancel') {
+          navigation.navigate('cancelBooking', {
+            booking_id: noti?._data?.booking_id,
+          });
+        } else if (noti?._data?.status == 'Pickup') {
+          navigation.navigate('returnBooking', {
+            booking_id: noti?._data?.booking_id,
+          });
+        } else {
+          navigation.navigate('bookingDetails', {
+            booking_id: noti?._data?.booking_id,
+          });
+        }
+      } else {
+        console.log('Clicked_Notifications', noti);
+      }
+    });
+  }, []);
+
+  // ----------------------------------- //
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
