@@ -7,6 +7,8 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   View,
+  Linking,
+  ToastAndroid,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Colors, Fonts} from '../../constants';
@@ -54,7 +56,20 @@ const Booking = () => {
   const [btnLoader, setBtnLoader] = useState(false);
   const [btnLoader2, setBtnLoader2] = useState(false);
   const [itemsRent, setItemsRent] = useState({});
-
+  const sendWPsms = (phone, msg) => {
+    var phone_n = phone.split(' ').join('').replace('+91', '');
+    var phone_new = phone_n.charAt(0) === '0' ? phone_n.substring(1) : phone_n;
+    Linking.openURL(
+      'whatsapp://send?text=' + msg + '&phone=91' + phone_new,
+    ).catch(err =>
+      ToastAndroid.show(
+        "Can't Open Whatsapp.",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      ),
+    );
+    // console.log("WP")
+  };
   //------- API ----------- //
   const getInventory = () => {
     AvailableItems().then(res => {
@@ -273,6 +288,7 @@ const Booking = () => {
           if (res?.data?.status === 'Success') {
             setmodal(true);
             setmodalData(res?.data?.data);
+            console.log(res?.data?.data);
             setBtnLoader(false);
           } else {
             setaddBiookingStatus(res?.data?.message);
@@ -1438,7 +1454,7 @@ const Booking = () => {
             </Text> */}
             {whp ? (
               <Button
-                // onPress={() => navigation.navigate('Booking')}
+                onPress={() => sendWPsms(cphone, modalData?.wa_message)}
                 btnStyle={{
                   height: 50,
                   width: wp(60),

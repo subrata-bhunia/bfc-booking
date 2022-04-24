@@ -47,6 +47,10 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
       navigation.navigate('returnBooking', {
         booking_id: item?.booking_id,
       });
+    } else if (item?.status == 'Paid') {
+      navigation.navigate('paidBooking', {
+        booking_id: item?.booking_id,
+      });
     } else {
       navigation.navigate('bookingDetails', {
         booking_id: item?.booking_id,
