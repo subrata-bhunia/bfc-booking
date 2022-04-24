@@ -9,11 +9,13 @@ import {Icon, Tooltip} from 'react-native-elements';
 import Button from './Button';
 import {AuthContext} from './context';
 import {UIStore} from '../UIStore';
+import {useNavigation} from '@react-navigation/native';
 
 const StaticHeader = () => {
   const {signOut} = React.useContext(AuthContext);
   const userId = UIStore.useState(s => s.userId);
   const userName = UIStore.useState(s => s.userName);
+  const navigation = useNavigation();
   // console.log(userId);
   return (
     <View
@@ -32,7 +34,12 @@ const StaticHeader = () => {
           padding: hp(1),
         }}>
         <Icon name="mail-outline" type="ionicon" size={27} />
-        <Icon name="bell" type="simple-line-icon" size={27} />
+        <Icon
+          name="bell"
+          type="simple-line-icon"
+          size={27}
+          onPress={() => navigation.navigate('notification')}
+        />
       </View>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Text
