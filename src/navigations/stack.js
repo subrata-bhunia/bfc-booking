@@ -11,6 +11,7 @@ import PickupBookingPage from '../screens/BookingsDetails/Pickup';
 import MissingBookingPage from '../screens/BookingsDetails/Missing';
 import CancelBooking from '../screens/BookingsDetails/Cancel';
 import ReturnBookingPage from '../screens/BookingsDetails/Return';
+import Notification from '../screens/Notification/Notification';
 import PaidBooking from '../screens/BookingsDetails/Paid';
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ const Stacks = () => {
       <Stack.Screen name="cancelBooking" component={CancelBooking} />
       <Stack.Screen name="returnBooking" component={ReturnBookingPage} />
       <Stack.Screen name="modifyBooking" component={Modify} />
+      <Stack.Screen name="notification" component={Notification} />
       <Stack.Screen name="paidBooking" component={PaidBooking} />
     </Stack.Navigator>
   );
