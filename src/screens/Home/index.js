@@ -12,7 +12,6 @@ import {
   Linking,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
-import {getDate} from '../../helper/bangla-calendar/cjs/index';
 import {Colors, Fonts} from '../../constants';
 import Model from 'react-native-modal';
 import {
@@ -26,6 +25,7 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {
   calenderBooking,
   dueBookings,
+  getBookingbyDate,
   upComingBookingList,
 } from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
@@ -39,6 +39,7 @@ import {
   NotificationMessage,
   Android,
 } from 'react-native-firebase-push-notifications';
+import {getBanglaDateAndMonth} from '../../helper/bangla-calender';
 const Home = () => {
   //  --------- Notifications --------- //
   const getInit = async () => {
@@ -99,29 +100,33 @@ const Home = () => {
   useEffect(() => {
     notifications.onNotificationOpened(noti => {
       if (noti?._data?.type == 'order') {
-        if (noti?._data?.status == 'Confirm') {
+        if (item?.status == 'Confirm') {
           navigation.navigate('pickupBooking', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
           });
-        } else if (noti?._data?.status == 'Due') {
+        } else if (item?.status == 'Due') {
           navigation.navigate('dueBooking', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
           });
-        } else if (noti?._data?.status == 'Missing') {
+        } else if (item?.status == 'Missing') {
           navigation.navigate('missingBooking', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
           });
-        } else if (noti?._data?.status == 'Cancel') {
+        } else if (item?.status == 'Cancel') {
           navigation.navigate('cancelBooking', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
           });
-        } else if (noti?._data?.status == 'Pickup') {
+        } else if (item?.status == 'Pickup') {
           navigation.navigate('returnBooking', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
+          });
+        } else if (item?.status == 'Paid') {
+          navigation.navigate('paidBooking', {
+            booking_id: item?.booking_id,
           });
         } else {
           navigation.navigate('bookingDetails', {
-            booking_id: noti?._data?.booking_id,
+            booking_id: item?.booking_id,
           });
         }
       } else {
@@ -129,7 +134,13 @@ const Home = () => {
       }
     });
   }, []);
-
+  const getAllBookingBydate = date => {
+    getBookingbyDate({
+      date,
+    }).then(res => {
+      setBookings(res?.data?.data);
+    });
+  };
   // ----------------------------------- //
   const user_id = UIStore.useState(s => s.userId);
   const [ben, setben] = useState('');
@@ -159,7 +170,7 @@ const Home = () => {
 
   const getBengaliDate = date => {
     var dd = new Date(date);
-    return getDate(dd, {format: 'D mm'});
+    return getBanglaDateAndMonth(dd);
   };
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -295,6 +306,7 @@ const Home = () => {
     getUpcomingList();
     getDueList();
     CalendarData();
+    setmodal(false);
   }, [isFocused]);
   return (
     <View
@@ -346,7 +358,38 @@ const Home = () => {
                 marginVertical: 10,
               }}
             />
-            {bookings.length > 0 ? null : (
+            {bookings.length > 0 ? (
+              <View>
+                <View style={{height: hp(30), width: wp(93)}}>
+                  <FlatListWithHeader
+                    items={bookings}
+                    horizontal={true}
+                    width={wp(85)}
+                  />
+                </View>
+                {fullDate.includes(selectDate) ? null : (
+                  <Button
+                    onPress={() => navigation.navigate('Booking')}
+                    btnStyle={{
+                      height: 50,
+                      width: wp(50),
+                      borderRadius: 50,
+                      backgroundColor: Colors.secondary,
+                      marginVertical: hp(2),
+                    }}
+                    textStyle={{
+                      fontFamily: Fonts.semibold,
+                      color: '#000',
+                    }}
+                    btnName=" Add Booking"
+                    icon={{
+                      name: 'plus',
+                      type: 'ant-design',
+                    }}
+                  />
+                )}
+              </View>
+            ) : (
               <View>
                 <Text
                   style={{
@@ -431,7 +474,11 @@ const Home = () => {
               <TouchableOpacity
                 activeOpacity={0.5}
                 onPress={() => {
-                  localNotification();
+                  // localNotification();
+                  setmodal(true);
+                  setSelectDate(date.dateString);
+                  setben(getBanglaDateAndMonth(date.dateString, 'MMMM'));
+                  getAllBookingBydate(date.dateString);
                 }}
                 style={{
                   height: 50,

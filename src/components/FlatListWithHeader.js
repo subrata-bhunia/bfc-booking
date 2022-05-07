@@ -23,7 +23,7 @@ import {SkypeIndicator} from 'react-native-indicators';
  * items - [all data]
  * @returns
  */
-const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
+const FlatListWithHeader = ({title, items, horizontal, isloader, width}) => {
   const navigation = useNavigation();
 
   const handleNavigation = item => {
@@ -85,7 +85,7 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
                     height: hp(20),
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: wp(100),
+                    width: width ? width : wp(100),
                   }}>
                   <SkypeIndicator
                     color={Colors.botton}
@@ -133,7 +133,7 @@ const FlatListWithHeader = ({title, items, horizontal, isloader}) => {
                 colors={['#eee', '#eee', '#fff']}
                 style={{
                   paddingVertical: hp(3),
-                  width: wp(90),
+                  width: width ? width : wp(90),
                   elevation: 2,
                   borderRadius: hp(1),
                   margin: 10,

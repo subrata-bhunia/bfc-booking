@@ -51,3 +51,6 @@ export const MissingUpdate = data => {
 export const CheckForOrder = data => {
   return axios.post('/check-availability', data);
 };
+export const getBookingbyDate = data => {
+  return axios.post('/booking-by-date', data);
+};

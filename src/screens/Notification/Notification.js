@@ -53,29 +53,33 @@ const Notification = () => {
 
   const handleNavigation = item => {
     if (item?.type == 'Order') {
-      if (item?.oder_info?.status == 'Confirm') {
+      if (item?.order_info?.status == 'Confirm') {
         navigation.navigate('pickupBooking', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
         });
-      } else if (item?.oder_info?.status == 'Due') {
+      } else if (item?.order_info?.status == 'Due') {
         navigation.navigate('dueBooking', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
         });
-      } else if (item?.oder_info?.status == 'Missing') {
+      } else if (item?.order_info?.status == 'Missing') {
         navigation.navigate('missingBooking', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
         });
-      } else if (item?.oder_info?.status == 'Cancel') {
+      } else if (item?.order_info?.status == 'Cancel') {
         navigation.navigate('cancelBooking', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
         });
-      } else if (item?.oder_info?.status == 'Pickup') {
+      } else if (item?.order_info?.status == 'Pickup') {
         navigation.navigate('returnBooking', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
+        });
+      } else if (item?.order_info?.status == 'Paid') {
+        navigation.navigate('paidBooking', {
+          booking_id: item?.order_info?.booking_id,
         });
       } else {
         navigation.navigate('bookingDetails', {
-          booking_id: item?.oder_info?.booking_id,
+          booking_id: item?.order_info?.booking_id,
         });
       }
     }

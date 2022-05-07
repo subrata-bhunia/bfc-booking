@@ -172,7 +172,7 @@ const SignUp = ({navigation}) => {
             fontFamily: Fonts.regular,
             textAlign: 'center',
           }}>
-          Keep your data safe null null null
+          We Are Verities
         </Text>
         <BlankSpace height={hp(2)} />
         <View
@@ -326,7 +326,7 @@ const SignUp = ({navigation}) => {
               fontSize: wp(6),
               fontFamily: Fonts.semibold,
             }}>
-            Enter otp
+            Enter OTP
           </Text>
 
           <BlankSpace height={hp(2)} />
@@ -374,7 +374,7 @@ const SignUp = ({navigation}) => {
               color: '#fff',
               fontSize: wp(4),
             }}
-            btnName="Verify otp"
+            btnName="VERIFY OTP"
             isLoader={btnLoader2}
           />
         </View>
