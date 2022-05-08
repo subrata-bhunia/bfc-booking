@@ -32,7 +32,7 @@ const Events = () => {
         // paddingTop: StatusBar.currentHeight,
         flex: 1,
       }}>
-      {userRole == '' ? (
+      {!userRole ? (
         <View
           style={{
             flex: 1,
@@ -45,21 +45,10 @@ const Events = () => {
         </View>
       ) : userRole == 'Treasurer' ? (
         <KhataEntry />
-      ) : userRole !== 'Treasurer' && userRole !== '' ? (
+      ) : (
         <Text style={{fontFamily: Fonts.medium, fontSize: 20}}>
           No Events Found
         </Text>
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            height: hp(20),
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: wp(100),
-          }}>
-          <SkypeIndicator color={Colors.botton} count={5} size={wp(12)} />
-        </View>
       )}
     </View>
   );
