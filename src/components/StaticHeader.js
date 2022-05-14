@@ -56,7 +56,7 @@ const StaticHeader = () => {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginVertical: 10,
-        backgroundColor: '#fff',
+        // backgroundColor: '#fff',
       }}>
       <View
         style={{

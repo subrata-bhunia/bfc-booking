@@ -11,6 +11,7 @@ import {Icon, Image} from 'react-native-elements';
 import {Colors, Fonts} from '../constants';
 import AllBookings from '../screens/AllBookings';
 import ContactList from '../screens/Contacts';
+import Members from '../screens/Members';
 import Events from '../screens/Events';
 import Stacks from './stack';
 import Modify from '../screens/Modify/Modify';
@@ -155,6 +156,33 @@ const Tabs = () => {
         }}
       />
       <Tab.Screen
+        name="Members"
+        component={Members}
+        options={{
+          tabBarIcon: ({focused}) => (
+            <View style={{alignItems: 'center'}}>
+              <Image
+                source={require('../../assets/images/icons/contact.png')}
+                style={{
+                  height: 30,
+                  width: 30,
+                  resizeMode: 'contain',
+                  tintColor: focused ? Colors.botton : Colors.disable,
+                }}
+              />
+              <Text
+                style={{
+                  fontFamily: Fonts.semibold,
+                  marginTop: 3,
+                  color: focused ? Colors.primary : Colors.disable,
+                }}>
+                Members
+              </Text>
+            </View>
+          ),
+        }}
+      />
+      {/* <Tab.Screen
         name="Contact"
         component={ContactList}
         options={{
@@ -180,7 +208,7 @@ const Tabs = () => {
             </View>
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Event"
         component={Events}
