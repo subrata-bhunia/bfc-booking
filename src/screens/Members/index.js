@@ -502,7 +502,7 @@ const ContactList = () => {
               fontSize: wp(4),
               fontFamily: Fonts.semibold,
             }}>
-            Contects
+            Contacts
           </Text>
         </Pressable>
       </View>
