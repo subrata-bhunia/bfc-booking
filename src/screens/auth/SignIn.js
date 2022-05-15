@@ -18,6 +18,7 @@ import {
   Android,
 } from 'react-native-firebase-push-notifications';
 import {useDispatch} from 'react-redux';
+import {getSignin} from '../../redux/action';
 
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -40,23 +41,29 @@ const SignIn = ({navigation}) => {
       if (phone.length == 10) {
         if (password.length >= 6) {
           setBtnLoader(true);
-          SignInUser({
-            phone: phone,
-            password: password,
-          })
-            .then(res => {
-              if (res?.data?.status === 'Success') {
-                signIn(res?.data?.user_id);
-              } else {
-                setstatus(true);
-                setstatusMsg(res?.data?.message);
-                setBtnLoader(false);
-              }
-            })
-            .catch(err => {
-              console.log(err);
-              setBtnLoader(false);
-            });
+          dispatch(
+            getSignin({
+              phone: phone,
+              password: password,
+            }),
+          );
+          // SignInUser({
+          //   phone: phone,
+          //   password: password,
+          // })
+          //   .then(res => {
+          //     if (res?.data?.status === 'Success') {
+          //       signIn(res?.data?.user_id);
+          //     } else {
+          //       setstatus(true);
+          //       setstatusMsg(res?.data?.message);
+          //       setBtnLoader(false);
+          //     }
+          //   })
+          //   .catch(err => {
+          //     console.log(err);
+          //     setBtnLoader(false);
+          //   });
         } else {
           setpasswordV(false);
         }

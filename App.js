@@ -1,7 +1,5 @@
 import {NavigationContainer} from '@react-navigation/native';
-import SplashScreen from 'react-native-splash-screen';
 import React, {useEffect, useState} from 'react';
-
 import {
   LogBox,
   StatusBar,
@@ -16,11 +14,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthContext} from './src/components/context';
 import {UIStore} from './src/UIStore';
 import {UserInfo} from './src/api/Users';
-import {Provider} from 'react-redux';
-import {store} from './src/redux/store/store';
+// import {Provider} from 'react-redux';
+// import store from './src/redux/store/store';
 import AnimatedSplash from './src/helper/react-native-animated-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
 import messaging from '@react-native-firebase/messaging';
+import {getTokenAction} from './src/redux/action';
+import {useDispatch} from 'react-redux';
 import {
   notifications,
   messages,
@@ -29,6 +29,7 @@ import {
 } from 'react-native-firebase-push-notifications';
 
 function AppZ({props}) {
+  const dispatch = useDispatch();
   console.log('Props', props);
   const [login, setlogin] = useState(false);
   const [load, setload] = useState(false);
@@ -65,6 +66,7 @@ function AppZ({props}) {
   // ----------- //
   useEffect(() => {
     setload(true);
+    dispatch(getTokenAction());
   }, []);
   LogBox.ignoreAllLogs();
   // -------------- //
@@ -114,47 +116,45 @@ function AppZ({props}) {
       backgroundColor={'#ddb540'}
       logoHeight={150}
       logoWidth={150}>
-      <Provider store={store}>
-        <AuthContext.Provider value={authContext}>
-          <NavigationContainer>
-            <StatusBar
-              translucent
-              backgroundColor={'transparent'}
-              barStyle="dark-content"
-            />
-            {netinfo ? (
-              login ? (
-                <Stacks />
-              ) : (
-                <AuthStackScreen />
-              )
+      <AuthContext.Provider value={authContext}>
+        <NavigationContainer>
+          <StatusBar
+            translucent
+            backgroundColor={'transparent'}
+            barStyle="dark-content"
+          />
+          {netinfo ? (
+            login ? (
+              <Stacks />
             ) : (
-              <View
+              <AuthStackScreen />
+            )
+          ) : (
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+              }}>
+              <Text>Hello No InterNet</Text>
+              <Text
                 style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flex: 1,
+                  marginTop: 20,
+                  color: 'red',
+                }}
+                onPress={() => {
+                  NetInfo.fetch().then(state => {
+                    console.log('Connection type', state.details);
+                    console.log('Is connected?', state.isConnected);
+                    setNetinfo(state.isConnected);
+                  });
                 }}>
-                <Text>Hello No InterNet</Text>
-                <Text
-                  style={{
-                    marginTop: 20,
-                    color: 'red',
-                  }}
-                  onPress={() => {
-                    NetInfo.fetch().then(state => {
-                      console.log('Connection type', state.details);
-                      console.log('Is connected?', state.isConnected);
-                      setNetinfo(state.isConnected);
-                    });
-                  }}>
-                  Retry
-                </Text>
-              </View>
-            )}
-          </NavigationContainer>
-        </AuthContext.Provider>
-      </Provider>
+                Retry
+              </Text>
+            </View>
+          )}
+        </NavigationContainer>
+      </AuthContext.Provider>
     </AnimatedSplash>
   );
 }
