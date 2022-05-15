@@ -1,4 +1,4 @@
-import {View, Text, Pressable} from 'react-native';
+import {View, Text, Pressable, DeviceEventEmitter} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Header from '../../components/Header';
 import BlankSpace from '../../components/BlankSpace';
@@ -12,6 +12,7 @@ import {UIStore} from '../../UIStore';
 import {getAllNotifications, handleReadMsg} from '../../api/Notification';
 import {FlatList} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
+import {SkypeIndicator} from 'react-native-indicators';
 
 const Notification = () => {
   const userId = UIStore.useState(s => s.userId);
@@ -19,9 +20,11 @@ const Notification = () => {
 
   const [allData, setAllData] = useState([]);
   const [unread, setUnread] = useState(0);
+  const [loader, setLoader] = useState(false);
 
   //All notifications get Api
   const handlegetNotification = async () => {
+    setLoader(true);
     getAllNotifications({
       user_id: userId,
     })
@@ -32,9 +35,11 @@ const Notification = () => {
           setAllData(data);
           setUnread(unread);
         }
+        setLoader(false);
       })
       .catch(err => {
         console.log('Err of getAllNotifications', err);
+        setLoader(false);
       });
   };
 
@@ -44,7 +49,12 @@ const Notification = () => {
     handleReadMsg({
       user_id: userId,
       notification_id: id,
-    });
+    })
+      .then(res => {
+        console.log('Res of handleReadMsg', res.data);
+        DeviceEventEmitter.emit('notificationRes', res.data.status);
+      })
+      .catch(err => console.log('Err of ReadMsg', err));
   };
 
   useEffect(() => {
@@ -179,9 +189,34 @@ const Notification = () => {
       }}>
       <Header name="Notification" backBtn={true} />
       <BlankSpace height={hp(1)} />
-      {allData.length != 0 ? (
-        <FlatList data={allData} renderItem={renderItem} />
-      ) : null}
+      {!loader ? (
+        allData.length > 0 ? (
+          <FlatList data={allData} renderItem={renderItem} />
+        ) : (
+          <View
+            style={{
+              height: hp(50),
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Text
+              style={{
+                color: Colors.text,
+                fontSize: wp(4),
+                fontFamily: Fonts.medium,
+              }}>
+              No Notification Found
+            </Text>
+          </View>
+        )
+      ) : (
+        <View
+          style={{
+            marginTop: hp(30),
+          }}>
+          <SkypeIndicator color={Colors.botton} count={5} size={wp(12)} />
+        </View>
+      )}
     </View>
   );
 };

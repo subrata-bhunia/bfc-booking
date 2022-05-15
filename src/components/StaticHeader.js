@@ -28,19 +28,28 @@ const StaticHeader = () => {
 
   //All notifications get Api
   const handlegetNotification = () => {
-    getAllNotifications({
-      user_id: userId,
-    })
-      .then(res => {
-        const {status, data, unread} = res.data;
-        console.log('Res of getAllNotification', res.data);
-        if (status == 'Success') {
-          setUnread(unread);
-        }
+    if (userId) {
+      getAllNotifications({
+        user_id: userId,
       })
-      .catch(err => {
-        console.log('Err of getAllNotifications', err);
-      });
+        .then(res => {
+          const {status, data, unread} = res.data;
+          console.log(
+            'Res of getAllNotification from static header page',
+            'unread :',
+            unread,
+          );
+          if (status == 'Success') {
+            setUnread(unread);
+          }
+        })
+        .catch(err => {
+          console.log(
+            'Err of getAllNotifications from static header page',
+            err,
+          );
+        });
+    }
   };
   console.log('unread', unread);
   useEffect(() => {
@@ -48,7 +57,7 @@ const StaticHeader = () => {
     DeviceEventEmitter.addListener('notificationRes', function () {
       handlegetNotification();
     });
-  });
+  }, [userId]);
   // console.log(userId);
   return (
     <View
