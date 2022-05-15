@@ -1,3 +1,20 @@
+import {
+  ALL_BOOKINGS_REQUEST,
+  DUE_BOOKING_REQUEST,
+  SIGNUP_REQUEST,
+  UPCOMING_BOOKING_REQUEST,
+  FORGOT_PASSWORD_REQUEST,
+  GET_TOKEN_REQUEST,
+  LOGOUT_REQUEST,
+  SIGNIN_REQUEST,
+  USER_INFO_REQUEST,
+  NOTIFICATIONS_REQUEST,
+  NOTIFICATIONS_READ_REQUEST,
+  CALENDER_BOOKINGS_INFO_REQUEST,
+  ALL_MEMBERS_REQUEST,
+  INVITE_STATUS_REQUEST,
+} from './types';
+
 export const calculateAction = (uniqueId, data, rent) => {
   return {
     type: 'CALCULATE_PRICE',
@@ -16,3 +33,92 @@ export const fcmSet = (user_id, fcm_token) => {
     fcm_token,
   };
 };
+
+// BOOKING
+
+export const getAllBookings = payload => ({
+  type: ALL_BOOKINGS_REQUEST,
+  payload,
+});
+export const getUpcomingBookings = payload => ({
+  type: UPCOMING_BOOKING_REQUEST,
+  payload,
+});
+export const getAllDueBookings = payload => ({
+  type: DUE_BOOKING_REQUEST,
+  payload,
+});
+
+//  Auth
+// SINGIN
+export const getSignin = payload => {
+  console.log(payload);
+  return {
+    type: SIGNIN_REQUEST,
+    payload,
+  };
+};
+// SINGUP
+export const signUp = payload => {
+  console.log(payload);
+  return {
+    type: SIGNUP_REQUEST,
+    payload,
+  };
+};
+// logout
+export const logout = payload => {
+  console.log(payload);
+  return {
+    type: LOGOUT_REQUEST,
+    payload,
+  };
+};
+// token
+export const getTokenAction = () => ({
+  type: GET_TOKEN_REQUEST,
+});
+// forgot password
+export const forgotPassword = payload => ({
+  type: FORGOT_PASSWORD_REQUEST,
+  payload,
+});
+
+// USER INFO
+export const getUserInfo = payload => ({
+  type: USER_INFO_REQUEST,
+  payload,
+});
+
+// NOTIFICATIONS
+
+export const getNotifications = payload => ({
+  type: NOTIFICATIONS_REQUEST,
+  payload,
+});
+// NOTIFICATIONS READ
+
+export const getNotificationsRead = payload => ({
+  type: NOTIFICATIONS_READ_REQUEST,
+  payload,
+});
+
+// calenders
+
+export const calenderBookings = payload => ({
+  type: CALENDER_BOOKINGS_INFO_REQUEST,
+  payload,
+});
+
+// All members
+export const allMembers = payload => ({
+  type: ALL_MEMBERS_REQUEST,
+  payload,
+});
+
+// Invite status
+
+export const inviteStatus = payload => ({
+  type: INVITE_STATUS_REQUEST,
+  payload,
+});

@@ -195,7 +195,8 @@ const Home = () => {
           .then(res => {
             if (res.data?.data?.status == 'Active') {
               UIStore.update(s => {
-                s.userName = res.data?.data?.user_name;
+                (s.userName = res.data?.data?.user_name),
+                  (s.userRole = res.data?.data?.user_role);
               });
             } else {
               signOut();
