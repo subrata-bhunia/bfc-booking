@@ -17,8 +17,11 @@ import {AuthContext} from './context';
 import {UIStore} from '../UIStore';
 import {useNavigation} from '@react-navigation/native';
 import {getAllNotifications} from '../api/Notification';
+import {useDispatch} from 'react-redux';
+import {logout} from '../redux/action';
 
 const StaticHeader = () => {
+  const dispatch = useDispatch();
   const {signOut} = React.useContext(AuthContext);
   const userId = UIStore.useState(s => s.userId);
   const userName = UIStore.useState(s => s.userName);
@@ -117,7 +120,7 @@ const StaticHeader = () => {
                   {`Hi ${userName},\nWelcome to BFC Booking App.\nThank You.`}
                 </Text>
                 <Button
-                  onPress={() => signOut()}
+                  onPress={() => dispatch(logout({userId}))}
                   btnStyle={{
                     height: 40,
                     width: wp(50),

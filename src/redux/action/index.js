@@ -13,6 +13,8 @@ import {
   CALENDER_BOOKINGS_INFO_REQUEST,
   ALL_MEMBERS_REQUEST,
   INVITE_STATUS_REQUEST,
+  VERIFY_OTP_SIGNUP_REQUEST,
+  VERIFY_OTP_FORGOT_PASSWORD_REQUEST,
 } from './types';
 
 export const calculateAction = (uniqueId, data, rent) => {
@@ -66,6 +68,14 @@ export const signUp = payload => {
     payload,
   };
 };
+// otpverifysignup
+export const otpVerifySignup = payload => {
+  console.log(payload);
+  return {
+    type: VERIFY_OTP_SIGNUP_REQUEST,
+    payload,
+  };
+};
 // logout
 export const logout = payload => {
   console.log(payload);
@@ -83,7 +93,14 @@ export const forgotPassword = payload => ({
   type: FORGOT_PASSWORD_REQUEST,
   payload,
 });
-
+// forgotPasswordOtpVerify
+export const forgotPasswordOtpVerify = payload => {
+  console.log(payload);
+  return {
+    type: VERIFY_OTP_FORGOT_PASSWORD_REQUEST,
+    payload,
+  };
+};
 // USER INFO
 export const getUserInfo = payload => ({
   type: USER_INFO_REQUEST,

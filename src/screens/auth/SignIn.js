@@ -17,8 +17,9 @@ import {
   NotificationMessage,
   Android,
 } from 'react-native-firebase-push-notifications';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {getSignin} from '../../redux/action';
+import {SIGNIN_FAILURE} from '../../redux/action/types';
 
 const SignIn = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -26,44 +27,20 @@ const SignIn = ({navigation}) => {
   const [phoneValid, setPhoneValid] = useState(true);
   const [password, setpassword] = useState('');
   const [passwordV, setpasswordV] = useState(true);
-  const [status, setstatus] = useState(false);
-  const [statusMsg, setstatusMsg] = useState('');
   const [btnLoader, setBtnLoader] = useState(false);
   const {signIn} = React.useContext(AuthContext);
 
-  useEffect(() => {
-    setstatus(false);
-  }, [password, phone]);
   const dispatch = useDispatch();
-
   const _SignIn = () => {
     if (phone.length == 10 || password.length >= 6) {
       if (phone.length == 10) {
         if (password.length >= 6) {
-          setBtnLoader(true);
           dispatch(
             getSignin({
               phone: phone,
               password: password,
             }),
           );
-          // SignInUser({
-          //   phone: phone,
-          //   password: password,
-          // })
-          //   .then(res => {
-          //     if (res?.data?.status === 'Success') {
-          //       signIn(res?.data?.user_id);
-          //     } else {
-          //       setstatus(true);
-          //       setstatusMsg(res?.data?.message);
-          //       setBtnLoader(false);
-          //     }
-          //   })
-          //   .catch(err => {
-          //     console.log(err);
-          //     setBtnLoader(false);
-          //   });
         } else {
           setpasswordV(false);
         }
@@ -75,7 +52,10 @@ const SignIn = ({navigation}) => {
       setPhoneValid(false);
     }
   };
-
+  const AuthReducer = useSelector(state => state.AuthReducer);
+  useEffect(() => {
+    setBtnLoader(AuthReducer.loader);
+  }, [AuthReducer]);
   return (
     <KeyboardAwareScrollView
       style={{
@@ -125,9 +105,9 @@ const SignIn = ({navigation}) => {
           height: hp(7),
           alignItems: 'center',
         }}>
-        {status ? (
+        {AuthReducer.status == SIGNIN_FAILURE ? (
           <Vaildation
-            errormsg={statusMsg}
+            errormsg={AuthReducer.error}
             txtStyle={{fontFamily: Fonts.semibold}}
           />
         ) : null}
@@ -183,7 +163,7 @@ const SignIn = ({navigation}) => {
           fontSize: wp(4),
         }}
         btnName="SIGN IN"
-        isLoader={btnLoader}
+        isLoader={AuthReducer.loader}
       />
 
       <BlankSpace height={hp(3)} />

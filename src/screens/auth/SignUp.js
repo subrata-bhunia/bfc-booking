@@ -15,6 +15,8 @@ import {OtpVerifyAPIRegister, SignUpUser} from '../../api/Users';
 import {AuthContext} from '../../components/context';
 import Modal from 'react-native-modal';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
+import {useDispatch} from 'react-redux';
+import {signUp} from '../../redux/action';
 
 const SignUp = ({navigation}) => {
   const [show, setShow] = useState(false);
@@ -28,7 +30,7 @@ const SignUp = ({navigation}) => {
   const [status, setstatus] = useState(false);
   const [status2, setstatus2] = useState(false);
   const [statusMsg, setstatusMsg] = useState('');
-  const {signUp} = React.useContext(AuthContext);
+  // const {signUp} = React.useContext(AuthContext);
   const [btnLoader, setBtnLoader] = useState(false);
   //For verify Otp btn
   const [btnLoader2, setBtnLoader2] = useState(false);
@@ -52,34 +54,21 @@ const SignUp = ({navigation}) => {
   useEffect(() => {
     setstatus(false);
   }, [Password, phone, Email, Name]);
-
+  const dispatch = useDispatch();
   const _SignUp = () => {
     if (Name.length > 5 || phone.length == 10 || Password.length >= 6) {
       if (Name.length > 5) {
         if (phone.length == 10) {
           if (Password.length >= 6) {
             if (isOtp) {
-              setBtnLoader(true);
-              SignUpUser({
-                name: Name,
-                email: Email,
-                phone: phone,
-                password: Password,
-              })
-                .then(res => {
-                  if (res.data?.status === 'Success') {
-                    signUp(res.data?.user_id);
-                  } else {
-                    setBtnLoader(false);
-                    setstatus(true);
-                    setstatusMsg(res.data?.message);
-                  }
-                })
-                .catch(err => {
-                  setBtnLoader(false);
-                  console.log(err);
-                  alert('Error in Signup');
-                });
+              dispatch(
+                signUp({
+                  name: Name,
+                  email: Email,
+                  phone: phone,
+                  password: Password,
+                }),
+              );
             } else {
               setstatusMsg('Mobile number not verified');
               setstatus(true);
