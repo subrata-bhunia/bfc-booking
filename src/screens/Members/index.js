@@ -23,6 +23,8 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import StaticHeader from '../../components/StaticHeader';
+import {getAllMembers} from '../../api/Members';
+import {UIStore} from '../../UIStore';
 const alphabet = [
   'A',
   'B',
@@ -53,6 +55,7 @@ const alphabet = [
 ];
 
 const ContactList = () => {
+  const userId = UIStore.useState(s => s.userId);
   let [contacts, setContacts] = useState([
     // {
     //   number: '9933785077',
@@ -74,6 +77,8 @@ const ContactList = () => {
   const [loader2, setloader2] = useState(false);
   const [checked, setChecked] = useState(false);
   const [selectedTabNo, setSelectedTabNo] = useState(1);
+  const [members, setMembers] = useState([]);
+  const [event, setIsEven] = useState(false);
   const colors = [
     '#fa756b',
     '#d2fa6b',
@@ -134,7 +139,7 @@ const ContactList = () => {
   ];
   const data = alphabet.map(c => {
     let filtered = contacts.filter(
-      i => i.displayName?.[0]?.toUpperCase() === c.toUpperCase(),
+      i => i.name?.[0]?.toUpperCase() === c.toUpperCase(),
     );
     if (filtered.length === 0) {
       return null;
@@ -143,14 +148,15 @@ const ContactList = () => {
         title: c.toUpperCase(),
         data: filtered.map(i => {
           return {
-            name: i.displayName,
-            mobile: i.number,
+            name: i.name,
+            mobile: i.phone,
             photo: i.thumbnailPath,
           };
         }),
       };
     }
   });
+
   const makeCall = phone => {
     Linking.openURL(`tel:${phone}`);
   };
@@ -182,109 +188,166 @@ const ContactList = () => {
     }
   }, [searchText]);
 
-  // Api call
-
-  const handleGetContact = async () => {
+  //GetAll members Api call
+  const handlegetAllMembers = () => {
     setloader2(true);
-    getContact()
+    getAllMembers({
+      user_id: userId,
+    })
       .then(res => {
-        const {status, message, data} = res?.data;
-
-        if (status == 'Success' && data) {
-          const newData = data.slice().map(item => {
-            return {
-              number: item.phone,
-              displayName: item.name,
-            };
-          });
-          setContacts(newData);
-          setloader2(false);
-        } else {
-          setloader2(false);
+        const {data, status, event} = res?.data;
+        console.log('res', data);
+        if (status == 'Success') {
+          setMembers(data);
+          setIsEven(event);
+          const contactdataafterfilter = members.filter(
+            i => i.phone.length > 9,
+          );
+          console.log('jjj', contactdataafterfilter);
+          setContacts(contactdataafterfilter);
         }
+        // const{}=res.data
+        // if()
+        setloader2(false);
       })
       .catch(err => {
-        console.log('Err of get Contact :', err);
-        setloader2(false);
+        console.log('Err of getallMembers', err), setloader2(false);
       });
   };
 
   useEffect(() => {
-    handleGetContact();
-  }, []);
+    handlegetAllMembers();
+  }, [selectedTabNo]);
 
   const FirstTab = () => {
     return (
       <>
         {!loader2 ? (
-          <FlatList
-            data={contacts}
-            keyExtractor={(item, index) => item + index}
-            renderItem={({item, index}) => (
-              <Pressable
-                style={[styles.container, {marginBottom: hp(1)}]}
-                onPress={() => setChecked(true)}>
-                <View
+          <>
+            {members.length > 0 ? (
+              <FlatList
+                data={members}
+                keyExtractor={(item, index) => item + index}
+                showsVerticalScrollIndicator={false}
+                renderItem={({item, index}) => (
+                  <>
+                    <Pressable
+                      style={[
+                        styles.container,
+                        {
+                          marginBottom: hp(1),
+                          flex: 1,
+                          width: wp(100),
+                          justifyContent: 'center',
+                        },
+                      ]}
+                      onPress={() => setChecked(!checked)}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: wp(90),
+                        }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                          <View
+                            style={{
+                              height: wp(10),
+                              width: wp(10),
+                              backgroundColor:
+                                colors[
+                                  Math.floor(Math.random() * colors.length)
+                                ],
+                              borderRadius: 100,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginRight: wp(3),
+                            }}>
+                            <Icon name="person" color={Colors.white} />
+                          </View>
+                          <View>
+                            <Text
+                              style={{
+                                fontFamily: Fonts.semibold,
+                                color: Colors.TextColor,
+                                fontSize: wp(4),
+                              }}>
+                              {item.name}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: Fonts.medium,
+                                color: Colors.TextColor,
+                                fontSize: wp(3),
+                              }}>
+                              {item.role}
+                            </Text>
+                          </View>
+                        </View>
+                        {event ? (
+                          checked ? (
+                            <View
+                              style={{
+                                height: wp(6),
+                                width: wp(6),
+                                borderRadius: 100,
+                                backgroundColor: 'green',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}>
+                              <Icon
+                                name="check"
+                                size={wp(5)}
+                                color={Colors.white}
+                              />
+                            </View>
+                          ) : (
+                            //   </View>
+                            <View
+                              style={{
+                                height: wp(6),
+                                width: wp(6),
+                                borderRadius: 100,
+                                borderWidth: 1,
+                                borderColor: Colors.disable,
+                              }}
+                            />
+                          )
+                        ) : null}
+                      </View>
+                    </Pressable>
+                    {members.length - 1 == index ? (
+                      <View
+                        style={{
+                          height: hp(15),
+                        }}
+                      />
+                    ) : null}
+                  </>
+                )}
+              />
+            ) : (
+              <View
+                style={{
+                  height: hp(50),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: wp(90),
+                    color: Colors.text,
+                    fontSize: wp(4),
+                    fontFamily: Fonts.medium,
                   }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                    }}>
-                    <View
-                      style={{
-                        height: wp(10),
-                        width: wp(10),
-                        backgroundColor:
-                          colors[Math.floor(Math.random() * colors.length)],
-                        borderRadius: 100,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: wp(3),
-                      }}>
-                      <Icon name="person" color={Colors.white} />
-                    </View>
-                    <Text
-                      style={{
-                        fontFamily: Fonts.semibold,
-                        color: Colors.TextColor,
-                      }}>
-                      {item.displayName}
-                    </Text>
-                  </View>
-                  {checked ? (
-                    <View
-                      style={{
-                        height: wp(6),
-                        width: wp(6),
-                        borderRadius: 100,
-                        backgroundColor: 'green',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                      <Icon name="check" size={wp(5)} color={Colors.white} />
-                    </View>
-                  ) : (
-                    //   </View>
-                    <View
-                      style={{
-                        height: wp(6),
-                        width: wp(6),
-                        borderRadius: 100,
-                        borderWidth: 1,
-                        borderColor: Colors.disable,
-                      }}
-                    />
-                  )}
-                </View>
-              </Pressable>
+                  No Members Found
+                </Text>
+              </View>
             )}
-          />
+          </>
         ) : (
           <View
             style={{
@@ -296,6 +359,7 @@ const ContactList = () => {
       </>
     );
   };
+
   const SecondTab = () => {
     return (
       <>
@@ -303,10 +367,11 @@ const ContactList = () => {
           <SectionList
             sections={data.filter(i => i)}
             keyboardDismissMode="interactive"
+            showsVerticalScrollIndicator={false}
             initialNumToRender={100}
             keyExtractor={(item, index) => item + index}
             renderItem={({item, index}) => (
-              <View style={styles.container}>
+              <View style={[styles.container, {padding: wp(4), flex: 1}]}>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -317,8 +382,8 @@ const ContactList = () => {
                     <Image
                       source={{uri: item?.photo}}
                       style={{
-                        height: wp(12),
-                        width: wp(12),
+                        height: wp(11),
+                        width: wp(11),
                         borderRadius: 25,
                         marginHorizontal: 7,
                       }}
@@ -326,8 +391,8 @@ const ContactList = () => {
                   ) : (
                     <View
                       style={{
-                        height: wp(12),
-                        width: wp(12),
+                        height: wp(11),
+                        width: wp(11),
                         backgroundColor:
                           colors[Math.floor(Math.random() * colors.length)],
                         borderRadius: 100,
@@ -374,8 +439,8 @@ const ContactList = () => {
                     onPress={() => sendWPsms(item.mobile, item.name)}
                     style={{
                       backgroundColor: '#04b026',
-                      height: wp(10.5),
-                      width: wp(10.5),
+                      height: wp(10),
+                      width: wp(10),
                       borderRadius: 100,
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -384,7 +449,7 @@ const ContactList = () => {
                       name="logo-whatsapp"
                       type="ionicon"
                       color={Colors.white}
-                      size={wp(6)}
+                      size={wp(5.8)}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -392,13 +457,13 @@ const ContactList = () => {
                     onPress={() => makeCall(item.mobile)}
                     style={{
                       backgroundColor: Colors.secondary,
-                      height: wp(10.5),
-                      width: wp(10.5),
+                      height: wp(10),
+                      width: wp(10),
                       borderRadius: 100,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                    <Icon name="phone" color={Colors.primary} size={wp(6)} />
+                    <Icon name="phone" color={Colors.primary} size={wp(5.8)} />
                   </TouchableOpacity>
                   {/* <TouchableOpacity
                   disabled={item.mobile === undefined ? true : false}
@@ -417,6 +482,7 @@ const ContactList = () => {
                   marginTop: hp(1),
                   padding: wp(3),
                   paddingBottom: wp(1),
+                  flex: 1,
                 }}>
                 <Text
                   style={{
@@ -428,6 +494,7 @@ const ContactList = () => {
                 </Text>
               </View>
             )}
+            ListFooterComponent={() => <View style={{height: hp(15)}} />}
           />
         ) : (
           <View
@@ -515,7 +582,7 @@ export default ContactList;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    paddingVertical: wp(4),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
