@@ -8,6 +8,9 @@ import {
   ADD_NEW_BOOKING_REQUEST,
   ADD_NEW_BOOKING_SUCCESS,
   ADD_NEW_BOOKING_FAILURE,
+  HANDLE_BOOKING_CANCEL_REQUEST,
+  HANDLE_BOOKING_CANCEL_SUCCESS,
+  HANDLE_BOOKING_CANCEL_FAILURE,
 } from '../action/types';
 
 export function* addBookingReqSaga(action) {
@@ -37,10 +40,37 @@ export function* addBookingReqSaga(action) {
     yield put({type: ADD_NEW_BOOKING_FAILURE, error: error});
   }
 }
+export function* handleCancleBookingSaga(action) {
+  try {
+    let authReducerRes = yield select(state => state.AuthReducer);
+    let user_id = authReducerRes.token;
+    let response = yield call(postApi, '/cancel-booking', {
+      user_id,
+      ...action.payload,
+    });
+
+    if (response.data.status == 'Success') {
+      yield put({
+        type: HANDLE_BOOKING_CANCEL_SUCCESS,
+        cancelBookingData: response.data,
+      });
+    } else {
+      yield put({
+        type: HANDLE_BOOKING_CANCEL_FAILURE,
+        error: response.data.message,
+      });
+    }
+  } catch (error) {
+    yield put({type: HANDLE_BOOKING_CANCEL_FAILURE, error: error});
+  }
+}
 
 const watchFunctionForBookinghandle = [
   (function* () {
     yield takeLatest(ADD_NEW_BOOKING_REQUEST, addBookingReqSaga);
+  })(),
+  (function* () {
+    yield takeLatest(HANDLE_BOOKING_CANCEL_REQUEST, handleCancleBookingSaga);
   })(),
 ];
 

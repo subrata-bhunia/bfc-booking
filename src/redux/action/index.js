@@ -21,6 +21,7 @@ import {
   CHECK_AVAILABILITY_REQUEST,
   CHECK_RETURN_ITEM_REQUEST,
   GET_INVENTORY_ITEM_REQUEST,
+  HANDLE_BOOKING_CANCEL_REQUEST,
 } from './types';
 
 export const calculateAction = (uniqueId, data, rent) => {
@@ -158,6 +159,11 @@ export const inviteStatus = payload => ({
 
 export const createNewBooking = payload => ({
   type: ADD_NEW_BOOKING_REQUEST,
+  payload,
+});
+
+export const cancelBooking = payload => ({
+  type: HANDLE_BOOKING_CANCEL_REQUEST,
   payload,
 });
 

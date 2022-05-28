@@ -28,6 +28,7 @@ export const allBookingList = data => {
 export const cancelBooking = data => {
   return axios.post('/cancel-booking', data);
 };
+//''''//
 export const pickupBooking = data => {
   return axios.post('/pickup-booking', data);
 };
