@@ -70,6 +70,7 @@ export function* getInventoryItemSaga(action) {
   try {
     let authReducerRes = yield select(state => state.AuthReducer);
     let user_id = authReducerRes.token;
+
     let response = yield call(postApi, '/inventory-items', {
       user_id,
       ...action.payload,
