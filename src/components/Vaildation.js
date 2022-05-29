@@ -9,6 +9,8 @@ import {
 
 const Vaildation = ({errormsg = '', txtStyle}) => {
   return (
+    <>
+    {(errormsg == '' || errormsg == null || errormsg == undefined) ? null :
     <View
       style={{
         flexDirection: 'row',
@@ -30,6 +32,8 @@ const Vaildation = ({errormsg = '', txtStyle}) => {
         {errormsg}
       </Text>
     </View>
+    }
+    </>
   );
 };
 

@@ -89,7 +89,7 @@ const SignIn = ({navigation}) => {
         }}>
         We Are Verities
       </Text>
-      <BlankSpace height={hp(2)} />
+      <BlankSpace height={hp(3)} />
 
       {/* <Text
         style={{
@@ -113,7 +113,7 @@ const SignIn = ({navigation}) => {
         ) : null}
       </View>
 
-      <BlankSpace height={hp(3)} />
+      {/* <BlankSpace height={hp(1)} /> */}
       <View>
         <CommonInput
           iconName="phone-iphone"
@@ -122,6 +122,7 @@ const SignIn = ({navigation}) => {
           onchangeText={txt => {
             setPhone(txt);
             setPhoneValid(true);
+            dispatch({type: SIGNIN_FAILURE, error: ''})
           }}
           keyboardType="numeric"
           max={10}
@@ -137,6 +138,7 @@ const SignIn = ({navigation}) => {
           onchangeText={value => {
             setpassword(value);
             setpasswordV(true);
+            dispatch({type: SIGNIN_FAILURE, error: undefined})
           }}
           rightIconName={!show ? 'visibility' : 'visibility-off'}
           rightIconClick={() => setShow(!show)}

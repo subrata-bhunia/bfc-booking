@@ -21,11 +21,10 @@ import Model from 'react-native-modal';
 import AnimatedLottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
-  // cancelBooking,
+  cancelBooking,
   getBookingInfoById,
   pickupBooking,
 } from '../../api/Bookings';
-import {cancelBooking} from '../../redux/action';
 import {useRoute} from '@react-navigation/native';
 import Header from '../../components/Header';
 import WarningModal from '../../components/WarningModal';
@@ -51,6 +50,7 @@ const PickupBookingPage = ({navigation}) => {
     );
     // console.log("WP")
   };
+  //--------------------- //
 
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(false);
@@ -84,15 +84,6 @@ const PickupBookingPage = ({navigation}) => {
   const [rent, setRent] = useState(0);
   const [payment, setPayment] = useState(0);
   const [costOfItems, setCostOfItems] = useState({});
-
-  //-----------------------//
-  const {cancelBookingRes} = useSelector(state => state.BookinghandleReducer);
-
-  console.log('cancelBookingRes++++++++++', cancelBookingRes);
-  useEffect(() => {
-    setmodalCancel(cancelBookingRes?.modal);
-  }, [cancelBookingRes]);
-  //--------------------- //
 
   // To get Booking Details (API CALL)
   useEffect(() => {
@@ -128,28 +119,22 @@ const PickupBookingPage = ({navigation}) => {
 
   // To Cancle Booking (API CALL)
   const CancelClick = () => {
-    dispatch(
-      cancelBooking({
-        booking_id: booking_id,
-        user_id: user_id,
-      }),
-    );
     //  setShow(true);
-    // setopenCancelModal(false);
-    // cancelBooking({
-    //   booking_id: booking_id,
-    //   user_id: user_id,
-    // })
-    //   .then(res => {
-    //     if (res?.data?.status === 'Success') {
-    //       // setcancle(res?.data?.data);
-    //       setmodalCancel(true);
-    //       setmodalRes(res?.data?.data);
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.log('Err of Cancel', err);
-    //   });
+    setopenCancelModal(false);
+    cancelBooking({
+      booking_id: booking_id,
+      user_id: user_id,
+    })
+      .then(res => {
+        if (res?.data?.status === 'Success') {
+          setcancle(res?.data?.data);
+          setmodalCancel(true);
+          setmodalRes(res?.data?.data);
+        }
+      })
+      .catch(err => {
+        console.log('Err of Cancel', err);
+      });
   };
 
   // handle Pickup (API CALL)
@@ -1178,7 +1163,7 @@ const PickupBookingPage = ({navigation}) => {
                 marginVertical: hp(2),
               }}>
               <Text style={styles.h2}>Date</Text>
-              <Text style={styles.h3}>{cancelBookingRes?.data?.date}</Text>
+              <Text style={styles.h3}>{modalRes?.date}</Text>
             </View>
             <View
               style={{
@@ -1187,9 +1172,7 @@ const PickupBookingPage = ({navigation}) => {
                 marginVertical: hp(2),
               }}>
               <Text style={styles.h2}>Booking Id</Text>
-              <Text style={styles.h3}>
-                {cancelBookingRes?.data?.booking_id}
-              </Text>
+              <Text style={styles.h3}>{modalRes?.booking_id}</Text>
             </View>
             <View
               style={{
@@ -1198,9 +1181,7 @@ const PickupBookingPage = ({navigation}) => {
                 marginVertical: hp(2),
               }}>
               <Text style={styles.h2}>Advanced</Text>
-              <Text style={styles.h3}>
-                {cancelBookingRes?.data?.advanced} /-
-              </Text>
+              <Text style={styles.h3}>{modalRes?.advanced} /-</Text>
             </View>
             <View
               style={{
@@ -1209,9 +1190,7 @@ const PickupBookingPage = ({navigation}) => {
                 marginVertical: hp(2),
               }}>
               <Text style={styles.h2}>Total Amount</Text>
-              <Text style={styles.h3}>
-                {cancelBookingRes?.data?.total_amount} /-
-              </Text>
+              <Text style={styles.h3}>{modalRes?.total_amount} /-</Text>
             </View>
           </View>
           {/*  */}
@@ -1227,13 +1206,10 @@ const PickupBookingPage = ({navigation}) => {
               ]}>
               {modalRes?.pending_amount} /-
             </Text> */}
-            {cancelBookingRes?.data?.have_whatsapp == 1 ? (
+            {modalRes?.have_whatsapp == 1 ? (
               <Button
                 onPress={() => {
-                  sendWPsms(
-                    cancelBookingRes?.data?.customer_phone,
-                    cancelBookingRes?.data?.wa_message,
-                  );
+                  sendWPsms(modalRes?.customer_phone, modalRes?.wa_message);
                 }}
                 btnStyle={{
                   height: 50,
