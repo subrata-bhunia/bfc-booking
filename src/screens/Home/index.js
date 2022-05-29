@@ -40,7 +40,23 @@ import {
   Android,
 } from 'react-native-firebase-push-notifications';
 import {getBanglaDateAndMonth} from '../../helper/bangla-calender';
+import {
+  getAllSpecificDateBookings,
+  getAllDueBookings,
+  getUpcomingBookings,
+  getcalendarBookingsInfo,
+} from '../../redux/action';
 const Home = () => {
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+  const navigation = useNavigation();
+  const user_id = UIStore.useState(s => s.userId);
+
+  const [ben, setben] = useState('');
+  const [selectDate, setSelectDate] = useState('');
+  const [modal, setmodal] = useState(false);
+  const [apiModal, setapiModal] = useState(false);
+
   //  --------- Notifications --------- //
   const getInit = async () => {
     const noti = await (
@@ -134,25 +150,32 @@ const Home = () => {
       }
     });
   }, []);
+
+  const {dueBookinglist, specificDateBookinglist, upcomingBookinglist} =
+    useSelector(state => state.BookinglistReducer);
+  const {calendarInfo} = useSelector(state => state.CalendarInfoReducer);
+
+  console.log(
+    'home page all details from api :',
+    dueBookinglist,
+    specificDateBookinglist,
+    upcomingBookinglist,
+    calendarInfo,
+  );
+
   const getAllBookingBydate = date => {
-    getBookingbyDate({
-      date,
-    }).then(res => {
-      setBookings(res?.data?.data);
-    });
+    dispatch(getAllSpecificDateBookings({date}));
   };
+
+  useEffect(() => {
+    dispatch(getAllDueBookings());
+    dispatch(getUpcomingBookings());
+    dispatch(getcalendarBookingsInfo());
+    setmodal(false);
+  }, [isFocused]);
+
   // ----------------------------------- //
-  const user_id = UIStore.useState(s => s.userId);
-  const [ben, setben] = useState('');
-  const [selectDate, setSelectDate] = useState('');
-  const [fullDate, setfull] = useState([]);
-  const [booked, setBooked] = useState([]);
-  const [modal, setmodal] = useState(false);
-  const [bookings, setBookings] = useState([]);
-  const [upComingbookingsList, setupComingbookingsList] = useState([]);
-  const [dueBookingList, setdueBookingList] = useState([]);
-  const [fullColor, setFullColor] = useState('#eee');
-  const [bookedColor, setBookedColor] = useState('#eee');
+
   const months = [
     'January',
     'February',
@@ -172,9 +195,6 @@ const Home = () => {
     var dd = new Date(date);
     return getBanglaDateAndMonth(dd);
   };
-  const navigation = useNavigation();
-  const isFocused = useIsFocused();
-  const dispatch = useDispatch();
 
   // --------------------- //
   const {signOut} = React.useContext(AuthContext);
@@ -253,7 +273,6 @@ const Home = () => {
   // console.log(dataRedux);
 
   // ------------------- Notice ------------------- //
-  const [apiModal, setapiModal] = useState(false);
   const data = {
     image: 'https://source.unsplash.com/random/600x600/?cook',
     type: 'warm',
@@ -264,51 +283,9 @@ const Home = () => {
   };
 
   // --------------- UPCOMING BOOK LIST ----------- //
-  const [loader, setloader] = useState(true);
-  const [loader2, setloader2] = useState(true);
-  const getUpcomingList = () => {
-    upComingBookingList({user_id: user_id})
-      .then(res => {
-        setloader(true);
-        if (res?.data?.status === 'Success') {
-          setupComingbookingsList(res?.data?.data);
-          setloader(false);
-        }
-        console.log('Res of get upcoming list :', res?.data);
-      })
-      .catch(err => console.log('Err of get upcoming list :', err));
-  };
-  const getDueList = () => {
-    dueBookings({user_id: user_id}).then(res => {
-      setloader2(true);
-      if (res?.data?.status === 'Success') {
-        setdueBookingList(res?.data?.data);
-        setloader2(false);
-      }
-    });
-  };
-  const CalendarData = () => {
-    calenderBooking({user_id: user_id})
-      .then(res => {
-        // setloader(true);
-        if (res?.data?.status === 'Success') {
-          // console.log('eee', res?.data);
-          setfull(res?.data?.full);
-          setBooked(res?.data?.semi_full);
-          setBookedColor(res?.data?.colors[1]);
-          setFullColor(res?.data?.colors[0]);
-        }
-      })
-      .catch(err => {
-        console.log(JSON.stringify(err));
-      });
-  };
-  useEffect(() => {
-    getUpcomingList();
-    getDueList();
-    CalendarData();
-    setmodal(false);
-  }, [isFocused]);
+  const [loader, setloader] = useState(false);
+  const [loader2, setloader2] = useState(false);
+
   return (
     <View
       style={{
@@ -359,16 +336,16 @@ const Home = () => {
                 marginVertical: 10,
               }}
             />
-            {bookings.length > 0 ? (
+            {specificDateBookinglist?.data?.length > 0 ? (
               <View>
                 <View style={{height: hp(30), width: wp(93)}}>
                   <FlatListWithHeader
-                    items={bookings}
+                    items={specificDateBookinglist.data}
                     horizontal={true}
                     width={wp(85)}
                   />
                 </View>
-                {fullDate.includes(selectDate) ? null : (
+                {calendarInfo?.full?.includes(selectDate) ? null : (
                   <Button
                     onPress={() => navigation.navigate('Booking')}
                     btnStyle={{
@@ -486,15 +463,15 @@ const Home = () => {
                   width: 50,
                   backgroundColor:
                     state === 'today'
-                      ? booked.includes(date.dateString)
-                        ? bookedColor
-                        : fullDate.includes(date.dateString)
-                        ? fullColor
+                      ? calendarInfo?.semi_full?.includes(date.dateString)
+                        ? calendarInfo?.colors?.[1]
+                        : calendarInfo?.full?.includes(date.dateString)
+                        ? calendarInfo?.colors?.[0]
                         : Colors.primary
-                      : booked.includes(date.dateString)
-                      ? bookedColor
-                      : fullDate.includes(date.dateString)
-                      ? fullColor
+                      : calendarInfo?.semi_full?.includes(date.dateString)
+                      ? calendarInfo?.colors?.[1]
+                      : calendarInfo?.full?.includes(date.dateString)
+                      ? calendarInfo?.colors?.[0]
                       : '#eee',
                   borderRadius: 10,
                   justifyContent: 'center',
@@ -502,7 +479,7 @@ const Home = () => {
                   elevation: 2,
                 }}>
                 {state === 'today' ? (
-                  booked.includes(date.dateString) ? (
+                  calendarInfo?.semi_full?.includes(date.dateString) ? (
                     <View
                       style={{
                         backgroundColor: Colors.primary,
@@ -514,7 +491,7 @@ const Home = () => {
                         right: -2,
                       }}
                     />
-                  ) : fullDate.includes(date.dateString) ? (
+                  ) : calendarInfo?.full?.includes(date.dateString) ? (
                     <View
                       style={{
                         backgroundColor: Colors.primary,
@@ -540,9 +517,9 @@ const Home = () => {
                         ? 'red'
                         : state === 'today'
                         ? '#fff'
-                        : booked.includes(date.dateString)
+                        : calendarInfo?.semi_full?.includes(date.dateString)
                         ? Colors.white
-                        : fullDate.includes(date.dateString)
+                        : calendarInfo?.full?.includes(date.dateString)
                         ? Colors.white
                         : '#000',
                   }}>
@@ -559,9 +536,9 @@ const Home = () => {
                         ? 'red'
                         : state === 'today'
                         ? '#fff'
-                        : booked.includes(date.dateString)
+                        : calendarInfo?.semi_full?.includes(date.dateString)
                         ? Colors.white
-                        : fullDate.includes(date.dateString)
+                        : calendarInfo?.full?.includes(date.dateString)
                         ? Colors.white
                         : '#000',
                   }}>
@@ -575,14 +552,14 @@ const Home = () => {
         />
         <View style={{marginTop: 20}}>
           <FlatListWithHeader
-            title={`Upcoming Bookings (${upComingbookingsList.length})`}
-            items={upComingbookingsList}
+            title={`Upcoming Bookings (${upcomingBookinglist?.data?.length})`}
+            items={upcomingBookinglist?.data}
             horizontal={true}
             isloader={loader}
           />
           <FlatListWithHeader
-            title={`Due Bookings (${dueBookingList.length})`}
-            items={dueBookingList}
+            title={`Due Bookings (${dueBookinglist?.data?.length})`}
+            items={dueBookinglist?.data}
             horizontal={true}
             isloader={loader2}
           />

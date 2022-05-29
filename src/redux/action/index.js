@@ -13,6 +13,15 @@ import {
   CALENDER_BOOKINGS_INFO_REQUEST,
   ALL_MEMBERS_REQUEST,
   INVITE_STATUS_REQUEST,
+  VERIFY_OTP_SIGNUP_REQUEST,
+  VERIFY_OTP_FORGOT_PASSWORD_REQUEST,
+  GET_BOOKINGS_BY_DATE_REQUEST,
+  ADD_NEW_BOOKING_REQUEST,
+  BOOKING_DETAILS_BY_ID_REQUEST,
+  CHECK_AVAILABILITY_REQUEST,
+  CHECK_RETURN_ITEM_REQUEST,
+  GET_INVENTORY_ITEM_REQUEST,
+  HANDLE_BOOKING_CANCEL_REQUEST,
 } from './types';
 
 export const calculateAction = (uniqueId, data, rent) => {
@@ -48,6 +57,14 @@ export const getAllDueBookings = payload => ({
   type: DUE_BOOKING_REQUEST,
   payload,
 });
+export const getAllSpecificDateBookings = payload => ({
+  type: GET_BOOKINGS_BY_DATE_REQUEST,
+  payload,
+});
+export const getBookingDetailsById = payload => ({
+  type: BOOKING_DETAILS_BY_ID_REQUEST,
+  payload,
+});
 
 //  Auth
 // SINGIN
@@ -63,6 +80,14 @@ export const signUp = payload => {
   console.log(payload);
   return {
     type: SIGNUP_REQUEST,
+    payload,
+  };
+};
+// otpverifysignup
+export const otpVerifySignup = payload => {
+  console.log(payload);
+  return {
+    type: VERIFY_OTP_SIGNUP_REQUEST,
     payload,
   };
 };
@@ -83,7 +108,14 @@ export const forgotPassword = payload => ({
   type: FORGOT_PASSWORD_REQUEST,
   payload,
 });
-
+// forgotPasswordOtpVerify
+export const forgotPasswordOtpVerify = payload => {
+  console.log(payload);
+  return {
+    type: VERIFY_OTP_FORGOT_PASSWORD_REQUEST,
+    payload,
+  };
+};
 // USER INFO
 export const getUserInfo = payload => ({
   type: USER_INFO_REQUEST,
@@ -105,7 +137,7 @@ export const getNotificationsRead = payload => ({
 
 // calenders
 
-export const calenderBookings = payload => ({
+export const getcalendarBookingsInfo = payload => ({
   type: CALENDER_BOOKINGS_INFO_REQUEST,
   payload,
 });
@@ -120,5 +152,34 @@ export const allMembers = payload => ({
 
 export const inviteStatus = payload => ({
   type: INVITE_STATUS_REQUEST,
+  payload,
+});
+
+// Booking handle
+
+export const createNewBooking = payload => ({
+  type: ADD_NEW_BOOKING_REQUEST,
+  payload,
+});
+
+export const cancelBooking = payload => ({
+  type: HANDLE_BOOKING_CANCEL_REQUEST,
+  payload,
+});
+
+//Check item handle
+
+export const checkAvailability = payload => ({
+  type: CHECK_AVAILABILITY_REQUEST,
+  payload,
+});
+
+export const checkReturnItems = payload => ({
+  type: CHECK_RETURN_ITEM_REQUEST,
+  payload,
+});
+
+export const getInventoryItems = payload => ({
+  type: GET_INVENTORY_ITEM_REQUEST,
   payload,
 });

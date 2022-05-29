@@ -32,11 +32,18 @@ import {AddBooking, CheckForOrder} from '../../api/Bookings';
 import {UIStore} from '../../UIStore';
 import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 import {useDispatch, useSelector} from 'react-redux';
-import {calculateAction} from '../../redux/action';
+import {
+  calculateAction,
+  checkAvailability,
+  createNewBooking,
+  getInventoryItems,
+} from '../../redux/action';
+import {CHECK_AVAILABILITY_SUCCESS} from '../../redux/action/types';
 
 const Booking = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(true);
@@ -71,20 +78,23 @@ const Booking = () => {
     // console.log("WP")
   };
   //------- API ----------- //
-  const getInventory = () => {
-    AvailableItems().then(res => {
-      if (res.data?.status === 'Success') {
-        setTableDate(res?.data?.data);
-        console.log('AvailableItems :', res.data);
-        setItemsRent(res.data?.rent);
-      }
-    });
-  };
+
   useEffect(() => {
-    getInventory();
+    dispatch(getInventoryItems());
   }, [isFocused]);
+  // const getInventory = () => {
+  //   AvailableItems().then(res => {
+  //     if (res.data?.status === 'Success') {
+  //       setTableDate(res?.data?.data);
+  //       console.log('AvailableItems :', res.data);
+  //       setItemsRent(res.data?.rent);
+  //     }
+  //   });
+  // };
+  // useEffect(() => {
+  //   getInventory();
+  // }, [isFocused]);
   // ------------------ //
-  const isFocused = useIsFocused();
   // -------- Date Picker --------------- //
   const [isDatePickerVisibleP, setDatePickerVisibilityP] = useState(false);
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
@@ -175,30 +185,50 @@ const Booking = () => {
   };
   console.log('Enter Items are :', book_items);
 
+  const AllCheckHandleReducerdata = useSelector(
+    state => state.AllCheckHandleReducer,
+  );
+
+  console.log('AllCheckHandleReducerdata_____', AllCheckHandleReducerdata);
+  useEffect(() => {
+    if (AllCheckHandleReducerdata.status == CHECK_AVAILABILITY_SUCCESS) {
+      setView0(!view0);
+      setnext1(true);
+      setView1(true);
+    }
+  }, [AllCheckHandleReducerdata.status]);
   // check-availability Api Call
   const handleChackOrdar = () => {
-    setBtnLoader2(true);
-    CheckForOrder({
-      pickup_date: pickupdate,
-      return_date: returndate,
-      gathering,
-    })
-      .then(res => {
-        console.log('success of ChackOrdarAvail', res.data);
-        const {status, message} = res.data;
-        if (status == 'Success') {
-          setView0(!view0);
-          setnext1(true);
-          setView1(true);
-        } else {
-          setCheckAvailabilityMsg(message);
-        }
-        setBtnLoader2(false);
-      })
-      .catch(err => {
-        console.log('Err Of ChackOrdarAvail :', err);
-        setBtnLoader2(false);
-      });
+    dispatch(
+      checkAvailability({
+        pickup_date: pickupdate,
+        return_date: returndate,
+        gathering,
+      }),
+    );
+
+    // setBtnLoader2(true);
+    // CheckForOrder({
+    //   pickup_date: pickupdate,
+    //   return_date: returndate,
+    //   gathering,
+    // })
+    //   .then(res => {
+    //     console.log('success of ChackOrdarAvail', res.data);
+    //     const {status, message} = res.data;
+    //     if (status == 'Success') {
+    //       setView0(!view0);
+    //       setnext1(true);
+    //       setView1(true);
+    //     } else {
+    //       setCheckAvailabilityMsg(message);
+    //     }
+    //     setBtnLoader2(false);
+    //   })
+    //   .catch(err => {
+    //     console.log('Err Of ChackOrdarAvail :', err);
+    //     setBtnLoader2(false);
+    //   });
     setTimeout(() => {
       setCheckAvailabilityMsg(null);
     }, 5000);
@@ -259,53 +289,83 @@ const Booking = () => {
       setgatheringV(false);
     }
   };
+
+  const {addBookingData} = useSelector(state => state.BookinghandleReducer);
+
+  console.log('266', addBookingData);
+
+  useEffect(() => {
+    setmodal(addBookingData.modal);
+    setmodalData(addBookingData?.data);
+  }, [addBookingData]);
+
   const _AddBooking = () => {
     if (rent > 0) {
       console.log(book_items);
       setBtnLoader(true);
-      console.log('userId', userId);
-      AddBooking({
-        pickup_date: pickupdate,
-        pickup_time: value,
-        return_date: returndate,
-        return_time: rvalue,
-        customer_name: cname,
-        customer_phone: cphone,
-        whatsapp: whp,
-        customer_address: cadd,
-        items: book_items,
-        gathering: gathering,
-        rent: rent,
-        advanced: Advanced,
-        caterers: caterersvalue,
-        caterer_charge: cat_rate,
-        extra_charges: extra,
-        total_amount: total,
-        user_id: userId,
-        discount: Discount,
-      })
-        .then(res => {
-          if (res?.data?.status === 'Success') {
-            setmodal(true);
-            setmodalData(res?.data?.data);
-            console.log(res?.data?.data);
-            setBtnLoader(false);
-          } else {
-            setaddBiookingStatus(res?.data?.message);
-            console.log(res?.data?.message);
-            setBtnLoader(false);
-            setTimeout(() => {
-              setaddBiookingStatus(null);
-            }, 5000);
-          }
-        })
-        .catch(err => {
-          console.log(err, 'TTTT');
-          setBtnLoader(false);
-          setTimeout(() => {
-            setaddBiookingStatus(null);
-          }, 5000);
-        });
+      dispatch(
+        createNewBooking({
+          pickup_date: pickupdate,
+          pickup_time: value,
+          return_date: returndate,
+          return_time: rvalue,
+          customer_name: cname,
+          customer_phone: cphone,
+          whatsapp: whp,
+          customer_address: cadd,
+          items: book_items,
+          gathering: gathering,
+          rent: rent,
+          advanced: Advanced,
+          caterers: caterersvalue,
+          caterer_charge: cat_rate,
+          extra_charges: extra,
+          total_amount: total,
+          discount: Discount,
+        }),
+      );
+      // AddBooking({
+      //   pickup_date: pickupdate,
+      //   pickup_time: value,
+      //   return_date: returndate,
+      //   return_time: rvalue,
+      //   customer_name: cname,
+      //   customer_phone: cphone,
+      //   whatsapp: whp,
+      //   customer_address: cadd,
+      //   items: book_items,
+      //   gathering: gathering,
+      //   rent: rent,
+      //   advanced: Advanced,
+      //   caterers: caterersvalue,
+      //   caterer_charge: cat_rate,
+      //   extra_charges: extra,
+      //   total_amount: total,
+      //   user_id: userId,
+      //   discount: Discount,
+      // })
+      //   .then(res => {
+      //     if (res?.data?.status === 'Success') {
+      //       setmodal(true);
+      //       setmodalData(res?.data?.data);
+      //       console.log(res?.data?.data);
+      //       setBtnLoader(false);
+      //     } else {
+      //       setaddBiookingStatus(res?.data?.message);
+      //       console.log(res?.data?.message);
+      //       setBtnLoader(false);
+      //       setTimeout(() => {
+      //         setaddBiookingStatus(null);
+      //       }, 5000);
+      //     }
+      //   })
+      //   .catch(err => {
+      //     console.log(err, 'TTTT');
+      //     setBtnLoader(false);
+      //     setTimeout(() => {
+      //       setaddBiookingStatus(null);
+      //     }, 5000);
+      //   });
     } else {
       setrentV(false);
     }
@@ -935,49 +995,47 @@ const Booking = () => {
               }}>
               {/* Table */}
               <View>
-                {tableData.length == 0 ? (
-                  <SkypeIndicator
-                    color={Colors.botton}
-                    count={5}
-                    size={wp(12)}
+                <Table
+                  borderStyle={{
+                    borderColor: Colors.secondary,
+                    borderWidth: 2,
+                  }}
+                  style={{}}>
+                  <Row
+                    data={TableHead}
+                    style={styles.head}
+                    textStyle={styles.text}
                   />
-                ) : (
-                  <Table
-                    borderStyle={{
-                      borderColor: Colors.secondary,
-                      borderWidth: 2,
-                    }}
-                    style={{}}>
-                    <Row
-                      data={TableHead}
-                      style={styles.head}
-                      textStyle={styles.text}
-                    />
-                    {tableData.map((rowData, index) => (
-                      <TableWrapper key={index} style={styles.row}>
-                        {rowData.map((cellData, cellIndex) => (
-                          <Cell
-                            key={cellIndex}
-                            data={
-                              cellIndex === 2 ? (
-                                <Input
-                                  placeholder="0"
-                                  defaultValue={book_items[cellData]}
-                                  textAlign="center"
-                                  onChangeText={txt => AddItems(cellData, txt)}
-                                  keyboardType="numeric"
-                                />
-                              ) : (
-                                cellData
-                              )
-                            }
-                            textStyle={styles.text}
-                          />
-                        ))}
-                      </TableWrapper>
-                    ))}
-                  </Table>
-                )}
+                  {AllCheckHandleReducerdata?.inventoryItem?.data
+                    ? AllCheckHandleReducerdata?.inventoryItem?.data.map(
+                        (rowData, index) => (
+                          <TableWrapper key={index} style={styles.row}>
+                            {rowData.map((cellData, cellIndex) => (
+                              <Cell
+                                key={cellIndex}
+                                data={
+                                  cellIndex === 2 ? (
+                                    <Input
+                                      placeholder="0"
+                                      defaultValue={book_items[cellData]}
+                                      textAlign="center"
+                                      onChangeText={txt =>
+                                        AddItems(cellData, txt)
+                                      }
+                                      keyboardType="numeric"
+                                    />
+                                  ) : (
+                                    cellData
+                                  )
+                                }
+                                textStyle={styles.text}
+                              />
+                            ))}
+                          </TableWrapper>
+                        ),
+                      )
+                    : null}
+                </Table>
               </View>
               <Button
                 onPress={() => {
@@ -986,7 +1044,13 @@ const Booking = () => {
                   setView2(true);
                   // setbook_items(book_items);
                   dispatch(
-                    calculateAction('createBooking', book_items, itemsRent),
+                    calculateAction(
+                      'createBooking',
+                      book_items,
+                      AllCheckHandleReducerdata?.inventoryItem?.rent
+                        ? AllCheckHandleReducerdata?.inventoryItem?.rent
+                        : 0,
+                    ),
                   );
                 }}
                 btnStyle={{

@@ -1,35 +1,23 @@
 import {NavigationContainer} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {
-  LogBox,
-  StatusBar,
-  ToastAndroid,
-  View,
-  Text,
-  DeviceEventEmitter,
-} from 'react-native';
+import {LogBox, StatusBar, View, Text, DeviceEventEmitter} from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthContext} from './src/components/context';
 import {UIStore} from './src/UIStore';
-import {UserInfo} from './src/api/Users';
-// import {Provider} from 'react-redux';
-// import store from './src/redux/store/store';
 import AnimatedSplash from './src/helper/react-native-animated-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
-import messaging from '@react-native-firebase/messaging';
 import {getTokenAction} from './src/redux/action';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   notifications,
   messages,
-  NotificationMessage,
-  Android,
 } from 'react-native-firebase-push-notifications';
 
 function AppZ({props}) {
   const dispatch = useDispatch();
+  const AuthReducer = useSelector(state => state.AuthReducer);
   console.log('Props', props);
   const [login, setlogin] = useState(false);
   const [load, setload] = useState(false);
@@ -124,10 +112,10 @@ function AppZ({props}) {
             barStyle="dark-content"
           />
           {netinfo ? (
-            login ? (
-              <Stacks />
-            ) : (
+            AuthReducer.token == null ? (
               <AuthStackScreen />
+            ) : (
+              <Stacks />
             )
           ) : (
             <View

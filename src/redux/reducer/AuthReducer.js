@@ -14,6 +14,15 @@ import {
   SIGNUP_FAILURE,
   SIGNUP_REQUEST,
   SIGNUP_SUCCESS,
+  USER_INFO_FAILURE,
+  USER_INFO_REQUEST,
+  USER_INFO_SUCCESS,
+  VERIFY_OTP_FORGOT_PASSWORD_FAILURE,
+  VERIFY_OTP_FORGOT_PASSWORD_REQUEST,
+  VERIFY_OTP_FORGOT_PASSWORD_SUCCESS,
+  VERIFY_OTP_SIGNUP_FAILURE,
+  VERIFY_OTP_SIGNUP_REQUEST,
+  VERIFY_OTP_SIGNUP_SUCCESS,
 } from '../action/types';
 const initialState = {
   status: '',
@@ -23,6 +32,7 @@ const initialState = {
   forgotPassRes: {},
   token: null,
   loading: true,
+  userDetails: {},
 };
 const AuthReducer = (state = initialState, action) => {
   console.log(action);
@@ -124,6 +134,64 @@ const AuthReducer = (state = initialState, action) => {
         status: action.type,
         loader: false,
         error: action.error,
+      };
+    case VERIFY_OTP_FORGOT_PASSWORD_REQUEST:
+      return {
+        ...state,
+        status: action.type,
+        loader: true,
+      };
+    case VERIFY_OTP_FORGOT_PASSWORD_SUCCESS:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+      };
+    case VERIFY_OTP_FORGOT_PASSWORD_FAILURE:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+        error: action.error,
+      };
+    case VERIFY_OTP_SIGNUP_REQUEST:
+      return {
+        ...state,
+        status: action.type,
+        loader: true,
+      };
+    case VERIFY_OTP_SIGNUP_SUCCESS:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+      };
+    case VERIFY_OTP_SIGNUP_FAILURE:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+        error: action.error,
+      };
+    case USER_INFO_REQUEST:
+      return {
+        ...state,
+        status: action.type,
+        loader: true,
+      };
+    case USER_INFO_SUCCESS:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+        userDetails: action.userDetails,
+      };
+    case USER_INFO_FAILURE:
+      return {
+        ...state,
+        status: action.type,
+        loader: false,
+        userDetails: action.error,
       };
     default:
       return state;
