@@ -22,6 +22,7 @@ import {
   CHECK_RETURN_ITEM_REQUEST,
   GET_INVENTORY_ITEM_REQUEST,
   HANDLE_BOOKING_CANCEL_REQUEST,
+  GET_NOTIFICATION_REQUEST,
 } from './types';
 
 export const calculateAction = (uniqueId, data, rent) => {

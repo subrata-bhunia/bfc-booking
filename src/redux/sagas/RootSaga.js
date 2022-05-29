@@ -5,6 +5,7 @@ import BookingListSaga from './BookingListSaga';
 import CalendarSaga from './CalendarSaga';
 import watchFunctionForBookinghandle from './BookinghandleSaga';
 import watchFunctionForAllCheckhandle from './AllCheckHandleSaga';
+import watchFunctionForExtraAPI from './ExtraOtherSaga';
 
 const combinedSaga = [
   ...AuthSaga,
@@ -12,6 +13,7 @@ const combinedSaga = [
   ...CalendarSaga,
   ...watchFunctionForBookinghandle,
   ...watchFunctionForAllCheckhandle,
+  ...watchFunctionForExtraAPI,
 ];
 
 export default function* RootSaga() {

@@ -8,8 +8,8 @@ import {AuthContext} from './src/components/context';
 import {UIStore} from './src/UIStore';
 import AnimatedSplash from './src/helper/react-native-animated-splash-screen';
 import NetInfo from '@react-native-community/netinfo';
-import {getTokenAction} from './src/redux/action';
-import {useDispatch, useSelector} from 'react-redux';
+import {getNotifications, getTokenAction} from './src/redux/action';
+import {connect, useDispatch, useSelector} from 'react-redux';
 import {
   notifications,
   messages,
@@ -147,7 +147,7 @@ function AppZ({props}) {
   );
 }
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -195,7 +195,7 @@ export default class App extends React.Component {
     this.removeOnNotification = notifications.onNotification(notification => {
       //do something with the notification
       console.log('onNotification', notification);
-      DeviceEventEmitter.emit('notificationRes', notification);
+      this.props.handlegetNotifications();
     });
   };
 
@@ -255,3 +255,12 @@ export default class App extends React.Component {
     return <AppZ props={(token, hasPermission)} />;
   }
 }
+
+function mapStateToProps(state) {
+  return 0;
+}
+
+const mapDispatchToProps = dispatch => ({
+  handlegetNotifications: () => dispatch(getNotifications()),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -17,7 +17,7 @@ import {AuthContext} from './context';
 import {UIStore} from '../UIStore';
 import {useNavigation} from '@react-navigation/native';
 import {getAllNotifications} from '../api/Notification';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {logout} from '../redux/action';
 
 const StaticHeader = () => {
@@ -27,41 +27,41 @@ const StaticHeader = () => {
   const userName = UIStore.useState(s => s.userName);
   const navigation = useNavigation();
 
-  const [unread, setUnread] = useState('');
-
   //All notifications get Api
-  const handlegetNotification = () => {
-    if (userId) {
-      getAllNotifications({
-        user_id: userId,
-      })
-        .then(res => {
-          const {status, data, unread} = res.data;
-          console.log(
-            'Res of getAllNotification from static header page',
-            'unread :',
-            unread,
-          );
-          if (status == 'Success') {
-            setUnread(unread);
-          }
-        })
-        .catch(err => {
-          console.log(
-            'Err of getAllNotifications from static header page',
-            err,
-          );
-        });
-    }
-  };
-  console.log('unread', unread);
-  useEffect(() => {
-    handlegetNotification();
-    DeviceEventEmitter.addListener('notificationRes', function () {
-      handlegetNotification();
-    });
-  }, [userId]);
+  // const handlegetNotification = () => {
+  //   if (userId) {
+  //     getAllNotifications({
+  //       user_id: userId,
+  //     })
+  //       .then(res => {
+  //         const {status, data, unread} = res.data;
+  //         console.log(
+  //           'Res of getAllNotification from static header page',
+  //           'unread :',
+  //           unread,
+  //         );
+  //         if (status == 'Success') {
+  //           setUnread(unread);
+  //         }
+  //       })
+  //       .catch(err => {
+  //         console.log(
+  //           'Err of getAllNotifications from static header page',
+  //           err,
+  //         );
+  //       });
+  //   }
+  // };
+  // console.log('unread', unread);
+  // useEffect(() => {
+  //   handlegetNotification();
+  //   DeviceEventEmitter.addListener('notificationRes', function () {
+  //     handlegetNotification();
+  //   });
+  // }, [userId]);
   // console.log(userId);
+
+  const {getNotificationRes} = useSelector(state => state.ExtraOthersReducer);
   return (
     <View
       style={{
@@ -90,7 +90,7 @@ const StaticHeader = () => {
             size={wp(7)}
             onPress={() => navigation.navigate('notification')}
           />
-          {unread > 0 ? (
+          {getNotificationRes?.unread && getNotificationRes?.unread > 0 ? (
             <View
               style={{
                 height: wp(3),

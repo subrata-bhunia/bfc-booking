@@ -13,35 +13,43 @@ import {getAllNotifications, handleReadMsg} from '../../api/Notification';
 import {FlatList} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 import {SkypeIndicator} from 'react-native-indicators';
+import {getNotifications} from '../../redux/action';
+import {useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 
 const Notification = () => {
   const userId = UIStore.useState(s => s.userId);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const [allData, setAllData] = useState([]);
   const [unread, setUnread] = useState(0);
-  const [loader, setLoader] = useState(false);
+  // const [loader, setLoader] = useState(false);
 
   //All notifications get Api
-  const handlegetNotification = async () => {
-    setLoader(true);
-    getAllNotifications({
-      user_id: userId,
-    })
-      .then(res => {
-        const {status, data, unread} = res.data;
-        console.log('Res of getAllNotification', res.data);
-        if (status == 'Success') {
-          setAllData(data);
-          setUnread(unread);
-        }
-        setLoader(false);
-      })
-      .catch(err => {
-        console.log('Err of getAllNotifications', err);
-        setLoader(false);
-      });
-  };
+  // const handlegetNotification = async () => {
+  //   setLoader(true);
+  //   getAllNotifications({
+  //     user_id: userId,
+  //   })
+  //     .then(res => {
+  //       const {status, data, unread} = res.data;
+  //       console.log('Res of getAllNotification', res.data);
+  //       if (status == 'Success') {
+  //         setAllData(data);
+  //         setUnread(unread);
+  //       }
+  //       setLoader(false);
+  //     })
+  //     .catch(err => {
+  //       console.log('Err of getAllNotifications', err);
+  //       setLoader(false);
+  //     });
+  // };
+
+  const {getNotificationRes, loader} = useSelector(
+    state => state.ExtraOthersReducer,
+  );
 
   //Read Msg api call
 
@@ -52,14 +60,14 @@ const Notification = () => {
     })
       .then(res => {
         console.log('Res of handleReadMsg', res.data);
-        DeviceEventEmitter.emit('notificationRes', res.data.status);
+        dispatch(getNotifications());
       })
       .catch(err => console.log('Err of ReadMsg', err));
   };
 
-  useEffect(() => {
-    handlegetNotification();
-  }, []);
+  // useEffect(() => {
+  //   handlegetNotification();
+  // }, []);
 
   const handleNavigation = item => {
     if (item?.type == 'Order') {
@@ -94,7 +102,7 @@ const Notification = () => {
       }
     }
     handleReadMsgClick(item?.id);
-    handlegetNotification();
+    // handlegetNotification();
   };
 
   // Notification Common View
@@ -166,7 +174,8 @@ const Notification = () => {
             </Text>
           </View>
         </View>
-        {allData.length == index + 1 ? null : (
+        {getNotificationRes?.data &&
+        getNotificationRes.data.length == index + 1 ? null : (
           <View
             style={{
               height: 1,
@@ -190,8 +199,8 @@ const Notification = () => {
       <Header name="Notification" backBtn={true} />
       <BlankSpace height={hp(1)} />
       {!loader ? (
-        allData.length > 0 ? (
-          <FlatList data={allData} renderItem={renderItem} />
+        getNotificationRes?.data && getNotificationRes?.data.length > 0 ? (
+          <FlatList data={getNotificationRes?.data} renderItem={renderItem} />
         ) : (
           <View
             style={{

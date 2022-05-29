@@ -6,6 +6,7 @@ import BookinglistReducer from './BookinglistReducer';
 import CalendarInfoReducer from './CalendarReducer';
 import BookinghandleReducer from './BookinghandleReducer';
 import AllCheckHandleReducer from './AllCheckHandleReducer';
+import ExtraOthersReducer from './ExtraOthersReducer';
 
 export const rootReducer = combineReducers({
   handleCalCulatePrice,
@@ -15,4 +16,5 @@ export const rootReducer = combineReducers({
   CalendarInfoReducer,
   BookinghandleReducer,
   AllCheckHandleReducer,
+  ExtraOthersReducer,
 });

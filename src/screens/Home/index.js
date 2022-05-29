@@ -45,6 +45,7 @@ import {
   getAllDueBookings,
   getUpcomingBookings,
   getcalendarBookingsInfo,
+  getNotifications,
 } from '../../redux/action';
 const Home = () => {
   const dispatch = useDispatch();
@@ -54,7 +55,7 @@ const Home = () => {
 
   const [ben, setben] = useState('');
   const [selectDate, setSelectDate] = useState('');
-  const [modal, setmodal] = useState(false);
+  const [modalShow, setmodalShow] = useState(false);
   const [apiModal, setapiModal] = useState(false);
 
   //  --------- Notifications --------- //
@@ -155,13 +156,13 @@ const Home = () => {
     useSelector(state => state.BookinglistReducer);
   const {calendarInfo} = useSelector(state => state.CalendarInfoReducer);
 
-  console.log(
-    'home page all details from api :',
-    dueBookinglist,
-    specificDateBookinglist,
-    upcomingBookinglist,
-    calendarInfo,
-  );
+  // console.log(
+  //   'home page all details from api :',
+  //   dueBookinglist,
+  //   specificDateBookinglist,
+  //   upcomingBookinglist,
+  //   calendarInfo,
+  // );
 
   const getAllBookingBydate = date => {
     dispatch(getAllSpecificDateBookings({date}));
@@ -171,9 +172,11 @@ const Home = () => {
     dispatch(getAllDueBookings());
     dispatch(getUpcomingBookings());
     dispatch(getcalendarBookingsInfo());
-    setmodal(false);
+    // setmodalShow(false);
   }, [isFocused]);
-
+  useEffect(() => {
+    dispatch(getNotifications());
+  }, []);
   // ----------------------------------- //
 
   const months = [
@@ -296,110 +299,6 @@ const Home = () => {
       {/* Header */}
       <StaticHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Modal */}
-        <Model
-          isVisible={modal}
-          onBackdropPress={() => setmodal(!modal)}
-          animationIn="slideInDown"
-          animationOut="slideOutUp"
-          animationInTiming={900}
-          animationOutTiming={900}
-          backdropOpacity={0.6}
-          onBackButtonPress={() => setmodal(false)}
-          avoidKeyboard>
-          <View style={styles.modal}>
-            <Text
-              style={{
-                fontSize: hp(2.5),
-                fontFamily: Fonts.bold,
-                letterSpacing: 3,
-                color: '#000',
-                textAlign: 'center',
-              }}>
-              {ben}
-            </Text>
-            <Text
-              style={{
-                fontSize: hp(2),
-                fontFamily: Fonts.semibold,
-                letterSpacing: 3,
-                color: '#000',
-                textAlign: 'center',
-              }}>
-              {`(${selectDate})`}
-            </Text>
-            <View
-              style={{
-                borderWidth: 0.5,
-                borderColor: '#000',
-                width: '90%',
-                marginVertical: 10,
-              }}
-            />
-            {specificDateBookinglist?.data?.length > 0 ? (
-              <View>
-                <View style={{height: hp(30), width: wp(93)}}>
-                  <FlatListWithHeader
-                    items={specificDateBookinglist.data}
-                    horizontal={true}
-                    width={wp(85)}
-                  />
-                </View>
-                {calendarInfo?.full?.includes(selectDate) ? null : (
-                  <Button
-                    onPress={() => navigation.navigate('Booking')}
-                    btnStyle={{
-                      height: 50,
-                      width: wp(50),
-                      borderRadius: 50,
-                      backgroundColor: Colors.secondary,
-                      marginVertical: hp(2),
-                    }}
-                    textStyle={{
-                      fontFamily: Fonts.semibold,
-                      color: '#000',
-                    }}
-                    btnName=" Add Booking"
-                    icon={{
-                      name: 'plus',
-                      type: 'ant-design',
-                    }}
-                  />
-                )}
-              </View>
-            ) : (
-              <View>
-                <Text
-                  style={{
-                    fontFamily: Fonts.semibold,
-                    color: Colors.text,
-                    textAlign: 'center',
-                  }}>
-                  No Booking Found
-                </Text>
-                <Button
-                  onPress={() => navigation.navigate('Booking')}
-                  btnStyle={{
-                    height: 50,
-                    width: wp(50),
-                    borderRadius: 50,
-                    backgroundColor: Colors.secondary,
-                    marginVertical: hp(2),
-                  }}
-                  textStyle={{
-                    fontFamily: Fonts.semibold,
-                    color: '#000',
-                  }}
-                  btnName=" Add Booking"
-                  icon={{
-                    name: 'plus',
-                    type: 'ant-design',
-                  }}
-                />
-              </View>
-            )}
-          </View>
-        </Model>
         {/* Calender */}
         <Calendar
           theme={{
@@ -453,7 +352,7 @@ const Home = () => {
                 activeOpacity={0.5}
                 onPress={() => {
                   // localNotification();
-                  setmodal(true);
+                  setmodalShow(true);
                   setSelectDate(date.dateString);
                   setben(getBanglaDateAndMonth(date.dateString, 'MMMM'));
                   getAllBookingBydate(date.dateString);
@@ -731,6 +630,106 @@ const Home = () => {
           </View>
         ) : null}
       </Model>
+      {/* Modal */}
+      <Model
+        isVisible={modalShow}
+        onBackdropPress={() => setmodalShow(!modalShow)}
+        backdropOpacity={0.6}
+        onBackButtonPress={() => setmodalShow(false)}
+        avoidKeyboard>
+        <View style={styles.modalstyle}>
+          <Text
+            style={{
+              fontSize: hp(2.5),
+              fontFamily: Fonts.bold,
+              letterSpacing: 3,
+              color: '#000',
+              textAlign: 'center',
+            }}>
+            {ben}
+          </Text>
+          <Text
+            style={{
+              fontSize: hp(2),
+              fontFamily: Fonts.semibold,
+              letterSpacing: 3,
+              color: '#000',
+              textAlign: 'center',
+            }}>
+            {`(${selectDate})`}
+          </Text>
+          <View
+            style={{
+              borderWidth: 0.5,
+              borderColor: '#000',
+              width: '90%',
+              marginVertical: 10,
+            }}
+          />
+          {specificDateBookinglist?.data?.length > 0 ? (
+            <View>
+              <View style={{height: hp(30), width: wp(93)}}>
+                <FlatListWithHeader
+                  items={specificDateBookinglist.data}
+                  horizontal={true}
+                  width={wp(85)}
+                />
+              </View>
+              {calendarInfo?.full?.includes(selectDate) ? null : (
+                <Button
+                  onPress={() => navigation.navigate('Booking')}
+                  btnStyle={{
+                    height: 50,
+                    width: wp(50),
+                    borderRadius: 50,
+                    backgroundColor: Colors.secondary,
+                    marginVertical: hp(2),
+                  }}
+                  textStyle={{
+                    fontFamily: Fonts.semibold,
+                    color: '#000',
+                  }}
+                  btnName=" Add Booking"
+                  icon={{
+                    name: 'plus',
+                    type: 'ant-design',
+                  }}
+                />
+              )}
+            </View>
+          ) : (
+            <View>
+              <Text
+                style={{
+                  fontFamily: Fonts.semibold,
+                  color: Colors.text,
+                  textAlign: 'center',
+                }}>
+                No Booking Found
+              </Text>
+              <Button
+                onPress={() => navigation.navigate('Booking')}
+                btnStyle={{
+                  height: 50,
+                  width: wp(50),
+                  borderRadius: 50,
+                  backgroundColor: Colors.secondary,
+                  marginVertical: hp(2),
+                }}
+                textStyle={{
+                  fontFamily: Fonts.semibold,
+                  color: '#000',
+                }}
+                btnName=" Add Booking"
+                icon={{
+                  name: 'plus',
+                  type: 'ant-design',
+                }}
+              />
+            </View>
+          )}
+        </View>
+      </Model>
     </View>
   );
 };
@@ -738,7 +737,7 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
-  modal: {
+  modalstyle: {
     // height: hp(10),
     backgroundColor: 'white',
     alignItems: 'center',
