@@ -113,12 +113,13 @@ export function* signupReqSaga(action) {
         type: SIGNUP_SUCCESS,
         signinRes: response.data,
       });
-      console.log('Token : ' + response.data.user_id);
-      yield call(AsyncStorage.setItem, 'userId', response.data.user_id);
-      yield put({
-        type: GET_TOKEN_SUCCESS,
-        token: response.data.user_id,
-      });
+      // console.log('Token : ' + response.data.user_id);
+      // yield call(AsyncStorage.setItem, 'userId', response.data.user_id);
+      // yield put({
+      //   type: GET_TOKEN_SUCCESS,
+      //   token: null,
+      //   redirect: 'login'
+      // });
     } else {
       yield put({type: SIGNUP_FAILURE, error: response.data.message});
     }

@@ -5,28 +5,15 @@ const handleCalCulatePrice = (
   switch (action.type) {
     case 'CALCULATE_PRICE':
       var total = 0;
-      const itemRents = action.payload?.rent;
+      const itemRents = (action.payload?.rent) ? action.payload?.rent : 0;
       for (var i = 0; i < Object.keys(action.payload.data).length; i++) {
-        let itemId = Object.keys(action.payload.data)[i];
-
-        total +=
-          parseInt(action.payload.data[itemId]) * parseInt(itemRents[itemId]);
-
-        // if ( == 'ITM001') {
-        //   total += action.payload.data.ITM001 * 50;
-        // } else {
-        //   total;
-        // }
+        var itemId = Object.keys(action.payload.data)[i];
+        if(itemId){
+          var itemqty = action.payload.data[itemId] ? action.payload.data[itemId] : 0;
+          total += parseInt(itemqty) * parseInt(itemRents[itemId]);
+        }
       }
-      console.log('=====Fun value', action.payload);
-      console.log('===----==', total);
       return (state = {uniqueId: action.payload.uniqueId, totalAmount: total});
-    //   for (var i = 0; i < action.payload.data.length; i++) {
-    //     if (action.payload.data[action.payload.itemIdPosition] == 'ITM018') {
-    //       state =
-    //         action.payload.data[action.payload.itemIdPosition.qtyPosition];
-    //     }
-    //   }
     default:
       return state;
   }

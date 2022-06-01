@@ -53,7 +53,13 @@ function AppZ({props}) {
   }, [login]);
   // ----------- //
   useEffect(() => {
-    setload(true);
+    // console.log('AuthReducer', AuthReducer)
+    if(AuthReducer.status == 'GET_TOKEN_SUCCESS' || AuthReducer.status == 'GET_TOKEN_FAILURE'){
+      setload(true);
+    }
+  }, [AuthReducer]);
+
+  useEffect(() => {
     dispatch(getTokenAction());
   }, []);
   LogBox.ignoreAllLogs();
@@ -124,7 +130,7 @@ function AppZ({props}) {
                 justifyContent: 'center',
                 flex: 1,
               }}>
-              <Text>Hello No InterNet</Text>
+              <Text>Don't have internet connection</Text>
               <Text
                 style={{
                   marginTop: 20,

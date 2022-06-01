@@ -15,10 +15,13 @@ import {OtpVerifyAPIRegister, SignUpUser} from '../../api/Users';
 import {AuthContext} from '../../components/context';
 import Modal from 'react-native-modal';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {signUp} from '../../redux/action';
+import { useNavigation } from '@react-navigation/native';
+import {SIGNUP_FAILURE} from '../../redux/action/types';
 
-const SignUp = ({navigation}) => {
+const SignUp = () => {
+  const navigation = useNavigation();
   const [show, setShow] = useState(false);
   const [Name, setName] = useState('');
   const [NameV, setNameV] = useState(true);
@@ -41,7 +44,7 @@ const SignUp = ({navigation}) => {
   const [otpV, setOtpV] = useState(true);
   const [modal, setModal] = useState(false);
 
-  console.log('isOtp', isOtp);
+  const AuthReducer = useSelector(state => state.AuthReducer);
 
   // useEffect(() => {
   //   if (otp == otpRes) {
@@ -50,9 +53,24 @@ const SignUp = ({navigation}) => {
   //     setIsOtp(false);
   //   }
   // }, [otp]);
+useEffect(() => {
+  switch(AuthReducer.status){
+    case "SIGNUP_SUCCESS" :
+        navigation.goBack()
+        setBtnLoader(false)
+        break;
+    case "SIGNUP_REQUEST" :
+        setBtnLoader(true)
+        break;
+    case "SIGNUP_FAILURE" :
+        setBtnLoader(false)
+        break;
+  }
+},[AuthReducer])
 
   useEffect(() => {
     setstatus(false);
+    dispatch({type: SIGNUP_FAILURE, error: ''})
   }, [Password, phone, Email, Name]);
   const dispatch = useDispatch();
   const _SignUp = () => {
@@ -165,17 +183,17 @@ const SignUp = ({navigation}) => {
         </Text>
         <BlankSpace height={hp(2)} />
         <View
-          style={{
-            height: hp(7),
-            alignItems: 'center',
-          }}>
-          {status ? (
-            <Vaildation
-              errormsg={statusMsg}
-              txtStyle={{fontFamily: Fonts.semibold}}
-            />
-          ) : null}
-        </View>
+        style={{
+          height: hp(7),
+          alignItems: 'center',
+        }}>
+        {AuthReducer.status == SIGNUP_FAILURE ? (
+          <Vaildation
+            errormsg={AuthReducer.error}
+            txtStyle={{fontFamily: Fonts.semibold}}
+          />
+        ) : null}
+      </View>
         <BlankSpace height={hp(3)} />
         <View>
           <CommonInput
@@ -293,16 +311,14 @@ const SignUp = ({navigation}) => {
             </Text>
           </TouchableOpacity>
         </View>
+        <BlankSpace height={hp(5)}/>
       </KeyboardAwareScrollView>
       <Modal
         isVisible={modal}
         statusBarTranslucent
-        onBackdropPress={() => setModal(!modal)}
         backdropOpacity={0.6}
         focusable
-        onBackButtonPress={() => {
-          setModal(false);
-        }}>
+        >
         <View
           style={{
             backgroundColor: Colors.white,

@@ -451,13 +451,13 @@ const Home = () => {
         />
         <View style={{marginTop: 20}}>
           <FlatListWithHeader
-            title={`Upcoming Bookings (${upcomingBookinglist?.data?.length})`}
+            title={`Upcoming Bookings (${(upcomingBookinglist?.data?.length) ? upcomingBookinglist?.data?.length : 0})`}
             items={upcomingBookinglist?.data}
             horizontal={true}
             isloader={loader}
           />
           <FlatListWithHeader
-            title={`Due Bookings (${dueBookinglist?.data?.length})`}
+            title={`Due Bookings (${(dueBookinglist?.data?.length) ? dueBookinglist?.data?.length : 0})`}
             items={dueBookinglist?.data}
             horizontal={true}
             isloader={loader2}

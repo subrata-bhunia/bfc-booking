@@ -75,7 +75,7 @@ const PickupBookingPage = ({navigation}) => {
   // ---------- Confirm -------------- //
   const [canclebtn, setcancle] = useState([]);
   const [openCancelModal, setopenCancelModal] = useState(false);
-  const [pickupbtn, setpickup] = useState(false);
+  const [pickupWarningModal, setpickupWarningModal] = useState(false);
   const [pickupitem, setpickupitem] = useState([]);
   const [pickupitemRes, setpickupitemRes] = useState([]);
 
@@ -139,8 +139,6 @@ const PickupBookingPage = ({navigation}) => {
 
   // handle Pickup (API CALL)
   const PickupClick = () => {
-    setpickup(false);
-    // setShow(true);
     pickupBooking({
       user_id: user_id,
       booking_id: booking_id,
@@ -928,7 +926,9 @@ const PickupBookingPage = ({navigation}) => {
                     ? `${resPickupData?.pickup_left_day} DAYS LEFT`
                     : 'PICKUP'
                 }
-                onPress={() => PickupClick()}
+                onPress={() => {
+                  setpickupWarningModal(true)
+                }}
               />
               {console.log('----', resPickupData?.pickup_left_day)}
             </View>
@@ -945,6 +945,22 @@ const PickupBookingPage = ({navigation}) => {
           name: 'Yes',
           onPress: () => {
             CancelClick();
+          },
+        }}
+        no={{
+          name: 'No',
+        }}
+      />
+
+      {/* Pickup Warn */}
+      <WarningModal
+        h1="Are you want to pickup this booking?"
+        open={pickupWarningModal}
+        setopen={setpickupWarningModal}
+        yes={{
+          name: 'Yes',
+          onPress: () => {
+            PickupClick();
           },
         }}
         no={{
