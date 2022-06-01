@@ -144,7 +144,7 @@ export const getcalendarBookingsInfo = payload => ({
 });
 
 // All members
-export const allMembers = payload => ({
+export const getallMembers = payload => ({
   type: ALL_MEMBERS_REQUEST,
   payload,
 });

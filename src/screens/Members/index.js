@@ -23,8 +23,12 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import StaticHeader from '../../components/StaticHeader';
-import {getAllMembers} from '../../api/Members';
+import {getAllMembers, memberInvite} from '../../api/Members';
 import {UIStore} from '../../UIStore';
+import {useDispatch, useSelector} from 'react-redux';
+import {getallMembers} from '../../redux/action';
+import {useIsFocused} from '@react-navigation/native';
+
 const alphabet = [
   'A',
   'B',
@@ -55,27 +59,27 @@ const alphabet = [
 ];
 
 const ContactList = () => {
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
   const userId = UIStore.useState(s => s.userId);
-  let [contacts, setContacts] = useState([
-    // {
-    //   number: '9933785077',
-    //   displayName: 'AAA',
-    // },
-    // {
-    //   number: '123',
-    //   displayName: 'BBB',
-    // },
-    // {
-    //   number: '123',
-    //   displayName: 'CCC',
-    // },
-  ]);
+
+  // State Call //
+  const {getAllMembersRes, loader} = useSelector(
+    state => state.ExtraOthersReducer,
+  );
+
+  // useEffect(() => {
+  //   const contactdataafterfilter = members.filter(i => i.phone.length > 9);
+  //   console.log('jjj', contactdataafterfilter);
+  //   setContacts(contactdataafterfilter);
+  // }, []);
+  console.log('---', getAllMembersRes);
+
   let [index, setindex] = useState([]);
   let [count, setCount] = useState();
   const [searchText, setSearchText] = useState('');
-  const [loader, setloader] = useState(false);
   const [loader2, setloader2] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const [selectedTabNo, setSelectedTabNo] = useState(1);
   const [members, setMembers] = useState([]);
   const [event, setIsEven] = useState(false);
@@ -137,13 +141,11 @@ const ContactList = () => {
     '#99E6E6',
     '#6666FF',
   ];
-  const data = alphabet.map(c => {
-    let filtered = contacts.filter(
-      i => i.name?.[0]?.toUpperCase() === c.toUpperCase(),
+  const contactdata = alphabet.map(c => {
+    let filtered = getAllMembersRes?.data?.filter(
+      i => i.name?.[0]?.toUpperCase() === c.toUpperCase() && i.phone.length > 9,
     );
-    if (filtered.length === 0) {
-      return null;
-    } else {
+    if (filtered && filtered.length > 0) {
       return {
         title: c.toUpperCase(),
         data: filtered.map(i => {
@@ -154,6 +156,8 @@ const ContactList = () => {
           };
         }),
       };
+    } else {
+      return null;
     }
   });
 
@@ -184,49 +188,46 @@ const ContactList = () => {
       //   loadContacts();
     } else {
       loadsearchContacts();
-      setloader(true);
+      // setloader(true);
     }
   }, [searchText]);
 
-  //GetAll members Api call
-  const handlegetAllMembers = () => {
-    setloader2(true);
-    getAllMembers({
-      user_id: userId,
+  // GetAll members Api call
+
+  const handleUpdateinvite = (memberId, checked) => {
+    memberInvite({
+      member_id: memberId,
+      invited: checked,
     })
       .then(res => {
-        const {data, status, event} = res?.data;
+        const {data, status} = res?.data;
         console.log('res', data);
         if (status == 'Success') {
-          setMembers(data);
-          setIsEven(event);
-          const contactdataafterfilter = members.filter(
-            i => i.phone.length > 9,
-          );
-          console.log('jjj', contactdataafterfilter);
-          setContacts(contactdataafterfilter);
+          console.log('jjj', data);
+          dispatch(getallMembers());
         }
         // const{}=res.data
-        // if()
-        setloader2(false);
       })
       .catch(err => {
-        console.log('Err of getallMembers', err), setloader2(false);
+        console.log('Err of handleUpdateinvite', err);
       });
   };
 
+  // useEffect(() => {
+  //   handlegetAllMembers();
+  // }, [selectedTabNo]);
   useEffect(() => {
-    handlegetAllMembers();
-  }, [selectedTabNo]);
+    dispatch(getallMembers());
+  }, [isFocused]);
 
   const FirstTab = () => {
     return (
       <>
-        {!loader2 ? (
+        {true ? (
           <>
-            {members.length > 0 ? (
+            {getAllMembersRes?.data && getAllMembersRes?.data?.length > 0 ? (
               <FlatList
-                data={members}
+                data={getAllMembersRes?.data}
                 keyExtractor={(item, index) => item + index}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item, index}) => (
@@ -241,7 +242,8 @@ const ContactList = () => {
                           justifyContent: 'center',
                         },
                       ]}
-                      onPress={() => setChecked(!checked)}>
+                      // onPress={() => setChecked(!checked)}
+                    >
                       <View
                         style={{
                           flexDirection: 'row',
@@ -288,9 +290,9 @@ const ContactList = () => {
                             </Text>
                           </View>
                         </View>
-                        {event ? (
-                          checked ? (
-                            <View
+                        {getAllMembersRes?.event ? (
+                          item?.invited == 1 ? (
+                            <Pressable
                               style={{
                                 height: wp(6),
                                 width: wp(6),
@@ -298,16 +300,19 @@ const ContactList = () => {
                                 backgroundColor: 'green',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                              }}>
+                              }}
+                              onPress={() =>
+                                handleUpdateinvite(item?.member_id, 0)
+                              }>
                               <Icon
                                 name="check"
                                 size={wp(5)}
                                 color={Colors.white}
                               />
-                            </View>
+                            </Pressable>
                           ) : (
                             //   </View>
-                            <View
+                            <Pressable
                               style={{
                                 height: wp(6),
                                 width: wp(6),
@@ -315,12 +320,14 @@ const ContactList = () => {
                                 borderWidth: 1,
                                 borderColor: Colors.disable,
                               }}
-                            />
+                              onPress={() =>
+                                handleUpdateinvite(item?.member_id, 1)
+                              }></Pressable>
                           )
                         ) : null}
                       </View>
                     </Pressable>
-                    {members.length - 1 == index ? (
+                    {getAllMembersRes?.data?.length - 1 == index ? (
                       <View
                         style={{
                           height: hp(15),
@@ -363,9 +370,9 @@ const ContactList = () => {
   const SecondTab = () => {
     return (
       <>
-        {!loader2 ? (
+        {true ? (
           <SectionList
-            sections={data.filter(i => i)}
+            sections={contactdata.filter(i => i)}
             keyboardDismissMode="interactive"
             showsVerticalScrollIndicator={false}
             initialNumToRender={100}
@@ -507,8 +514,6 @@ const ContactList = () => {
       </>
     );
   };
-
-  console.log('checked Item Are :', checked);
 
   return (
     <View style={{flex: 1, paddingTop: StatusBar.currentHeight}}>
