@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Pressable,
-  DeviceEventEmitter,
-  ScrollView,
-} from 'react-native';
+import {View, Text, Pressable, DeviceEventEmitter} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Header from '../../components/Header';
 import BlankSpace from '../../components/BlankSpace';
@@ -118,7 +112,7 @@ const Notification = () => {
       <>
         <Swipeable
           rightContent={() => console.log('hello')}
-          rightActionActivationDistance={10}
+          rightActionActivationDistance={wp(40)}
           onRightActionRelease={() => console.log('onRightActionRelease')}
           onRightActionActivate={() => console.log('onRightActionActive')}>
           <Pressable
@@ -204,28 +198,6 @@ const Notification = () => {
             }}
           />
         )}
-        {showRead ? (
-          <View
-            style={{
-              backgroundColor: Colors.primary,
-              height: '100%',
-              // marginVertical: hp(1),
-              width: wp(30),
-              position: 'absolute',
-              right: 0,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Text
-              style={{
-                color: Colors.white,
-                fontFamily: Fonts.semibold,
-                fontSize: wp(4),
-              }}>
-              Read
-            </Text>
-          </View>
-        ) : null}
       </>
     );
   };
@@ -239,143 +211,7 @@ const Notification = () => {
       <BlankSpace height={hp(1)} />
       {true ? (
         getNotificationRes?.data && getNotificationRes?.data.length > 0 ? (
-          // <FlatList data={getNotificationRes?.data} renderItem={renderItem} />
-          <ScrollView>
-            {getNotificationRes?.data.map((item, index) => {
-              const [showRead, setShowRead] = useState(false);
-              return (
-                <View
-                  style={
-                    {
-                      // position: 'relative',
-                      // zIndex: 999999,
-                      // backgroundColor: Colors.white,
-                    }
-                  }>
-                  <Swipeable
-                    rightContent={() => console.log('hello')}
-                    rightActionActivationDistance={wp(30)}
-                    onRightActionRelease={() => {
-                      console.log('onRightActionRelease'), setShowRead(false);
-                      handleReadMsgClick(item?.id);
-                    }}
-                    onRightActionActivate={() => {
-                      console.log('onRightActionActive'), setShowRead(true);
-                    }}
-                    onSwipeRelease={() => {
-                      console.log('Hello'), setShowRead(false);
-                    }}>
-                    <Pressable
-                      style={{
-                        backgroundColor:
-                          item.read == 0 ? '#f2f7ff' : Colors.white,
-                      }}
-                      onPress={() => handleNavigation(item)}>
-                      <View
-                        style={{
-                          width: wp(90),
-                          alignSelf: 'center',
-                          // flexDirection: 'row',
-                          // justifyContent: 'space-between',
-                          paddingVertical: hp(2),
-                        }}>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: hp(1),
-                            justifyContent: 'space-between',
-                          }}>
-                          <Icon
-                            name={
-                              item.type == 'Order'
-                                ? 'shopping-cart'
-                                : 'notifications-none'
-                            }
-                            size={wp(5)}
-                            color={Colors.primary}
-                          />
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              justifyContent: 'space-between',
-                              width: wp(83),
-                            }}>
-                            <Text
-                              style={{
-                                fontFamily: Fonts.semibold,
-                                fontSize: wp(4),
-                                color: Colors.text,
-                              }}>
-                              {item.title}
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: Fonts.semibold,
-                                fontSize: wp(3),
-                                color: Colors.disable,
-                              }}>
-                              {item.time}
-                            </Text>
-                          </View>
-                        </View>
-                        <View
-                          style={{
-                            width: wp(83),
-                            alignSelf: 'flex-end',
-                          }}>
-                          <Text
-                            style={{
-                              fontFamily: Fonts.regular,
-                              fontSize: wp(3.5),
-                              color: 'grey',
-                            }}>
-                            {item.description}
-                          </Text>
-                        </View>
-                      </View>
-                      {showRead ? (
-                        <View
-                          style={{
-                            backgroundColor: Colors.primary,
-                            height: '100%',
-                            // marginVertical: hp(1),
-                            width: wp(100),
-                            position: 'absolute',
-                            right: -wp(100),
-                            // alignItems: 'center',
-                            paddingLeft: wp(10),
-                            justifyContent: 'center',
-                          }}>
-                          <Text
-                            style={{
-                              color: Colors.white,
-                              fontFamily: Fonts.semibold,
-                              fontSize: wp(4),
-                            }}>
-                            Read
-                          </Text>
-                        </View>
-                      ) : null}
-                    </Pressable>
-                  </Swipeable>
-                  {getNotificationRes?.data &&
-                  getNotificationRes.data.length == index + 1 ? null : (
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: '#999',
-                        opacity: 0.5,
-                        // marginVertical: hp(3),
-                        width: wp(89),
-                        alignSelf: 'center',
-                      }}
-                    />
-                  )}
-                </View>
-              );
-            })}
-          </ScrollView>
+          <FlatList data={getNotificationRes?.data} renderItem={renderItem} />
         ) : (
           <View
             style={{
