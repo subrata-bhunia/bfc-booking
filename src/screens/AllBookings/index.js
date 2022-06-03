@@ -25,7 +25,7 @@ const AllBookings = () => {
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const [filterallBooking, setfilterallBooking] = useState(null);
-  const [loader, setloader] = useState(false);
+  // const [loader, setloader] = useState(false);
   const [status, setStatus] = useState(0);
 
   // ---------- DropDown ----------- //
@@ -39,7 +39,9 @@ const AllBookings = () => {
     {label: 'Missing', value: 'Missing'},
   ]);
 
-  const {allBookinglist} = useSelector(state => state.BookinglistReducer);
+  const {allBookinglist, loader} = useSelector(
+    state => state.BookinglistReducer,
+  );
 
   console.log('Booking Page All allBookinglist from api', allBookinglist);
 
