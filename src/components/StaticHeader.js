@@ -26,7 +26,7 @@ const StaticHeader = () => {
   const userId = UIStore.useState(s => s.userId);
   const userName = UIStore.useState(s => s.userName);
   const navigation = useNavigation();
-
+  const userRole = UIStore.useState(s => s.userRole);
   //All notifications get Api
   // const handlegetNotification = () => {
   //   if (userId) {
@@ -73,16 +73,16 @@ const StaticHeader = () => {
       <View
         style={{
           flexDirection: 'row',
-          width: wp(30),
+          // width: wp(15),
           justifyContent: 'space-around',
           alignItems: 'center',
           padding: hp(1),
         }}>
-        <Icon name="mail-outline" type="ionicon" size={27} />
         <View
           style={{
             height: wp(7.2),
             width: wp(7.2),
+            marginLeft:wp(1)
           }}>
           <Icon
             name="bell"
@@ -103,6 +103,16 @@ const StaticHeader = () => {
             />
           ) : null}
         </View>
+        {userRole == 'Treasurer' ? (
+        <View
+          style={{
+            height: wp(7.2),
+            width: wp(7.2),
+            marginLeft: wp(3)
+          }}>
+            <Icon name="book" type="AntDesign" size={27} onPress={() => navigation.navigate('khataentry')} />
+        </View>
+        ): null }
       </View>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Text

@@ -639,7 +639,6 @@ const PaidBooking = ({navigation}) => {
                       </Text>
                       <Input
                         disabled
-                        defaultValue={'0'}
                         keyboardType="number-pad"
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -647,39 +646,12 @@ const PaidBooking = ({navigation}) => {
                           fontSize: wp(4),
                         }}
                         placeholder={'0'}
-                        value={resCancelData?.payment}
-                        onChangeText={txt => {
-                          setPayment(txt);
-                        }}
-                      />
-                    </View>
-                    {/* Refund */}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: -wp(4),
-                      }}>
-                      <Text
-                        style={{
-                          fontFamily: Fonts.semibold,
-                          fontSize: wp(4),
-                          width: wp(40),
-                          textAlign: 'right',
-                        }}>
-                        Refund :
-                      </Text>
-                      <Input
-                        disabled
                         defaultValue={`${
                           parseInt(resCancelData?.payment) +
                           parseInt(resCancelData?.advanced)
                         }`}
-                        containerStyle={{width: wp(40), height: hp(10)}}
-                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                        inputStyle={{
-                          fontSize: wp(4),
+                        onChangeText={txt => {
+                          setPayment(txt);
                         }}
                       />
                     </View>

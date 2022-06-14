@@ -36,9 +36,12 @@ import {UIStore} from '../../UIStore';
 import {PacmanIndicator, SkypeIndicator} from 'react-native-indicators';
 import LinearGradient from 'react-native-linear-gradient';
 import Header from '../../components/Header';
+import {useDispatch, useSelector} from 'react-redux';
+import {calculateAction} from '../../redux/action';
 
 const Modify = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const [view0, setView0] = useState(true);
   const [view1, setView1] = useState(true);
   const [view2, setView2] = useState(true);
@@ -56,21 +59,27 @@ const Modify = () => {
   const [modalData, setmodalData] = useState(null);
   const userId = UIStore.useState(s => s.userId);
   const [btnLoader, setBtnLoader] = useState(false);
+  const [costOfItems, setCostOfItems] = useState({});
   const route = useRoute();
   const booking_id = route?.params?.booking_id;
 
   console.log('tableData', tableData);
+
+  const reduxCalculationData = useSelector(state => state.handleCalCulatePrice);
+  console.log('reduxCalculationData', reduxCalculationData);
 
   //------- API ----------- //
   const handleGetBookingDetails = async () => {
     // setShow(true);
     getModifyBookingInfo({booking_id: booking_id})
       .then(res => {
-        const {data, status} = res.data;
+        const {data, status, rent} = res.data;
+        console.log('Res of handleGetBookingDetails', res.data);
         if (status === 'Success') {
           // setShow(false);
           setResReturnData(data);
           setTableDate(res.data.data.items);
+          setCostOfItems(rent);
         }
         console.log('getData', data);
       })
@@ -164,6 +173,7 @@ const Modify = () => {
       }
     }
     setreturnItems(oldReturnItems);
+    dispatch(calculateAction(booking_id, oldReturnItems, costOfItems));
   };
 
   const setValueOnReturnItems = () => {
@@ -176,6 +186,7 @@ const Modify = () => {
     }
     setreturnItems(newObj);
     console.log('newObj', newObj);
+    dispatch(calculateAction(booking_id, newObj, costOfItems));
   };
 
   useEffect(() => {
@@ -189,6 +200,7 @@ const Modify = () => {
     console.log(book_items);
     setBtnLoader(true);
     console.log('userId', userId);
+
     UpdateBooking({
       items: returnItems,
       booking_id: booking_id,
@@ -409,6 +421,7 @@ const Modify = () => {
                 setView0(false);
                 setView1(!view1);
                 setView2(false);
+                setnext2(false);
               }}
               style={{
                 flexDirection: 'row',
@@ -614,7 +627,14 @@ const Modify = () => {
                     keyboardType="number-pad"
                     containerStyle={{width: wp(40)}}
                     leftIcon={<Icon name="inr" type="fontisto" size={15} />}
-                    value={rent}
+                    value={`${
+                      parseInt(resReturnData?.rent) +
+                      parseInt(
+                        reduxCalculationData.totalAmount
+                          ? reduxCalculationData.totalAmount
+                          : 0,
+                      )
+                    }`}
                     onChangeText={txt => {
                       setrent(parseInt(txt));
                       setrentV(true);
@@ -622,6 +642,7 @@ const Modify = () => {
                     inputStyle={{
                       fontSize: 20,
                     }}
+                    disabled={true}
                   />
                 </View>
                 <View
@@ -639,7 +660,8 @@ const Modify = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     marginTop: -wp(4),
-                    display: caterersvalue === 'Yes' ? 'flex' : 'none',
+                    display:
+                      resReturnData?.caterer_charge > 0 ? 'flex' : 'none',
                   }}>
                   <Text
                     style={{
@@ -653,7 +675,7 @@ const Modify = () => {
                   <Input
                     placeholder={'0'}
                     keyboardType="number-pad"
-                    value={cat_rate}
+                    value={resReturnData?.caterer_charge.toString()}
                     onChangeText={txt => {
                       setcat_rate(parseInt(txt));
                     }}
@@ -662,8 +684,10 @@ const Modify = () => {
                     inputStyle={{
                       fontSize: 20,
                     }}
+                    disabled={true}
                   />
                 </View>
+
                 {/* Extra */}
                 <View
                   style={{
@@ -671,6 +695,7 @@ const Modify = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     marginTop: -wp(4),
+                    display: resReturnData?.extra_charges > 0 ? 'flex' : 'none',
                   }}>
                   <Text
                     style={{
@@ -720,7 +745,14 @@ const Modify = () => {
                   </Text>
                   <Input
                     disabled
-                    defaultValue={total.toString()}
+                    defaultValue={`${
+                      parseInt(resReturnData?.total_amount) +
+                      parseInt(
+                        reduxCalculationData.totalAmount
+                          ? reduxCalculationData.totalAmount
+                          : 0,
+                      )
+                    }`}
                     // value={total}
                     containerStyle={{width: wp(40)}}
                     leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -747,7 +779,7 @@ const Modify = () => {
                   </Text>
                   <Input
                     placeholder={'0'}
-                    value={Advanced}
+                    value={resReturnData?.advanced.toString()}
                     keyboardType="number-pad"
                     onChangeText={txt => {
                       setAdvanced(parseInt(txt));
@@ -757,6 +789,7 @@ const Modify = () => {
                     inputStyle={{
                       fontSize: 20,
                     }}
+                    disabled
                   />
                 </View>
                 {/* Pending Amount */}
@@ -777,7 +810,14 @@ const Modify = () => {
                   </Text>
                   <Input
                     disabled
-                    defaultValue={Pending.toString()}
+                    defaultValue={`${
+                      parseInt(resReturnData?.pending_payment) +
+                      parseInt(
+                        reduxCalculationData.totalAmount
+                          ? reduxCalculationData.totalAmount
+                          : 0,
+                      )
+                    }`}
                     containerStyle={{width: wp(40)}}
                     leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                     inputStyle={{
@@ -863,7 +903,7 @@ const Modify = () => {
                 textAlign: 'center',
                 letterSpacing: 1,
               }}>
-              Booking Successful
+              Booking Update Successful
             </Text>
             <View style={{alignItems: 'center'}}>
               <AnimatedLottieView

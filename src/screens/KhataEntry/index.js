@@ -15,7 +15,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
-import StaticHeader from '../../components/StaticHeader';
+import Header from '../../components/Header';
 import LinearGradient from 'react-native-linear-gradient';
 import {Icon, Input} from 'react-native-elements';
 import Modal from 'react-native-modal';
@@ -156,13 +156,9 @@ const AllEntry = () => {
   };
   return (
     <>
-      <View
-        style={{
-          backgroundColor: '#fff',
-          paddingTop: StatusBar.currentHeight,
-          flex: 1,
-        }}>
-        <StaticHeader />
+      <View style={{ backgroundColor: '#fff', flex: 1, }}>
+      <Header name="Khata Book" backBtn={true} />
+      <BlankSpace height={hp(1)} />
         {isLoader ? (
           <View
             style={{

@@ -29,31 +29,6 @@ const Notification = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const [allData, setAllData] = useState([]);
-  const [unread, setUnread] = useState(0);
-  // const [loader, setLoader] = useState(false);
-
-  //All notifications get Api
-  // const handlegetNotification = async () => {
-  //   setLoader(true);
-  //   getAllNotifications({
-  //     user_id: userId,
-  //   })
-  //     .then(res => {
-  //       const {status, data, unread} = res.data;
-  //       console.log('Res of getAllNotification', res.data);
-  //       if (status == 'Success') {
-  //         setAllData(data);
-  //         setUnread(unread);
-  //       }
-  //       setLoader(false);
-  //     })
-  //     .catch(err => {
-  //       console.log('Err of getAllNotifications', err);
-  //       setLoader(false);
-  //     });
-  // };
-
   const {getNotificationRes, loader} = useSelector(
     state => state.ExtraOthersReducer,
   );
@@ -71,10 +46,6 @@ const Notification = () => {
       })
       .catch(err => console.log('Err of ReadMsg', err));
   };
-
-  // useEffect(() => {
-  //   handlegetNotification();
-  // }, []);
 
   const handleNavigation = item => {
     if (item?.type == 'Order') {
@@ -239,10 +210,9 @@ const Notification = () => {
       <BlankSpace height={hp(1)} />
       {true ? (
         getNotificationRes?.data && getNotificationRes?.data.length > 0 ? (
-          // <FlatList data={getNotificationRes?.data} renderItem={renderItem} />
           <ScrollView>
             {getNotificationRes?.data.map((item, index) => {
-              const [showRead, setShowRead] = useState(false);
+              // const [showRead, setShowRead] = useState(false);
               return (
                 <View
                   style={
@@ -256,14 +226,14 @@ const Notification = () => {
                     rightContent={() => console.log('hello')}
                     rightActionActivationDistance={wp(30)}
                     onRightActionRelease={() => {
-                      console.log('onRightActionRelease'), setShowRead(false);
+                      // console.log('onRightActionRelease'), setShowRead(false);
                       handleReadMsgClick(item?.id);
                     }}
                     onRightActionActivate={() => {
-                      console.log('onRightActionActive'), setShowRead(true);
+                      // console.log('onRightActionActive'), setShowRead(true);
                     }}
                     onSwipeRelease={() => {
-                      console.log('Hello'), setShowRead(false);
+                      // console.log('Hello'), setShowRead(false);
                     }}>
                     <Pressable
                       style={{
@@ -334,7 +304,7 @@ const Notification = () => {
                           </Text>
                         </View>
                       </View>
-                      {showRead ? (
+                      {/* {showRead ? (
                         <View
                           style={{
                             backgroundColor: Colors.primary,
@@ -356,7 +326,7 @@ const Notification = () => {
                             Read
                           </Text>
                         </View>
-                      ) : null}
+                      ) : null} */}
                     </Pressable>
                   </Swipeable>
                   {getNotificationRes?.data &&

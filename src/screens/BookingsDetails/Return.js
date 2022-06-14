@@ -772,6 +772,7 @@ const ReturnBookingPage = ({navigation}) => {
                           fontSize: wp(4),
                         }}
                         placeholder={'0'}
+
                       />
                     </View>
                     {/* Advanced */}
@@ -822,9 +823,9 @@ const ReturnBookingPage = ({navigation}) => {
                       <Input
                         disabled
                         defaultValue={`${
-                          parseInt(resReturnData.pending_payment) +
-                          parseInt(extra) -
-                          parseInt(Discount ? Discount : 0)
+                          parseInt(resReturnData?.total_amount) -
+                          parseInt(resReturnData.advanced) -
+                          parseInt(resReturnData.advanced) - parseInt(Discount)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
