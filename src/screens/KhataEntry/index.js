@@ -26,19 +26,27 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {addKhataEntry, getKhataEntry} from '../../api/KhataEntry';
 import {UIStore} from '../../UIStore';
 import {SkypeIndicator} from 'react-native-indicators';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const AllEntry = () => {
   const [modal, setmodal] = useState(false);
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState(0);
-  const [remark, setRemark] = useState('');
+  const [txnType, setTxnType] = useState('');
   const [datefrompicker, setDatefrompicker] = useState(false);
   const [entryDate, setEntryDate] = useState(new Date());
   const [btnLoader, setBtnLoader] = useState(false);
   const [isLoader, setIsLoader] = useState(true);
   const [allKhataEntryDetails, setAllKhataEntryDetails] = useState([]);
   const userId = UIStore.useState(s => s.userId);
+  const [types, setTypes] = useState([
+    {label: 'Credit', value: 'Credit'},
+    {label: 'Debit', value: 'Debit'},
+  ]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const StructuralDate = date =>
     `${
@@ -54,12 +62,13 @@ const AllEntry = () => {
   // Create Khata Entry Api Call
   const handleCreateEntry = () => {
     setBtnLoader(true);
+    // console.log(txnType)
     addKhataEntry({
       user_id: userId,
       date: entryDate,
       description: description,
       amount: amount,
-      remark: remark,
+      type: txnType,
     })
       .then(res => {
         console.log('success of Create Khata Entry', res.data);
@@ -70,12 +79,13 @@ const AllEntry = () => {
           // setCheckAvailabilityMsg(message);
         }
         setBtnLoader(false);
+        getAllKhataEntry();
       })
       .catch(err => {
         console.log('Err Of Create Khata Entry :', err);
         setBtnLoader(false);
       });
-    getAllKhataEntry();
+    
   };
 
   // Create Khata Entry Api Call
@@ -84,10 +94,11 @@ const AllEntry = () => {
       user_id: userId,
     })
       .then(res => {
-        console.log('success of GetAll Khata Entry', res.data);
-        const {status, message, data} = res.data;
+        // console.log('success of GetAll Khata Entry', res.data);
+        const {status, message, data, total} = res.data;
         if (status == 'Success') {
           setAllKhataEntryDetails(data);
+          setTotalAmount(total);
           setIsLoader(false);
         } else {
           // setCheckAvailabilityMsg(message);
@@ -106,7 +117,7 @@ const AllEntry = () => {
   useEffect(() => {
     setDescription('');
     setAmount(0);
-    setRemark('');
+    setTxnType('');
     setDatefrompicker(false);
     setEntryDate(new Date());
   }, [modal]);
@@ -137,9 +148,9 @@ const AllEntry = () => {
               style={{
                 fontSize: wp(3.5),
                 fontFamily: Fonts.semibold,
+                color: (item?.type == 'Debit')? "#dc3545": "#146c43"
               }}>
-              <Icon name="inr" type="fontisto" size={wp(2.3)} /> {item?.amount}{' '}
-              {item?.remark ? `( ${item.remark} )` : null}
+              <Icon name="inr" type="fontisto" size={wp(2.3)} /> {(item?.type == 'Debit')? '-': ''}{item?.amount}{' '}
             </Text>
           </View>
           <Text
@@ -158,7 +169,36 @@ const AllEntry = () => {
     <>
       <View style={{ backgroundColor: '#fff', flex: 1, }}>
       <Header name="Khata Book" backBtn={true} />
-      <BlankSpace height={hp(1)} />
+      <LinearGradient
+        colors={['#eee', '#eee', '#fff']}
+        style={{
+          paddingHorizontal: wp(5),
+          paddingVertical: wp(3),
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: wp(2),
+          }}>
+            <Text
+              style={{
+                fontSize: wp(4.5),
+                fontFamily: Fonts.semibold,
+                width: wp(70),
+              }}>
+              Total Amount:
+            </Text>
+          <Text
+            style={{
+              fontSize: wp(4.5),
+              fontFamily: Fonts.semibold
+            }}>
+            <Icon name="inr" type="fontisto" size={wp(3)} /> {totalAmount}
+          </Text>
+        </View>
+      </LinearGradient>
         {isLoader ? (
           <View
             style={{
@@ -171,6 +211,7 @@ const AllEntry = () => {
             <SkypeIndicator color={Colors.botton} count={5} size={wp(12)} />
           </View>
         ) : (
+          
           <ScrollView
             style={{
               flex: 1,
@@ -178,6 +219,8 @@ const AllEntry = () => {
             showsVerticalScrollIndicator={false}>
             {allKhataEntryDetails.length != 0 ? (
               <>
+                
+                <BlankSpace height={hp(1)} />
                 {allKhataEntryDetails.map((item, ind) => {
                   return <CommonView item={item} key={ind} />;
                 })}
@@ -345,34 +388,24 @@ const AllEntry = () => {
                   <Icon name="calendar" type="antdesign" style={{padding: 5}} />
                 }
               />
-              {console.log('entryDate', entryDate)}
             </TouchableOpacity>
-            <Input
-              label="Remark"
-              placeholder="Enter Remark"
-              value={remark}
-              onChangeText={txt => {
-                setRemark(txt);
+            <DropDownPicker
+              open={open}
+              value={value}
+              items={types}
+              setOpen={setOpen}
+              setValue={setValue}
+              setItems={setTypes}
+              onChangeValue={() => {
+                setTxnType(value);
               }}
-              inputStyle={{
-                fontFamily: Fonts.regular,
-                textAlign: 'auto',
-                marginLeft: 10,
-                fontSize: wp(4),
+              placeholder="Type"
+              style={{
+                width: wp(30),
+                borderColor: '#999',
+                marginTop: hp(3.5)
               }}
-              containerStyle={{
-                borderBottomWidth: 0,
-                flex: 1,
-              }}
-              inputContainerStyle={{
-                borderWidth: 1,
-                borderRadius: 10,
-                marginTop: 5,
-              }}
-              labelStyle={{
-                fontFamily: Fonts.semibold,
-                color: '#000',
-              }}
+
             />
           </View>
           <View
@@ -428,7 +461,7 @@ const AllEntry = () => {
               }}
               btnName="ADD"
               onPress={() => {
-                !description || !amount || !entryDate
+                !description || !amount || !entryDate || !txnType
                   ? alert('fill requird value')
                   : handleCreateEntry();
               }}

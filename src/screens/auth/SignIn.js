@@ -165,7 +165,7 @@ const SignIn = ({navigation}) => {
           fontSize: wp(4),
         }}
         btnName="SIGN IN"
-        isLoader={(AuthReducer.status == 'SIGNIN_REQUEST')&& AuthReducer.loader}
+        isLoader={(AuthReducer.status == 'SIGNIN_REQUEST') && AuthReducer.loader}
       />
 
       <BlankSpace height={hp(3)} />

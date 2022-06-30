@@ -79,7 +79,8 @@ const Events = () => {
     interested,
     interested_msg,
     eventId,
-    bgColor
+    bgColor,
+    date_title
   }) => {
   const [InterestedState,seInterestedState] = useState("Not Participate")
 
@@ -89,6 +90,7 @@ const Events = () => {
           <View
             style={{
               padding: wp(7),
+              paddingBottom: hp(2.5)
             }}>
             <Text
               style={{
@@ -100,7 +102,7 @@ const Events = () => {
             </Text>
             <BlankSpace height={hp(1)} />
             <Text
-              numberOfLines={3}
+              numberOfLines={5}
               ellipsizeMode="tail"
               style={{
                 color: Colors.white,
@@ -110,12 +112,12 @@ const Events = () => {
               }}>
               {description}
             </Text>
-            <BlankSpace height={hp(1.5)} />
+            <BlankSpace height={hp(2)} />
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                width: '100%',
+                width: '100%'
               }}>
               <View
                 style={{
@@ -128,7 +130,7 @@ const Events = () => {
                     color: Colors.white,
                     textAlign: 'center',
                   }}>
-                  Remaining
+                  {date_title}
                 </Text>
                 <Text
                   style={{
@@ -264,6 +266,7 @@ const Events = () => {
               interested_msg={item.interested_msg}
               eventId={item.id}
               bgColor={item?.card_color}
+              date_title={item?.date_title}
             />
             {
               allData.length == ind+1 ?<BlankSpace height={hp(15)}/>:null

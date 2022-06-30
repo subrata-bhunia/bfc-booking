@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Tabs from './tab';
 import AuthStackScreen from './authstack';
@@ -17,6 +17,7 @@ import PaidBooking from '../screens/BookingsDetails/Paid';
 const Stack = createStackNavigator();
 
 const Stacks = () => {
+ 
   return (
     <Stack.Navigator headerMode="none" initialRouteName="Home">
       <Stack.Screen name="Home" component={Tabs} />

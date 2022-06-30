@@ -47,6 +47,8 @@ import {
   getcalendarBookingsInfo,
   getNotifications,
 } from '../../redux/action';
+import InAppUpdate from '../../helper/InAppUpdate'
+import { SkypeIndicator } from 'react-native-indicators';
 const Home = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
@@ -152,7 +154,7 @@ const Home = () => {
     });
   }, []);
 
-  const {dueBookinglist, specificDateBookinglist, upcomingBookinglist} =
+  const {dueBookinglist, specificDateBookinglist, upcomingBookinglist,loader} =
     useSelector(state => state.BookinglistReducer);
   const {calendarInfo} = useSelector(state => state.CalendarInfoReducer);
 
@@ -175,8 +177,12 @@ const Home = () => {
     // setmodalShow(false);
   }, [isFocused]);
   useEffect(() => {
+    InAppUpdate.checkUpdate()
+  },[]);
+  useEffect(() => {
     dispatch(getNotifications());
   }, []);
+  
   // ----------------------------------- //
 
   const months = [
@@ -286,7 +292,7 @@ const Home = () => {
   };
 
   // --------------- UPCOMING BOOK LIST ----------- //
-  const [loader, setloader] = useState(false);
+  // const [loader, setloader] = useState(false);
   const [loader2, setloader2] = useState(false);
 
   return (
@@ -454,13 +460,13 @@ const Home = () => {
             title={`Upcoming Bookings (${(upcomingBookinglist?.data?.length) ? upcomingBookinglist?.data?.length : 0})`}
             items={upcomingBookinglist?.data}
             horizontal={true}
-            isloader={loader}
+            // isloader={loader}
           />
           <FlatListWithHeader
             title={`Due Bookings (${(dueBookinglist?.data?.length) ? dueBookinglist?.data?.length : 0})`}
             items={dueBookinglist?.data}
             horizontal={true}
-            isloader={loader2}
+            // isloader={loader2}
           />
         </View>
         <View style={{height: hp(13)}} />
@@ -666,16 +672,27 @@ const Home = () => {
               marginVertical: 10,
             }}
           />
-          {specificDateBookinglist?.data?.length > 0 ? (
+          {
+          loader ?(
+          <View style={{
+            height:hp(15),
+            backgroundolor:"#fff"
+          }}>
+          <SkypeIndicator color={Colors.botton} count={5} size={wp(14)} />
+          </View>)
+          :(
+          specificDateBookinglist?.data?.length > 0 ? (
             <View>
               <View style={{height: hp(30), width: wp(93)}}>
                 <FlatListWithHeader
                   items={specificDateBookinglist.data}
                   horizontal={true}
                   width={wp(85)}
+                  isloader={loader}
                 />
               </View>
-              {calendarInfo?.full?.includes(selectDate) ? null : (
+              {(Date.parse(selectDate) - Date.parse(new Date()) < 0) ?null:(
+              calendarInfo?.full?.includes(selectDate) ? null : (
                 <Button
                   onPress={() => navigation.navigate('Booking')}
                   btnStyle={{
@@ -695,7 +712,7 @@ const Home = () => {
                     type: 'ant-design',
                   }}
                 />
-              )}
+              ))}
             </View>
           ) : (
             <View>
@@ -704,9 +721,11 @@ const Home = () => {
                   fontFamily: Fonts.semibold,
                   color: Colors.text,
                   textAlign: 'center',
+                  marginVertical:hp(5)
                 }}>
                 No Booking Found
               </Text>
+              {(Date.parse(selectDate) - Date.parse(new Date()) < 0) ?null:
               <Button
                 onPress={() => navigation.navigate('Booking')}
                 btnStyle={{
@@ -725,9 +744,10 @@ const Home = () => {
                   name: 'plus',
                   type: 'ant-design',
                 }}
-              />
+              />}
             </View>
-          )}
+          ))
+          }
         </View>
       </Model>
     </View>
