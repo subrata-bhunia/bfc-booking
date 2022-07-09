@@ -95,7 +95,7 @@ const DueBookingPage = ({navigation}) => {
         setDiscount(parseInt(data.discount));
         setPrePayment(parseInt(data.payment));
         setTableData(items);
-        console.log('handleGetBookingDetails res :', data);
+        // console.log('handleGetBookingDetails res :', data);
         setCostOfItems(rent);
         var newObj = new Object();
         for (var i = 0; i < items.length; i++) {
@@ -123,7 +123,7 @@ const DueBookingPage = ({navigation}) => {
           setmodalData(data);
           setmodal(true);
         }
-        console.log('PaymentUpdate :', res?.data);
+        // console.log('PaymentUpdate :', res?.data);
       })
       .catch(err => console.log('err of paymentUpdate :', err));
   };
@@ -582,7 +582,6 @@ const DueBookingPage = ({navigation}) => {
                         }}
                         disabled
                       />
-                      {console.log(resDueData?.caterer_charge)}
                     </View>
 
                     {/* Extra Charges */}

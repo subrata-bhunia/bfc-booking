@@ -121,7 +121,7 @@ const MissingBookingPage = ({navigation}) => {
       }
     });
   };
-  console.log('booking_id', booking_id);
+  // console.log('booking_id', booking_id);
   const resetInput = index => {
     var newArr = [];
     for (var i = 0; i < tableData.length; i++) {
@@ -152,7 +152,7 @@ const MissingBookingPage = ({navigation}) => {
     setreturnItems(oldReturnItems);
   };
   const checkMissingItems = () => {
-    console.log('returnItems', returnItems);
+    // console.log('returnItems', returnItems);
     setShow(true);
     checkReturnItems({
       booking_id: booking_id,
@@ -191,11 +191,11 @@ const MissingBookingPage = ({navigation}) => {
           setmodalData(data);
           setmodal(true);
         }
-        console.log('MissingUpdate :', res?.data);
+        // console.log('MissingUpdate :', res?.data);
       })
       .catch(err => console.log('err of MissingUpdate :', err));
   };
-  console.log('returnItems :', returnItems);
+  // console.log('returnItems :', returnItems);
 
   const calculateBill = extraCharge => {
     setextra(extraCharge);

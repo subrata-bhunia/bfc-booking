@@ -101,7 +101,7 @@ const PickupBookingPage = ({navigation}) => {
         setRent(data.rent);
         setDiscount(parseInt(data.discount));
         setTableData(items);
-        console.log('rent of items :', rent);
+        // console.log('rent of items :', rent);
         setCostOfItems(rent);
         var newObj = new Object();
         for (var i = 0; i < items.length; i++) {
@@ -152,7 +152,7 @@ const PickupBookingPage = ({navigation}) => {
           setpickupitemRes(res?.data?.data);
           setmodal(true);
           setmodalRes(res?.data?.data);
-          console.log('Pickup Click Res :', res?.data);
+          // console.log('Pickup Click Res :', res?.data);
         }
       })
       .catch(err => {
@@ -200,13 +200,13 @@ const PickupBookingPage = ({navigation}) => {
     setpickupitem(oldPickupItems);
   };
 
-  console.log('Pickupup item :', pickupitem);
-  console.log('ResData item :', resPickupData);
+  // console.log('Pickupup item :', pickupitem);
+  // console.log('ResData item :', resPickupData);
 
   // Rent Calculation
 
   const reduxData = useSelector(state => state.handleCalCulatePrice);
-  console.log('Total Price', reduxData);
+  // console.log('Total Price', reduxData);
 
   useEffect(() => {
     if (reduxData.uniqueId == booking_id) {
@@ -685,7 +685,6 @@ const PickupBookingPage = ({navigation}) => {
                           }}
                           disabled
                         />
-                        {console.log(resPickupData?.caterer_charge)}
                       </View>
                     ) : null}
 
@@ -930,7 +929,6 @@ const PickupBookingPage = ({navigation}) => {
                   setpickupWarningModal(true)
                 }}
               />
-              {console.log('----', resPickupData?.pickup_left_day)}
             </View>
           </>
         )}

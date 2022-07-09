@@ -75,7 +75,7 @@ const Booking = () => {
     AvailableItems().then(res => {
       if (res.data?.status === 'Success') {
         setTableDate(res?.data?.data);
-        console.log('AvailableItems :', res.data);
+        // console.log('AvailableItems :', res.data);
         setItemsRent(res.data?.rent);
       }
     });
@@ -90,7 +90,7 @@ const Booking = () => {
   const [isDatePickerVisibleR, setDatePickerVisibilityR] = useState(false);
   // ---------- Drop Down ---------- //
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [pickupTime, setPickupTime] = useState(null);
   const [valueV, setValueV] = useState(true);
   const [_return, setreturn] = useState(false);
   const [rvalue, setrvalue] = useState(null);
@@ -124,9 +124,9 @@ const Booking = () => {
   const [Pending, setPending] = useState(0);
   const [rentV, setrentV] = useState(true);
   const [book_items, setbook_items] = useState({});
-  const [stockValue, setStockValue] = useState({stockRent: 0, stoctAdv: 0});
+  const [rentDays, setRentDays] = useState(1);
 
-  console.log('rent', rent);
+  // console.log('rent', rent);
 
   // ------------- //
   useEffect(() => {
@@ -138,7 +138,7 @@ const Booking = () => {
     setnext1(false);
     // ------ Personal ------- //
     setpickupdate(null);
-    setValue(null);
+    setPickupTime(null);
     setrvalue(null);
     setreturndate(null);
     setcadd('');
@@ -154,6 +154,7 @@ const Booking = () => {
     setPending(0);
     setcat_rate(0);
     setextra(0);
+    setRentDays(1);
   }, [isFocused]);
   useEffect(() => {
     let _Advanced = Advanced == '' || Advanced == 0 ? 0 : parseInt(Advanced);
@@ -173,7 +174,7 @@ const Booking = () => {
     setbook_items(oldSelected);
     // setrent(0);
   };
-  console.log('Enter Items are :', book_items);
+  // console.log('Enter Items are :', book_items);
 
   // check-availability Api Call
   const handleChackOrdar = () => {
@@ -182,21 +183,29 @@ const Booking = () => {
       pickup_date: pickupdate,
       return_date: returndate,
       gathering,
+      pickup_time: pickupTime,
+      return_time: rvalue,
     })
       .then(res => {
-        console.log('success of ChackOrdarAvail', res.data);
-        const {status, message} = res.data;
+        // console.log('success of ChackOrdarAvail', res.data);
+        const {status, message, caterer_cost, rent_days} = res.data;
         if (status == 'Success') {
           setView0(!view0);
           setnext1(true);
           setView1(true);
+          setRentDays(rent_days);
+          if(caterersvalue == 'Yes'){
+            setcat_rate(caterer_cost);
+          }else{
+            setcat_rate(0);
+          }
         } else {
           setCheckAvailabilityMsg(message);
         }
         setBtnLoader2(false);
       })
       .catch(err => {
-        console.log('Err Of ChackOrdarAvail :', err);
+        // console.log('Err Of ChackOrdarAvail :', err);
         setBtnLoader2(false);
       });
     setTimeout(() => {
@@ -208,7 +217,7 @@ const Booking = () => {
     if (
       pickupdate !== null ||
       returndate !== null ||
-      value !== null ||
+      pickupTime !== null ||
       rvalue !== null ||
       cname.length > 3 ||
       cadd.length > 3 ||
@@ -217,7 +226,7 @@ const Booking = () => {
     ) {
       if (pickupdate !== null) {
         if (returndate !== null) {
-          if (value !== null) {
+          if (pickupTime !== null) {
             if (rvalue !== null) {
               if (cname.length > 3) {
                 if (cphone.length == 10) {
@@ -261,12 +270,12 @@ const Booking = () => {
   };
   const _AddBooking = () => {
     if (rent > 0) {
-      console.log(book_items);
+      // console.log(book_items);
       setBtnLoader(true);
-      console.log('userId', userId);
+      // console.log('userId', userId);
       AddBooking({
         pickup_date: pickupdate,
-        pickup_time: value,
+        pickup_time: pickupTime,
         return_date: returndate,
         return_time: rvalue,
         customer_name: cname,
@@ -285,14 +294,15 @@ const Booking = () => {
         discount: Discount,
       })
         .then(res => {
+          // console.log('293', res?.data?.status)
           if (res?.data?.status === 'Success') {
             setmodal(true);
             setmodalData(res?.data?.data);
-            console.log(res?.data?.data);
+            // console.log(res?.data?.data);
             setBtnLoader(false);
           } else {
             setaddBiookingStatus(res?.data?.message);
-            console.log(res?.data?.message);
+            // console.log(res?.data?.message);
             setBtnLoader(false);
             setTimeout(() => {
               setaddBiookingStatus(null);
@@ -300,7 +310,7 @@ const Booking = () => {
           }
         })
         .catch(err => {
-          console.log(err, 'TTTT');
+          // console.log(err, 'TTTT');
           setBtnLoader(false);
           setTimeout(() => {
             setaddBiookingStatus(null);
@@ -312,10 +322,12 @@ const Booking = () => {
   };
 
   const autoCalculateData = useSelector(state => state.handleCalCulatePrice);
-  console.log('Total Price', autoCalculateData);
+  // console.log('Total Price', autoCalculateData);
 
   useEffect(() => {
-    setrent(autoCalculateData.totalAmount);
+    let productRent = parseInt(autoCalculateData.totalAmount);
+    setrent(productRent * rentDays);
+
   }, [autoCalculateData]);
 
   const StructuralDate = date =>
@@ -437,14 +449,13 @@ const Booking = () => {
                       />
                     }
                   />
-                  {console.log('pickupdate', pickupdate)}
                 </TouchableOpacity>
                 <DropDownPicker
                   open={open}
-                  value={value}
+                  value={pickupTime}
                   items={items}
                   setOpen={setOpen}
-                  setValue={setValue}
+                  setValue={setPickupTime}
                   setItems={setItems}
                   onChangeValue={() => {
                     setValueV(true);
@@ -1087,20 +1098,10 @@ const Booking = () => {
                   Rent :
                 </Text>
                 <Input
-                  // placeholder={`${stockValue.stockRent}`}
                   keyboardType="number-pad"
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   value={rent.toString()}
-                  // defaultValue={0}
-                  // onChangeText={txt => {
-                  //   setrent(parseInt(txt));
-                  //   setrentV(true);
-                  // }}
-                  // onEndEditing={() =>
-                  //   setStockValue({...stockValue, stockRent: rent})
-                  // }
-                  // onFocus={() => setStockValue({...stockValue, stockRent: ''})}
                   inputStyle={{
                     fontSize: 20,
                   }}
@@ -1136,15 +1137,16 @@ const Booking = () => {
                 <Input
                   placeholder={'0'}
                   keyboardType="number-pad"
-                  value={cat_rate}
-                  onChangeText={txt => {
-                    setcat_rate(txt);
-                  }}
+                  value={cat_rate.toString()}
+                  // onChangeText={txt => {
+                  //   setcat_rate(txt);
+                  // }}
                   containerStyle={{width: wp(40)}}
                   leftIcon={<Icon name="inr" type="fontisto" size={15} />}
                   inputStyle={{
                     fontSize: 20,
                   }}
+                  disabled={true}
                 />
               </View>
               {/* Extra */}

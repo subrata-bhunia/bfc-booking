@@ -43,7 +43,7 @@ const AllBookings = () => {
     state => state.BookinglistReducer,
   );
 
-  console.log('Booking Page All allBookinglist from api', allBookinglist);
+  // console.log('Booking Page All allBookinglist from api', allBookinglist);
 
   useEffect(() => {
     dispatch(getAllBookings());

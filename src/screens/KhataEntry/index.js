@@ -71,7 +71,7 @@ const AllEntry = () => {
       type: txnType,
     })
       .then(res => {
-        console.log('success of Create Khata Entry', res.data);
+        // console.log('success of Create Khata Entry', res.data);
         const {status, message} = res.data;
         if (status == 'Success') {
           setmodal(false);
@@ -82,7 +82,7 @@ const AllEntry = () => {
         getAllKhataEntry();
       })
       .catch(err => {
-        console.log('Err Of Create Khata Entry :', err);
+        // console.log('Err Of Create Khata Entry :', err);
         setBtnLoader(false);
       });
     
@@ -105,7 +105,7 @@ const AllEntry = () => {
         }
       })
       .catch(err => {
-        console.log('Err Of GetAll Khata Entry :', err);
+        // console.log('Err Of GetAll Khata Entry :', err);
       });
     setTimeout(() => {
       // setCheckAvailabilityMsg(null);

@@ -92,7 +92,7 @@ const Home = () => {
         });
       }
     } else {
-      console.log('Inital_Notifications', noti);
+      // console.log('Inital_Notifications', noti);
     }
   };
   const localNotification = async () => {
@@ -149,7 +149,7 @@ const Home = () => {
           });
         }
       } else {
-        console.log('Clicked_Notifications', noti);
+        // console.log('Clicked_Notifications', noti);
       }
     });
   }, []);

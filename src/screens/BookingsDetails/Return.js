@@ -176,7 +176,7 @@ const ReturnBookingPage = ({navigation}) => {
         console.log(err);
       });
   };
-  console.log(nextModalres);
+  // console.log(nextModalres);
   var radio_props = [
     {label: 'Product Price', value: 0},
     {label: 'Products', value: 1},
@@ -204,7 +204,7 @@ const ReturnBookingPage = ({navigation}) => {
       });
   };
 
-  console.log('returnItems :', returnItems);
+  // console.log('returnItems :', returnItems);
 
   const TodayDate = `${new Date().getFullYear()}-${
     new Date().getMonth() + 1 < 10

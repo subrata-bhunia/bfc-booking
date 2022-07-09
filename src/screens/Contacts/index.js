@@ -168,7 +168,7 @@ const ContactList = () => {
     }
   });
   const loadsearchContacts = () => {
-    console.log('jj');
+    // console.log('jj');
   };
   useEffect(() => {
     if (searchText.length < 1) {
@@ -209,7 +209,7 @@ const ContactList = () => {
         }
       })
       .catch(err => {
-        console.log('Err of get Contact :', err);
+        // console.log('Err of get Contact :', err);
         setloader2(false);
       });
   };

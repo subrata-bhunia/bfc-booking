@@ -28,7 +28,7 @@ const NewPassword = ({route}) => {
   const [statusMsg, setstatusMsg] = useState('');
   const [btnLoader, setBtnLoader] = useState(false);
 
-  console.log('From RoutParams', phone);
+  // console.log('From RoutParams', phone);
 
   const handleSavepasswordbtn = () => {
     setstatus(false);
@@ -40,7 +40,7 @@ const NewPassword = ({route}) => {
           password: password,
         })
           .then(res => {
-            console.log('0000', res?.data);
+            // console.log('0000', res?.data);
             if (res?.data?.status == 'Success') {
               navigation.navigate('SignIn');
               setBtnLoader(false);
@@ -51,7 +51,7 @@ const NewPassword = ({route}) => {
             }
           })
           .catch(err => {
-            console.log('verify otp api error :', err);
+            // console.log('verify otp api error :', err);
             setstatusMsg('Something went wrong');
             setstatus(true);
             setBtnLoader(false);

@@ -42,14 +42,14 @@ const Events = () => {
     })
       .then(res => {
         const {status, data} = res.data;
-        console.log('Res of getAlEvents', res.data);
+        // console.log('Res of getAlEvents', res.data);
         if (status == 'Success') {
           setAllData(data);
         }
         setLoader(false);
       })
       .catch(err => {
-        console.log('Err of getAllEvents', err);
+        // console.log('Err of getAllEvents', err);
         setLoader(false);
       });
   };
@@ -61,7 +61,7 @@ const Events = () => {
     })
       .then(res => {
         const {status, data} = res.data;
-        console.log('Res of handleEventParticipation', res.data);
+        // console.log('Res of handleEventParticipation', res.data);
       })
       .catch(err => {
         console.log('Err of handleEventParticipation', err);

@@ -41,7 +41,7 @@ const Notification = () => {
       notification_id: id,
     })
       .then(res => {
-        console.log('Res of handleReadMsg', res.data);
+        // console.log('Res of handleReadMsg', res.data);
         dispatch(getNotifications());
       })
       .catch(err => console.log('Err of ReadMsg', err));

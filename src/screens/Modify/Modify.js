@@ -66,7 +66,7 @@ const Modify = () => {
   console.log('tableData', tableData);
 
   const reduxCalculationData = useSelector(state => state.handleCalCulatePrice);
-  console.log('reduxCalculationData', reduxCalculationData);
+  // console.log('reduxCalculationData', reduxCalculationData);
 
   //------- API ----------- //
   const handleGetBookingDetails = async () => {
@@ -74,14 +74,14 @@ const Modify = () => {
     getModifyBookingInfo({booking_id: booking_id})
       .then(res => {
         const {data, status, rent} = res.data;
-        console.log('Res of handleGetBookingDetails', res.data);
+        // console.log('Res of handleGetBookingDetails', res.data);
         if (status === 'Success') {
           // setShow(false);
           setResReturnData(data);
           setTableDate(res.data.data.items);
           setCostOfItems(rent);
         }
-        console.log('getData', data);
+        // console.log('getData', data);
       })
       .catch(err => console.log('-----', JSON.stringify(err)));
   };
@@ -131,7 +131,7 @@ const Modify = () => {
 
   const [returnItems, setreturnItems] = useState([]);
 
-  console.log('returnItems', returnItems);
+  // console.log('returnItems', returnItems);
 
   // ------------- //
   useEffect(() => {
@@ -185,7 +185,7 @@ const Modify = () => {
       newObj[key] = value;
     }
     setreturnItems(newObj);
-    console.log('newObj', newObj);
+    // console.log('newObj', newObj);
     dispatch(calculateAction(booking_id, newObj, costOfItems));
   };
 
@@ -197,9 +197,9 @@ const Modify = () => {
   const arr = new Array();
 
   const _UpdateBooking = () => {
-    console.log(book_items);
+    // console.log(book_items);
     setBtnLoader(true);
-    console.log('userId', userId);
+    // console.log('userId', userId);
 
     UpdateBooking({
       items: returnItems,
@@ -214,7 +214,7 @@ const Modify = () => {
           setBtnLoader(false);
         } else {
           setaddBiookingStatus(res?.data?.message);
-          console.log(res?.data?.message);
+          // console.log(res?.data?.message);
           setBtnLoader(false);
           setTimeout(() => {
             setaddBiookingStatus(null);
@@ -222,7 +222,6 @@ const Modify = () => {
         }
       })
       .catch(err => {
-        console.log(err, 'TTTT');
         setBtnLoader(false);
         setTimeout(() => {
           setaddBiookingStatus(null);

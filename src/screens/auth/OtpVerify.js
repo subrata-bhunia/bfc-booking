@@ -25,7 +25,7 @@ const OtpVerify = ({navigation, route}) => {
   const [statusMsg, setstatusMsg] = useState('');
   const [btnLoader, setBtnLoader] = useState(false);
 
-  console.log('From RoutParams', phone);
+  // console.log('From RoutParams', phone);
 
   const handleVerifybtn = () => {
     setstatus(false);
@@ -36,7 +36,7 @@ const OtpVerify = ({navigation, route}) => {
         otp: otp,
       })
         .then(res => {
-          console.log('0000', res?.data);
+          // console.log('0000', res?.data);
           if (res?.data?.status == 'Success') {
             setBtnLoader(false);
             navigation.navigate('NewPassword', {
@@ -49,7 +49,7 @@ const OtpVerify = ({navigation, route}) => {
           }
         })
         .catch(err => {
-          console.log('verify otp api error :', err);
+          // console.log('verify otp api error :', err);
           setstatusMsg('Something went wrong');
           setstatus(true);
           setBtnLoader(false);

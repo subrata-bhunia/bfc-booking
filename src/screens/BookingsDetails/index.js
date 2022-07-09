@@ -137,7 +137,7 @@ const BookingDetails = ({navigation}) => {
       });
   };
 
-  console.log('booking_id :', booking_id);
+  // console.log('booking_id :', booking_id);
   //--------------- Pickup ----------- //
   const [returnbtn, setreturnbtn] = useState(false);
   const [returnBtnDisable, setreturnBtnDisable] = useState(true);
@@ -149,7 +149,7 @@ const BookingDetails = ({navigation}) => {
   useEffect(() => {
     if (resReturnData?.status === 'Pickup') {
       setView1(true);
-      console.log(resReturnData?.items);
+      // console.log(resReturnData?.items);
       const takenItems = new Object();
       resReturnData?.items?.map((item, index) => {
         takenItems[item[2].item_id] = item[2].taken;
@@ -168,7 +168,7 @@ const BookingDetails = ({navigation}) => {
           setResReturnData(data);
           setTableData(res.data.data.items);
         }
-        console.log('getBooking info :', data);
+        // console.log('getBooking info :', data);
       })
       .catch(err => console.log('Err of getBooking :', err));
   };
@@ -976,7 +976,7 @@ const BookingDetails = ({navigation}) => {
               <Button
                 onPress={() => {
                   setpickup(true);
-                  console.log(pickupitem);
+                  // console.log(pickupitem);
                 }}
                 btnStyle={{
                   height: hp(7),

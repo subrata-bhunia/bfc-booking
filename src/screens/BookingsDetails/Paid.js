@@ -72,7 +72,7 @@ const PaidBooking = ({navigation}) => {
         setResCancelData(data);
         setTableData(items);
       }
-      console.log(data);
+      // console.log(data);
     });
   };
 

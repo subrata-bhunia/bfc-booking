@@ -115,7 +115,7 @@ useEffect(() => {
         .then(res => {
           if (res.data?.status === 'Success') {
             setModal(true);
-            console.log('00', res.data);
+            // console.log('00', res.data);
             setOtpRes(res?.data?.otp);
           } else {
             // setBtnLoader2(false);
@@ -125,7 +125,7 @@ useEffect(() => {
           setOtpLoader(false);
         })
         .catch(err => {
-          console.log('API ERROR', err);
+          // console.log('API ERROR', err);
           setOtpLoader(false);
           // setBtnLoader2(false);
           // setstatus2(true);

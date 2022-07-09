@@ -19,7 +19,7 @@ const ForgotPassword = ({navigation}) => {
   const [statusMsg, setstatusMsg] = useState('');
   const [btnLoader, setBtnLoader] = useState(false);
 
-  console.log('phone', phone);
+  // console.log('phone', phone);
 
   useEffect(() => {
     setstatus(false);
@@ -33,7 +33,7 @@ const ForgotPassword = ({navigation}) => {
         phone: phone,
       })
         .then(res => {
-          console.log('0000', res?.data);
+          // console.log('0000', res?.data);
           if (res?.data?.status == 'Success') {
             setBtnLoader(false);
             navigation.navigate('OtpVerify', {
@@ -46,7 +46,7 @@ const ForgotPassword = ({navigation}) => {
           }
         })
         .catch(err => {
-          console.log('send otp api error :', err);
+          // console.log('send otp api error :', err);
           setstatusMsg('Something went wrong');
           setstatus(true);
           setBtnLoader(false);

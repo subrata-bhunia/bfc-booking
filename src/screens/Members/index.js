@@ -182,7 +182,7 @@ const ContactList = () => {
     // console.log("WP")
   };
   const loadsearchContacts = () => {
-    console.log('jj');
+    // console.log('jj');
   };
   useEffect(() => {
     if (searchText.length < 1) {
@@ -202,9 +202,9 @@ const ContactList = () => {
     })
       .then(res => {
         const {data, status} = res?.data;
-        console.log('res', data);
+        // console.log('res', data);
         if (status == 'Success') {
-          console.log('jjj', data);
+          // console.log('jjj', data);
           // dispatch(getallMembers());
         }
         // const{}=res.data
