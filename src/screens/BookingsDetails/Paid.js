@@ -522,6 +522,35 @@ const PaidBooking = ({navigation}) => {
                         disabled
                       />
                     </View>
+                    
+                    {/* Extra Charges */}
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: -wp(4)
+                      }}>
+                      <Text
+                        style={{
+                          fontFamily: Fonts.semibold,
+                          fontSize: wp(4),
+                          width: wp(40),
+                          textAlign: 'right',
+                        }}>
+                        Extra Charges :
+                      </Text>
+                      <Input
+                        keyboardType="number-pad"
+                        defaultValue={`${resCancelData?.extra_charges}`}
+                        containerStyle={{width: wp(40), height: hp(10)}}
+                        leftIcon={<Icon name="inr" type="fontisto" size={15} />}
+                        inputStyle={{
+                          fontSize: wp(4),
+                        }}
+                        disabled
+                      />
+                    </View>
 
                     <View
                       style={{
@@ -551,7 +580,7 @@ const PaidBooking = ({navigation}) => {
                         disabled
                         defaultValue={`${
                           parseInt(resCancelData?.rent) +
-                          parseInt(resCancelData?.caterer_charge)
+                          parseInt(resCancelData?.caterer_charge) + parseInt(resCancelData?.extra_charges)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -683,7 +712,7 @@ const PaidBooking = ({navigation}) => {
                       borderRadius: wp(66),
                     }}
                     onPress={() => {
-                      sendWPsms(resCancelData?.customer_phone, 'Test To Msg.');
+                      sendWPsms(resCancelData?.customer_phone, resCancelData?.wa_message);
                     }}
                     textStyle={{
                       fontFamily: Fonts.semibold,

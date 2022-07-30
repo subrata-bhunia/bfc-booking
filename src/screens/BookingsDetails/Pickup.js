@@ -84,6 +84,7 @@ const PickupBookingPage = ({navigation}) => {
   const [rent, setRent] = useState(0);
   const [payment, setPayment] = useState(0);
   const [costOfItems, setCostOfItems] = useState({});
+  const [rentDays, setRentDays] = useState(1);
 
   // To get Booking Details (API CALL)
   useEffect(() => {
@@ -93,7 +94,7 @@ const PickupBookingPage = ({navigation}) => {
   const handleGetBookingDetails = async () => {
     setShow(true);
     getBookingInfoById({booking_id: booking_id}).then(res => {
-      const {data, status, rent} = res.data;
+      const {data, status, rent, rent_days} = res.data;
       if (status === 'Success') {
         const items = res.data.data.items;
         setShow(false);
@@ -101,7 +102,7 @@ const PickupBookingPage = ({navigation}) => {
         setRent(data.rent);
         setDiscount(parseInt(data.discount));
         setTableData(items);
-        // console.log('rent of items :', rent);
+        setRentDays(rent_days);
         setCostOfItems(rent);
         var newObj = new Object();
         for (var i = 0; i < items.length; i++) {
@@ -152,7 +153,6 @@ const PickupBookingPage = ({navigation}) => {
           setpickupitemRes(res?.data?.data);
           setmodal(true);
           setmodalRes(res?.data?.data);
-          // console.log('Pickup Click Res :', res?.data);
         }
       })
       .catch(err => {
@@ -200,17 +200,12 @@ const PickupBookingPage = ({navigation}) => {
     setpickupitem(oldPickupItems);
   };
 
-  // console.log('Pickupup item :', pickupitem);
-  // console.log('ResData item :', resPickupData);
-
   // Rent Calculation
-
   const reduxData = useSelector(state => state.handleCalCulatePrice);
-  // console.log('Total Price', reduxData);
-
   useEffect(() => {
     if (reduxData.uniqueId == booking_id) {
-      setRent(reduxData.totalAmount);
+      let productRent = parseInt(reduxData.totalAmount);
+      setRent(productRent * rentDays);
     }
   }, [reduxData]);
 
@@ -220,7 +215,6 @@ const PickupBookingPage = ({navigation}) => {
         style={{
           flex: 1,
           backgroundColor: Colors.secondary,
-          // paddingTop: StatusBar.currentHeight,
           padding: 10,
         }}>
         <Header name="Pickup Booking Details" backBtn={true} />

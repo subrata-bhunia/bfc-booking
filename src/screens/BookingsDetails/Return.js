@@ -827,7 +827,7 @@ const ReturnBookingPage = ({navigation}) => {
                           parseInt(resReturnData.advanced) -
                           parseInt(Discount)) < 0 ? 0 : parseInt(resReturnData?.total_amount) -
                           parseInt(resReturnData.advanced) -
-                          parseInt(Discount)
+                          parseInt(Discount) + parseInt(extra)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}

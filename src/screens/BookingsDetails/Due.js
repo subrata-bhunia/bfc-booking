@@ -67,7 +67,7 @@ const DueBookingPage = ({navigation}) => {
   const [tableData, setTableData] = useState([]);
   // ---------- Drop Down ---------- //
   const [nextLoader, setnextLoader] = useState(false);
-  const [check, setCheck] = useState(false);
+  const [markFullPayment, setMarkFullPayment] = useState(false);
 
   //Rent Variable
   const [Discount, setDiscount] = useState(0);
@@ -115,7 +115,7 @@ const DueBookingPage = ({navigation}) => {
       user_id,
       booking_id,
       payment,
-      is_full_payment: check,
+      is_full_payment: markFullPayment,
     })
       .then(res => {
         const {data, status} = res.data;
@@ -827,8 +827,8 @@ const DueBookingPage = ({navigation}) => {
                         // alignSelf: 'center',
                       }}>
                       <CheckBox
-                        checked={check}
-                        onPress={() => setCheck(!check)}
+                        checked={markFullPayment}
+                        onPress={() => setMarkFullPayment(!markFullPayment)}
                         containerStyle={{
                           margin: 0,
                           padding: 0,
@@ -884,6 +884,9 @@ const DueBookingPage = ({navigation}) => {
                 icon={{
                   name: 'logo-whatsapp',
                   type: 'ionicon',
+                }}
+                onPress={() => {
+                  sendWPsms(resDueData?.customer_phone, resDueData?.wa_message);
                 }}
               />
               <Button
