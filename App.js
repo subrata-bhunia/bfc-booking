@@ -1,6 +1,14 @@
 import {NavigationContainer} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
-import {LogBox, StatusBar, View, Text, DeviceEventEmitter} from 'react-native';
+import {
+  LogBox,
+  StatusBar,
+  View,
+  Text,
+  DeviceEventEmitter,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import Stacks from './src/navigations/stack';
 import AuthStackScreen from './src/navigations/authstack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +22,21 @@ import {
   notifications,
   messages,
 } from 'react-native-firebase-push-notifications';
+import SpInAppUpdates, {
+  NeedsUpdateResponse,
+  IAUUpdateKind,
+  StartUpdateOptions,
+  StatusUpdateEvent,
+} from 'sp-react-native-in-app-updates';
+import Modal from 'react-native-modal';
+import * as Progress from 'react-native-progress';
+import {getVersion} from 'react-native-device-info';
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from 'react-native-responsive-screen';
+import {Colors, Fonts} from './src/constants';
+import BlankSpace from './src/components/BlankSpace';
 
 function AppZ({props}) {
   const dispatch = useDispatch();
@@ -22,6 +45,9 @@ function AppZ({props}) {
   const [login, setlogin] = useState(false);
   const [load, setload] = useState(false);
   const [netinfo, setNetinfo] = useState(true);
+  const [startUpdate, setstartUpdate] = useState(false);
+  const [data, setData] = useState(null);
+  const [modal, setModal] = useState(false);
 
   NetInfo.fetch().then(state => {
     // console.log('Connection type', state.details);
@@ -54,13 +80,17 @@ function AppZ({props}) {
   // ----------- //
   useEffect(() => {
     // console.log('AuthReducer', AuthReducer)
-    if(AuthReducer.status == 'GET_TOKEN_SUCCESS' || AuthReducer.status == 'GET_TOKEN_FAILURE'){
+    if (
+      AuthReducer.status == 'GET_TOKEN_SUCCESS' ||
+      AuthReducer.status == 'GET_TOKEN_FAILURE'
+    ) {
       setload(true);
     }
   }, [AuthReducer]);
 
   useEffect(() => {
     dispatch(getTokenAction());
+    checkUpdate();
   }, []);
   LogBox.ignoreAllLogs();
   // -------------- //
@@ -102,6 +132,39 @@ function AppZ({props}) {
       }
     },
   }));
+
+  const inAppUpdates = new SpInAppUpdates(
+    false, // isDebug
+  );
+
+  const checkUpdate = () => {
+    // curVersion is optional if you don't provide it will automatically take from the app using react-native-device-info
+    inAppUpdates.checkNeedsUpdate().then(result => {
+      console.log('checkUpdateResult', result);
+      console.log('currentVirsion', getVersion());
+      if (result.shouldUpdate) {
+        // let updateOptions = {};
+        // if (Platform.OS === 'android') {
+        //   // android only, on iOS the user will be promped to go to your app store page
+        //   updateOptions = {
+        //     updateType: IAUUpdateKind.IMMEDIATE,
+        //   };
+        // }
+        setModal(true);
+        // inAppUpdates.startUpdate(updateOptions); // https://github.com/SudoPlz/sp-react-native-in-app-updates/blob/master/src/types.ts#L78
+        // inAppUpdates.addStatusUpdateListener(e => console.log(e)); // https://github.com/SudoPlz/sp-react-native-in-app-updates/blob/master/src/types.ts#L78
+      }
+    });
+    inAppUpdates.addStatusUpdateListener(e => {
+      console.log('eee', e);
+      setData(e);
+      if (e.status == 5) {
+        setModal(false);
+        alert('Updated');
+      }
+    });
+    // inAppUpdates.installUpdate();
+  };
   return (
     <AnimatedSplash
       translucent={true}
@@ -147,6 +210,139 @@ function AppZ({props}) {
               </Text>
             </View>
           )}
+          <Modal
+            isVisible={modal}
+            backdropOpacity={0.7}
+            animationIn="slideInUp"
+            animationOut="slideOutDown"
+            animationOutTiming={900}
+            animationInTiming={900}
+            statusBarTranslucent>
+            <View
+              style={{
+                shadowColor: 'rgba(12, 27, 151, .7)',
+                shadowOpacity: 0.6,
+                shadowOffset: {height: 0, width: 1},
+                backgroundColor: 'white',
+                width: '120%',
+                alignSelf: 'center',
+                position: 'absolute',
+                bottom: 0,
+                borderTopRightRadius: wp(3),
+                borderTopLeftRadius: wp(3),
+                height: '30%',
+              }}>
+              <BlankSpace height={hp(5)} />
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontFamily: Fonts.semibold,
+                }}>
+                Update now !!
+              </Text>
+              <BlankSpace height={hp(3)} />
+
+              {data?.status == 2 ? (
+                <View
+                  style={{
+                    width: wp(80),
+                    alignSelf: 'center',
+                    backgroundColor: Colors.disable,
+                    height: hp(6),
+                    borderRadius: wp(10),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      width: `${(
+                        (data?.bytesDownloaded / data?.totalBytesToDownload) *
+                        100
+                      ).toFixed(1)}%`,
+                      backgroundColor: Colors.primary,
+                      left: 0,
+                      height: hp(6),
+                      borderRadius: wp(10),
+                      borderBottomEndRadius: 0,
+                      borderTopRightRadius: 0,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: wp(5),
+                    }}>
+                    {`${(
+                      (data?.bytesDownloaded / data?.totalBytesToDownload) *
+                      100
+                    ).toFixed(1)}%`}
+                  </Text>
+                </View>
+              ) : data?.status == 11 ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    inAppUpdates.installUpdate();
+                  }}
+                  style={{
+                    width: wp(80),
+                    alignSelf: 'center',
+                    backgroundColor: Colors.primary,
+                    height: hp(6),
+                    borderRadius: wp(10),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: Colors.white,
+                      fontFamily: Fonts.semibold,
+                    }}>
+                    {' '}
+                    Install
+                  </Text>
+                </TouchableOpacity>
+              ) : data?.status == 3 || data?.status == 1 ? (
+                <View
+                  style={{
+                    width: wp(80),
+                    alignSelf: 'center',
+                    backgroundColor: 'gray',
+                    height: hp(6),
+                    borderRadius: wp(10),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <ActivityIndicator color={Colors.white} size={wp(5)} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    inAppUpdates.startUpdate({
+                      updateType: IAUUpdateKind.FLEXIBLE,
+                    });
+                  }}
+                  style={{
+                    width: wp(80),
+                    alignSelf: 'center',
+                    backgroundColor: Colors.primary,
+                    height: hp(6),
+                    borderRadius: wp(10),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: Colors.white,
+                      fontFamily: Fonts.semibold,
+                    }}>
+                    {' '}
+                    Update
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Modal>
         </NavigationContainer>
       </AuthContext.Provider>
     </AnimatedSplash>
