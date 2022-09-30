@@ -1,8 +1,8 @@
 export const Colors = {
-  primary: '#2573f2',
+  primary: 'blue',
   secondary: '#eee',
   text: '#000',
-  botton: '#2573f2',
+  botton: 'blue',
   error: 'red',
   disable: '#999',
   white: '#fff',
