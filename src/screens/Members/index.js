@@ -69,6 +69,8 @@ const ContactList = () => {
     state => state.ExtraOthersReducer,
   );
 
+  getAllMembersRes?.data?.sort((a, b) => a.name - b.name);
+
   // useEffect(() => {
   //   const contactdataafterfilter = members.filter(i => i.phone.length > 9);
   //   console.log('jjj', contactdataafterfilter);
@@ -194,6 +196,7 @@ const ContactList = () => {
   }, [searchText]);
 
   // GetAll members Api call
+  let selectPeople = getAllMembersRes?.data?.filter(i => i.invited == 1).length;
 
   const handleUpdateinvite = (memberId, checked) => {
     memberInvite({
@@ -213,7 +216,7 @@ const ContactList = () => {
         console.log('Err of handleUpdateinvite', err);
       });
   };
-
+  console.log('first', selectPeople);
   // useEffect(() => {
   //   handlegetAllMembers();
   // }, [selectedTabNo]);
@@ -228,117 +231,123 @@ const ContactList = () => {
           <>
             {getAllMembersRes?.data && getAllMembersRes?.data?.length > 0 ? (
               <ScrollView showsVerticalScrollIndicator={false}>
-                {getAllMembersRes?.data.map((item, index) => {
-                  const [isChecked, setIsChecked] = useState(item?.invited);
-                  return (
-                    <>
-                      <Pressable
-                        style={[
-                          styles.container,
-                          {
-                            marginBottom: hp(1),
-                            flex: 1,
-                            width: wp(100),
-                            justifyContent: 'center',
-                          },
-                        ]}
-                        // onPress={() => setChecked(!checked)}
-                      >
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            width: wp(90),
-                          }}>
+                {getAllMembersRes?.data
+
+                  ?.sort((a, b) => a.name.localeCompare(b.name))
+                  .map((item, index) => {
+                    const [isChecked, setIsChecked] = useState(item?.invited);
+                    return (
+                      <>
+                        <Pressable
+                          style={[
+                            styles.container,
+                            {
+                              marginBottom: hp(1),
+                              flex: 1,
+                              width: wp(100),
+                              justifyContent: 'center',
+                            },
+                          ]}
+                          // onPress={() => setChecked(!checked)}
+                        >
                           <View
                             style={{
                               flexDirection: 'row',
                               alignItems: 'center',
+                              justifyContent: 'space-between',
+                              width: wp(90),
                             }}>
                             <View
                               style={{
-                                height: wp(10),
-                                width: wp(10),
-                                backgroundColor:
-                                  colors[
-                                    Math.floor(Math.random() * colors.length)
-                                  ],
-                                borderRadius: 100,
+                                flexDirection: 'row',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: wp(3),
                               }}>
-                              <Icon name="person" color={Colors.white} />
-                            </View>
-                            <View>
-                              <Text
+                              <View
                                 style={{
-                                  fontFamily: Fonts.semibold,
-                                  color: Colors.TextColor,
-                                  fontSize: wp(4),
-                                }}>
-                                {item.name}
-                              </Text>
-                              <Text
-                                style={{
-                                  fontFamily: Fonts.medium,
-                                  color: Colors.TextColor,
-                                  fontSize: wp(3),
-                                }}>
-                                {item.role}
-                              </Text>
-                            </View>
-                          </View>
-                          {getAllMembersRes?.event ? (
-                            isChecked ? (
-                              <Pressable
-                                style={{
-                                  height: wp(6),
-                                  width: wp(6),
+                                  height: wp(10),
+                                  width: wp(10),
+                                  backgroundColor:
+                                    colors[
+                                      Math.floor(Math.random() * colors.length)
+                                    ],
                                   borderRadius: 100,
-                                  backgroundColor: 'green',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                }}
-                                onPress={() => {
-                                  handleUpdateinvite(item?.member_id, 0),
-                                    setIsChecked(!isChecked);
+                                  marginRight: wp(3),
                                 }}>
-                                <Icon
-                                  name="check"
-                                  size={wp(5)}
-                                  color={Colors.white}
-                                />
-                              </Pressable>
-                            ) : (
-                              //   </View>
-                              <Pressable
-                                style={{
-                                  height: wp(6),
-                                  width: wp(6),
-                                  borderRadius: 100,
-                                  borderWidth: 1,
-                                  borderColor: Colors.disable,
-                                }}
-                                onPress={() => {
-                                  handleUpdateinvite(item?.member_id, 1),
+                                <Icon name="person" color={Colors.white} />
+                              </View>
+                              <View>
+                                <Text
+                                  style={{
+                                    fontFamily: Fonts.semibold,
+                                    color: Colors.TextColor,
+                                    fontSize: wp(4),
+                                  }}>
+                                  {item.name}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontFamily: Fonts.medium,
+                                    color: Colors.TextColor,
+                                    fontSize: wp(3),
+                                  }}>
+                                  {item.role}
+                                </Text>
+                              </View>
+                            </View>
+                            {getAllMembersRes?.event ? (
+                              isChecked ? (
+                                <Pressable
+                                  style={{
+                                    height: wp(6),
+                                    width: wp(6),
+                                    borderRadius: 100,
+                                    backgroundColor: 'green',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                  onPress={() => {
                                     setIsChecked(!isChecked);
-                                }}></Pressable>
-                            )
-                          ) : null}
-                        </View>
-                      </Pressable>
-                      {getAllMembersRes?.data?.length - 1 == index ? (
-                        <View
-                          style={{
-                            height: hp(15),
-                          }}
-                        />
-                      ) : null}
-                    </>
-                  );
-                })}
+                                    handleUpdateinvite(item?.member_id, 0);
+
+                                    // setselectPeople(prev => prev - 1);
+                                  }}>
+                                  <Icon
+                                    name="check"
+                                    size={wp(5)}
+                                    color={Colors.white}
+                                  />
+                                </Pressable>
+                              ) : (
+                                //   </View>
+                                <Pressable
+                                  style={{
+                                    height: wp(6),
+                                    width: wp(6),
+                                    borderRadius: 100,
+                                    borderWidth: 1,
+                                    borderColor: Colors.disable,
+                                  }}
+                                  onPress={() => {
+                                    setIsChecked(!isChecked);
+                                    handleUpdateinvite(item?.member_id, 1);
+                                    // setselectPeople(prev => prev + 1);
+                                  }}></Pressable>
+                              )
+                            ) : null}
+                          </View>
+                        </Pressable>
+                        {getAllMembersRes?.data?.length - 1 == index ? (
+                          <View
+                            style={{
+                              height: hp(15),
+                            }}
+                          />
+                        ) : null}
+                      </>
+                    );
+                  })}
               </ScrollView>
             ) : (
               <View
@@ -531,7 +540,7 @@ const ContactList = () => {
       <View
         style={{
           height: hp(6),
-          width: wp(65),
+          width: wp(70),
           borderRadius: wp(40),
           flexDirection: 'row',
           alignItems: 'center',
@@ -556,8 +565,18 @@ const ContactList = () => {
               color: selectedTabNo == 1 ? Colors.white : '#000',
               fontSize: wp(4),
               fontFamily: Fonts.semibold,
+              textAlign: 'center',
             }}>
             Members
+            {getAllMembersRes?.event && (
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: wp(3),
+                }}>
+                {'\n'}({selectPeople}/{getAllMembersRes?.data?.length})
+              </Text>
+            )}
           </Text>
         </Pressable>
         <Pressable
