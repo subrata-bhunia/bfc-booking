@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Icon, SearchBar} from 'react-native-elements';
 import {Colors, Fonts} from '../../constants';
 import Header from '../../components/Header';
@@ -62,30 +62,18 @@ const alphabet = [
 const ContactList = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
-  const userId = UIStore.useState(s => s.userId);
 
   // State Call //
-  const {getAllMembersRes, loader} = useSelector(
+  const {getAllMembersRes, loader, status} = useSelector(
     state => state.ExtraOthersReducer,
   );
 
   getAllMembersRes?.data?.sort((a, b) => a.name - b.name);
-
-  // useEffect(() => {
-  //   const contactdataafterfilter = members.filter(i => i.phone.length > 9);
-  //   console.log('jjj', contactdataafterfilter);
-  //   setContacts(contactdataafterfilter);
-  // }, []);
   console.log('---', getAllMembersRes);
+  const user_id = UIStore.useState(s => s.userId);
 
-  let [index, setindex] = useState([]);
-  let [count, setCount] = useState();
   const [searchText, setSearchText] = useState('');
-  const [loader2, setloader2] = useState(false);
-  // const [isChecked, setIsChecked] = useState(false);
   const [selectedTabNo, setSelectedTabNo] = useState(1);
-  const [members, setMembers] = useState([]);
-  const [event, setIsEven] = useState(false);
   const colors = [
     '#fa756b',
     '#d2fa6b',
@@ -196,10 +184,24 @@ const ContactList = () => {
   }, [searchText]);
 
   // GetAll members Api call
-  let selectPeople = getAllMembersRes?.data?.filter(i => i.invited == 1).length;
+  const [selectPeople, setselectPeople] = useState(
+    getAllMembersRes?.data?.filter(i => i.invited == 1).length > 0
+      ? getAllMembersRes?.data?.filter(i => i.invited == 1).length
+      : 0,
+  );
+  useEffect(() => {
+    if (status == 'ALL_MEMBERS_SUCCESS') {
+      setselectPeople(
+        getAllMembersRes?.data?.filter(i => i.invited == 1).length > 0
+          ? getAllMembersRes?.data?.filter(i => i.invited == 1).length
+          : 0,
+      );
+    }
+  }, [status]);
 
   const handleUpdateinvite = (memberId, checked) => {
     memberInvite({
+      user_id,
       member_id: memberId,
       invited: checked,
     })
@@ -224,7 +226,7 @@ const ContactList = () => {
     dispatch(getallMembers());
   }, [isFocused]);
 
-  const FirstTab = () => {
+  const FirstTab = useCallback(() => {
     return (
       <>
         {!loader ? (
@@ -311,7 +313,7 @@ const ContactList = () => {
                                     setIsChecked(!isChecked);
                                     handleUpdateinvite(item?.member_id, 0);
 
-                                    // setselectPeople(prev => prev - 1);
+                                    setselectPeople(prev => prev - 1);
                                   }}>
                                   <Icon
                                     name="check"
@@ -332,7 +334,7 @@ const ContactList = () => {
                                   onPress={() => {
                                     setIsChecked(!isChecked);
                                     handleUpdateinvite(item?.member_id, 1);
-                                    // setselectPeople(prev => prev + 1);
+                                    setselectPeople(prev => prev + 1);
                                   }}></Pressable>
                               )
                             ) : null}
@@ -377,7 +379,7 @@ const ContactList = () => {
         )}
       </>
     );
-  };
+  }, [getAllMembersRes]);
 
   const SecondTab = () => {
     return (

@@ -202,6 +202,21 @@ const PaidBooking = ({navigation}) => {
                             alignItems: 'center',
                             marginTop: 5,
                           }}>
+                          <Icon name="smartphone" />
+                          <Text
+                            style={styles.textH2}
+                            onPress={() => {
+                              Linking.openURL(
+                                `tel:${resCancelData?.customer_phone}`,
+                              );
+                            }}>{`${resCancelData?.customer_phone}`}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 5,
+                          }}>
                           <Icon name="home" />
                           <Text
                             style={
@@ -522,14 +537,14 @@ const PaidBooking = ({navigation}) => {
                         disabled
                       />
                     </View>
-                    
+
                     {/* Extra Charges */}
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        marginTop: -wp(4)
+                        marginTop: -wp(4),
                       }}>
                       <Text
                         style={{
@@ -580,7 +595,8 @@ const PaidBooking = ({navigation}) => {
                         disabled
                         defaultValue={`${
                           parseInt(resCancelData?.rent) +
-                          parseInt(resCancelData?.caterer_charge) + parseInt(resCancelData?.extra_charges)
+                          parseInt(resCancelData?.caterer_charge) +
+                          parseInt(resCancelData?.extra_charges)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}
@@ -712,7 +728,10 @@ const PaidBooking = ({navigation}) => {
                       borderRadius: wp(66),
                     }}
                     onPress={() => {
-                      sendWPsms(resCancelData?.customer_phone, resCancelData?.wa_message);
+                      sendWPsms(
+                        resCancelData?.customer_phone,
+                        resCancelData?.wa_message,
+                      );
                     }}
                     textStyle={{
                       fontFamily: Fonts.semibold,

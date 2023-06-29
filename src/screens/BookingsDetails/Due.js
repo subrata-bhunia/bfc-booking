@@ -262,6 +262,21 @@ const DueBookingPage = ({navigation}) => {
                             alignItems: 'center',
                             marginTop: 5,
                           }}>
+                          <Icon name="smartphone" />
+                          <Text
+                            style={styles.textH2}
+                            onPress={() => {
+                              Linking.openURL(
+                                `tel:${resDueData?.customer_phone}`,
+                              );
+                            }}>{`${resDueData?.customer_phone}`}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 5,
+                          }}>
                           <Icon name="home" />
                           <Text
                             style={

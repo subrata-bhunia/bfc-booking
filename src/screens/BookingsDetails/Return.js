@@ -350,6 +350,21 @@ const ReturnBookingPage = ({navigation}) => {
                             alignItems: 'center',
                             marginTop: 5,
                           }}>
+                          <Icon name="smartphone" />
+                          <Text
+                            style={styles.textH2}
+                            onPress={() => {
+                              Linking.openURL(
+                                `tel:${resReturnData?.customer_phone}`,
+                              );
+                            }}>{`${resReturnData?.customer_phone}`}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 5,
+                          }}>
                           <Icon name="home" />
                           <Text
                             style={
@@ -772,7 +787,6 @@ const ReturnBookingPage = ({navigation}) => {
                           fontSize: wp(4),
                         }}
                         placeholder={'0'}
-
                       />
                     </View>
                     {/* Advanced */}
@@ -823,11 +837,15 @@ const ReturnBookingPage = ({navigation}) => {
                       <Input
                         disabled
                         defaultValue={`${
-                          (parseInt(resReturnData?.total_amount) -
-                          parseInt(resReturnData.advanced) -
-                          parseInt(Discount)) < 0 ? 0 : parseInt(resReturnData?.total_amount) -
-                          parseInt(resReturnData.advanced) -
-                          parseInt(Discount) + parseInt(extra)
+                          parseInt(resReturnData?.total_amount) -
+                            parseInt(resReturnData.advanced) -
+                            parseInt(Discount) <
+                          0
+                            ? 0
+                            : parseInt(resReturnData?.total_amount) -
+                              parseInt(resReturnData.advanced) -
+                              parseInt(Discount) +
+                              parseInt(extra)
                         }`}
                         containerStyle={{width: wp(40), height: hp(10)}}
                         leftIcon={<Icon name="inr" type="fontisto" size={15} />}

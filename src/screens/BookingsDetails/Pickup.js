@@ -334,6 +334,21 @@ const PickupBookingPage = ({navigation}) => {
                             alignItems: 'center',
                             marginTop: 5,
                           }}>
+                          <Icon name="smartphone" />
+                          <Text
+                            style={styles.textH2}
+                            onPress={() => {
+                              Linking.openURL(
+                                `tel:${resPickupData?.customer_phone}`,
+                              );
+                            }}>{`${resPickupData?.customer_phone}`}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginTop: 5,
+                          }}>
                           <Icon name="home" />
                           <Text
                             style={
@@ -920,7 +935,7 @@ const PickupBookingPage = ({navigation}) => {
                     : 'PICKUP'
                 }
                 onPress={() => {
-                  setpickupWarningModal(true)
+                  setpickupWarningModal(true);
                 }}
               />
             </View>

@@ -163,6 +163,7 @@ const BookingDetails = ({navigation}) => {
     getBookingInfoById({booking_id: booking_id})
       .then(res => {
         const {data, status} = res.data;
+        console.log('data of booking details', data);
         if (status === 'Success') {
           setShow(false);
           setResReturnData(data);

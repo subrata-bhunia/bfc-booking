@@ -113,7 +113,7 @@ const Booking = () => {
   const [cphoneV, setcphoneV] = useState(true);
   const [cadd, setcadd] = useState('');
   const [caddV, setcaddV] = useState(true);
-  const [whp, setwhp] = useState(true);
+  const [whp, setwhp] = useState(false);
   // ---------- //
   const [rent, setrent] = useState(0);
   const [cat_rate, setcat_rate] = useState(0);
@@ -194,9 +194,9 @@ const Booking = () => {
           setnext1(true);
           setView1(true);
           setRentDays(rent_days);
-          if(caterersvalue == 'Yes'){
+          if (caterersvalue == 'Yes') {
             setcat_rate(caterer_cost);
-          }else{
+          } else {
             setcat_rate(0);
           }
         } else {
@@ -327,7 +327,6 @@ const Booking = () => {
   useEffect(() => {
     let productRent = parseInt(autoCalculateData.totalAmount);
     setrent(productRent * rentDays);
-
   }, [autoCalculateData]);
 
   const StructuralDate = date =>
