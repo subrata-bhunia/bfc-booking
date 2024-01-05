@@ -28,7 +28,7 @@
     "@reduxjs/toolkit": "^1.8.1",
     "@twotalltotems/react-native-otp-input": "^1.3.11",
     "add": "^2.0.6",
-    "axios": "^0.26.0",
+    "axios": "^1.6.4",
     "bangla-calendar": "^3.0.0",
     "date-bengali-revised": "^2.0.1",
     "lottie-react-native": "^5.0.1",
