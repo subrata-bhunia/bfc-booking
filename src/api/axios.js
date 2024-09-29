@@ -1,5 +1,5 @@
 import axios from 'axios';
-const instance = axios.create({baseURL: 'https://bfc.codecaption.com/api/v1'});
+const instance = axios.create({baseURL: 'https://bfc.definescreen.com/api/v1'});
 // const instance = axios.create({baseURL: 'https://debpurbfc.com/api/v1'});
 // const instance = axios.create({baseURL: 'https://dev.debpurbfc.com/api/v1'});
 // const instance = axios.create({
